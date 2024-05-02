@@ -72,47 +72,47 @@ timer wctime() {
     return time;
 }
 
-template <typename VEC1, typename VEC2>
-void swap2perm(VEC1* swap, VEC2* perm) {
-    using VEC1_int = typename VEC1::Scalar;
-    using VEC2_int = typename VEC2::Scalar;
-    VEC2_int n = perm->size();
-    assert(swap->size() == (VEC1_int) n);
-    for(VEC2_int i = 0; i < n; i++) {
-        (*perm)[i] = i;
-    }
-    for(int i = 0; i < n; i++) {
-        VEC1_int ipiv = (*swap)[i];
-        VEC2_int tmp  = (*perm)[ipiv];
-        (*perm)[ipiv] = (*perm)[i];
-        (*perm)[i] = tmp;
-    }
-}
+// template <typename VEC1, typename VEC2>
+// void swap2perm(VEC1* swap, VEC2* perm) {
+//     using VEC1_int = typename VEC1::Scalar;
+//     using VEC2_int = typename VEC2::Scalar;
+//     VEC2_int n = perm->size();
+//     assert(swap->size() == (VEC1_int) n);
+//     for(VEC2_int i = 0; i < n; i++) {
+//         (*perm)[i] = i;
+//     }
+//     for(int i = 0; i < n; i++) {
+//         VEC1_int ipiv = (*swap)[i];
+//         VEC2_int tmp  = (*perm)[ipiv];
+//         (*perm)[ipiv] = (*perm)[i];
+//         (*perm)[i] = tmp;
+//     }
+// }
 
-template <typename iVEC>
-bool isperm(const iVEC* perm) {
-    using iVEC_scalar_t = typename iVEC::Scalar;
-    auto n = perm->size();
-    iVEC count = iVEC::Zero(n);
-    for(int64_t i = 0;i < n; i++) {
-        iVEC_scalar_t pi = (*perm)[i];
-        if(pi < 0 || pi >= n) { return false; }
-        count[pi] += 1;
-    }
-    return (count.cwiseEqual(1)).all();
-}
+// template <typename iVEC>
+// bool isperm(const iVEC* perm) {
+//     using iVEC_scalar_t = typename iVEC::Scalar;
+//     auto n = perm->size();
+//     iVEC count = iVEC::Zero(n);
+//     for(int64_t i = 0;i < n; i++) {
+//         iVEC_scalar_t pi = (*perm)[i];
+//         if(pi < 0 || pi >= n) { return false; }
+//         count[pi] += 1;
+//     }
+//     return (count.cwiseEqual(1)).all();
+// }
 
-template <typename iVEC>
-iVEC invperm(const iVEC& perm) {
-    using iVEC_scalar_t = typename iVEC::Scalar;
-    assert(isperm(&perm));
-    iVEC invperm(perm.size());
-    for(iVEC_scalar_t i = 0; i < perm.size(); i++) {
-        invperm[perm[i]] = i;
-    }
-    assert(isperm(&invperm));
-    return invperm;    
-}
+// template <typename iVEC>
+// iVEC invperm(const iVEC& perm) {
+//     using iVEC_scalar_t = typename iVEC::Scalar;
+//     assert(isperm(&perm));
+//     iVEC invperm(perm.size());
+//     for(iVEC_scalar_t i = 0; i < perm.size(); i++) {
+//         invperm[perm[i]] = i;
+//     }
+//     assert(isperm(&invperm));
+//     return invperm;    
+// }
 
 size_t hashv(std::vector<size_t> vals) {
     size_t seed = 0;
@@ -205,16 +205,16 @@ int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi64* p) {
     }
 }
 
-template <typename VEC1, typename VEC2>
-void fpgetf(Eigen::MatrixXd* A, VEC1* p, VEC2* q) {
-    assert(A->cols() == A->rows());
-    assert(p->size() == A->cols());
-    assert(q->size() == A->cols());
-    if(A->rows() == 0) return;
-    Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd>> pluq(*A);
-    *p = invperm(pluq.permutationP().indices());
-    *q = invperm(pluq.permutationQ().indices());
-}
+// template <typename VEC1, typename VEC2>
+// void fpgetf(Eigen::MatrixXd* A, VEC1* p, VEC2* q) {
+//     assert(A->cols() == A->rows());
+//     assert(p->size() == A->cols());
+//     assert(q->size() == A->cols());
+//     if(A->rows() == 0) return;
+//     Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd>> pluq(*A);
+//     *p = invperm(pluq.permutationP().indices());
+//     *q = invperm(pluq.permutationQ().indices());
+// }
 
 // A = L * (D + U') = L * D (I + D^-1 U') = { L * |D|^1/2 } { |D|^1/2 sign(D) (I + D^-1 U') }
 void split_LU(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::MatrixXd* U) {

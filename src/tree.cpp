@@ -1001,7 +1001,7 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     if(preserve) {
         MatrixXd* phi_original = original->phi();
         // Apply Q on phi
-        ormqr_spand(v, h, phi_original, 'L', 'T'); // Ass <- Q^T Ass
+        ormqr_spand(v, h, phi_original, Side::Left, Op::Trans); // Ass <- Q^T Ass
         // Split and shrink phi        
         sibling->set_phi(std::make_unique<MatrixXd>(sibling_size, phi_original->cols()));        
         assert(phi_original->rows() == original_size + sibling_size);
@@ -1026,7 +1026,7 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
         // From Q^T original for both
         } else {
             MatrixXd* Apn = edge->A();
-            ormqr_spand(v, h, Apn, 'L', 'T'); // Q^T Apn
+            ormqr_spand(v, h, Apn, Side::Left, Op::Trans); // Q^T Apn
             // Allocate sibling
             if(keep_sibling_if_pred_false) {
                 pMatrixXd Asn = std::make_unique<MatrixXd>(sibling_size,  n->size());
@@ -1054,7 +1054,7 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
         // From original Q for both
         } else {
             MatrixXd* Anp = edge->A();
-            ormqr_spand(v, h, Anp, 'R', 'N'); // Anp Q
+            ormqr_spand(v, h, Anp, Side::Right, Op::NoTrans); // Anp Q
             // Allocate sibling
             if(keep_sibling_if_pred_false) {
                 if(! this->symmetry()) {
@@ -1077,8 +1077,8 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     // Self edges
     MatrixXd* piv = original->pivot()->A();
     if(! is_pivot_I) {
-        ormqr_spand(v, h, piv, 'R', 'N'); // Ass <- Ass Q 
-        ormqr_spand(v, h, piv, 'L', 'T'); // Ass <- Q^T Ass
+        ormqr_spand(v, h, piv, Side::Right, Op::NoTrans); // Ass <- Ass Q 
+        ormqr_spand(v, h, piv, Side::Left, Op::Trans); // Ass <- Q^T Ass
     }
     // Diagonal
     pMatrixXd Aoo = std::make_unique<MatrixXd>(original_size, original_size);

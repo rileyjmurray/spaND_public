@@ -20,9 +20,52 @@ namespace spaND {
 bool are_connected(Eigen::VectorXi64 &a, Eigen::VectorXi64 &b, SpMat &A);
 bool should_be_disconnected(int64_t lvl1, int64_t lvl2, int64_t sep1, int64_t sep2);
 double elapsed(timeval& start, timeval& end);
-void swap2perm(Eigen::VectorXi64* swap, Eigen::VectorXi64* perm);
-bool isperm(const Eigen::VectorXi64* perm);
-Eigen::VectorXi64 invperm(const Eigen::VectorXi64& perm);
+
+template <typename VEC1, typename VEC2>
+void swap2perm(VEC1* swap, VEC2* perm) {
+    using VEC1_int = typename VEC1::Scalar;
+    using VEC2_int = typename VEC2::Scalar;
+    VEC2_int n = perm->size();
+    assert(swap->size() == (VEC1_int) n);
+    for(VEC2_int i = 0; i < n; i++) {
+        (*perm)[i] = i;
+    }
+    for(int i = 0; i < n; i++) {
+        VEC1_int ipiv = (*swap)[i];
+        VEC2_int tmp  = (*perm)[ipiv];
+        (*perm)[ipiv] = (*perm)[i];
+        (*perm)[i] = tmp;
+    }
+}
+
+
+template <typename iVEC>
+bool isperm(const iVEC* perm) {
+    using iVEC_scalar_t = typename iVEC::Scalar;
+    auto n = perm->size();
+    iVEC count = iVEC::Zero(n);
+    for(int64_t i = 0;i < n; i++) {
+        iVEC_scalar_t pi = (*perm)[i];
+        if(pi < 0 || pi >= n) { return false; }
+        count[pi] += 1;
+    }
+    return (count.cwiseEqual(1)).all();
+}
+
+template <typename VEC2, typename VEC1>
+VEC2 invperm(const VEC1& perm) {
+    using VEC1_scalar_t = typename VEC1::Scalar;
+    using VEC2_scalar_t = typename VEC2::Scalar;
+    assert(isperm(&perm));
+    VEC2 invperm(perm.size());
+    VEC2_scalar_t perm_size = perm.size();
+    for(VEC2_scalar_t i = 0; i < perm_size; i++) {
+        invperm[perm[i]] = i;
+    }
+    assert(isperm(&invperm));
+    return invperm;    
+}
+
 SpMat symmetric_graph(SpMat& A);
 
 typedef timeval timer;
@@ -71,7 +114,18 @@ int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi64* swap);
  * L is unit diagonal
  * U is not
  */
-void fpgetf(Eigen::MatrixXd* A, Eigen::VectorXi64* p, Eigen::VectorXi64* q);
+template <typename VEC1, typename VEC2>
+void fpgetf(Eigen::MatrixXd* A, VEC1* p, VEC2* q) {
+    assert(A->cols() == A->rows());
+    assert(p->size() == A->cols());
+    assert(q->size() == A->cols());
+    if(A->rows() == 0) return;
+    Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd>> pluq(*A);
+    auto invp = pluq.permutationP().indices();
+    auto invq = pluq.permutationQ().indices();
+    *p = invperm<VEC1>(pluq.permutationP().indices());
+    *q = invperm<VEC2>(pluq.permutationQ().indices());
+}
 
 /**
  * A = L U
@@ -167,7 +221,7 @@ void ormqr_trans(Eigen::MatrixXd* v, Eigen::VectorXd* h, Segment* x);
  * A <- Q   * A
  * A <- Q^T * A
  */
-void ormqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h, Eigen::MatrixXd* A, char side, char trans);
+void ormqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h, Eigen::MatrixXd* A, Side side, Op trans);
 
 /**
  * Create the thin Q
