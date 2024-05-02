@@ -165,9 +165,9 @@ std::string Orthogonal::name() {
 
 Merge::Merge(Cluster* parent) : parent(parent) {}
 void Merge::fwd() {
-    int k = 0;
+    int64_t k = 0;
     for(auto c: parent->children()) {
-        for(int i = 0; i < c->size(); i++) {
+        for(int64_t i = 0; i < c->size(); i++) {
             (*parent->get_x())[k] = (*c->get_x())[i];
             k++;
         }
@@ -175,9 +175,9 @@ void Merge::fwd() {
     assert(k == parent->get_x()->size());
 }
 void Merge::bwd() {
-    int k = 0;
+    int64_t k = 0;
     for(auto c: parent->children()) {
-        for(int i = 0; i < c->size(); i++) {
+        for(int64_t i = 0; i < c->size(); i++) {
             (*c->get_x())[i] = (*parent->get_x())[k];
             k++;
         }

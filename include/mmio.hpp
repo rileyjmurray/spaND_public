@@ -183,7 +183,7 @@ namespace mmio {
                 data.reserve(K);
             }
             /** Read data **/
-            int lineread = 0;
+            int64_t lineread = 0;
             while(std::getline(mfile, line)) {
                 if(line.size() == 0 || line[0] == '%') continue;
                 std::istringstream vals(line);
@@ -235,18 +235,18 @@ namespace mmio {
                 if(line.size() == 0 || line[0] == '%') continue;
                 else break;
             }
-            int M, N;
+            int64_t M, N;
             std::istringstream MNK(line);
             MNK >> M >> N;
             Eigen::Matrix<V, Eigen::Dynamic, Eigen::Dynamic> A(M, N); 
             /** Read data **/
-            int lineread = 0;
+            int64_t lineread = 0;
             while(std::getline(mfile, line)) {
                 if(line.size() == 0 || line[0] == '%') continue;
                 std::istringstream vals(line);
                 V v = read_entry<V>(vals);
-                int i = (lineread % M);
-                int j = (lineread / M);
+                int64_t i = (lineread % M);
+                int64_t j = (lineread / M);
                 A(i,j) = v;
                 lineread ++;
             }
@@ -262,7 +262,7 @@ namespace mmio {
      * Writes a sparse matrix in MM format, using the optional property p.
      * Wether the matrix satisfies or not p is not verified
      */
-    template<typename V, int S, typename I>
+    template<typename V, int64_t S, typename I>
     inline void sp_mmwrite(std::string filename, Eigen::SparseMatrix<V,S,I> mat, property p = property::general) {
         std::ofstream mfile;
         mfile.open(filename);
@@ -271,8 +271,8 @@ namespace mmio {
             std::string type = V2str<V>::value();
             std::string prop = prop2str(p);
             mfile << "%%MatrixMarket matrix coordinate " << type << " " << prop << "\n";
-            int NNZ = 0;
-            for (int k = 0; k < mat.outerSize(); ++k) {
+            int64_t NNZ = 0;
+            for (int64_t k = 0; k < mat.outerSize(); ++k) {
                 for (typename Eigen::SparseMatrix<V,S,I>::InnerIterator it(mat,k); it; ++it) {
                     if( (p == property::symmetric || p == property::hermitian) && (it.row() < it.col()) ) continue;
                     if( (p == property::skew_symmetric) && (it.row() <= it.col()) ) continue;
@@ -280,7 +280,7 @@ namespace mmio {
                 }
             }
             mfile << mat.rows() << " " << mat.cols() << " " << NNZ << "\n";
-            for (int k = 0; k < mat.outerSize(); ++k) {
+            for (int64_t k = 0; k < mat.outerSize(); ++k) {
                 for (typename Eigen::SparseMatrix<V,S,I>::InnerIterator it(mat,k); it; ++it) {
                     if( (p == property::symmetric || p == property::hermitian) && (it.row() < it.col()) ) continue;
                     if( (p == property::skew_symmetric) && (it.row() <= it.col()) ) continue;
@@ -306,8 +306,8 @@ namespace mmio {
             std::string prop = prop2str(p);
             mfile << "%%MatrixMarket matrix array " << type << " " << prop << "\n";
             mfile << mat.rows() << " " << mat.cols() << "\n";
-            for(int j = 0; j < mat.cols(); j++) {
-                for(int i = 0; i < mat.rows(); i++) {
+            for(int64_t j = 0; j < mat.cols(); j++) {
+                for(int64_t i = 0; i < mat.rows(); i++) {
                     if( (p == property::symmetric || p == property::hermitian) && (i < j) ) continue;
                     if( (p == property::skew_symmetric) && (i <= j) ) continue;
                     mfile << mat(i,j) << "\n";

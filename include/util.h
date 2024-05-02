@@ -25,7 +25,7 @@
 namespace spaND {
 
 bool are_connected(Eigen::VectorXi &a, Eigen::VectorXi &b, SpMat &A);
-bool should_be_disconnected(int lvl1, int lvl2, int sep1, int sep2);
+bool should_be_disconnected(int64_t lvl1, int64_t lvl2, int64_t sep1, int64_t sep2);
 double elapsed(timeval& start, timeval& end);
 void swap2perm(Eigen::VectorXi* swap, Eigen::VectorXi* perm);
 bool isperm(const Eigen::VectorXi* perm);
@@ -58,9 +58,9 @@ void syrk(Eigen::MatrixXd* A, Eigen::MatrixXd* C, CBLAS_TRANSPOSE tA, double alp
  * A <- L, L L^T = A
  * Return != 0 if potf failed (not spd)
  */ 
-int potf(Eigen::MatrixXd* A);
+int64_t potf(Eigen::MatrixXd* A);
 
-int ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi* p, double* rcond);
+int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi* p, double* rcond);
 
 /**
  * A <- [L\U] (lower and upper)
@@ -70,7 +70,7 @@ int ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::Vect
  * U is not
  * Return != 0 if getf failed (singular)
  */
-int getf(Eigen::MatrixXd* A, Eigen::VectorXi* swap);
+int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* swap);
 
 /**
  * A = P L U Q
@@ -191,7 +191,7 @@ void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h);
  */
 void geqrf(Eigen::MatrixXd* A, Eigen::VectorXd* tau);
 
-int choose_rank(Eigen::VectorXd& s, double tol);
+int64_t choose_rank(Eigen::VectorXd& s, double tol);
 
 std::size_t hashv(std::vector<size_t> vals);
 
@@ -213,17 +213,17 @@ struct matrix_hash : std::unary_function<T, size_t> {
   }
 };
 
-void block2dense(Eigen::VectorXi &rowval, Eigen::VectorXi &colptr, Eigen::VectorXd &nnzval, int i, int j, int li, int lj, Eigen::MatrixXd *dst, bool transpose);
+void block2dense(Eigen::VectorXi &rowval, Eigen::VectorXi &colptr, Eigen::VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, Eigen::MatrixXd *dst, bool transpose);
 
-Eigen::MatrixXd linspace_nd(int n, int dim);
+Eigen::MatrixXd linspace_nd(int64_t n, int64_t dim);
 
 // Returns A[p,p]
 SpMat symm_perm(SpMat &A, Eigen::VectorXi &p);
 
 // Random vector with seed
-Eigen::VectorXd random(int size, int seed);
+Eigen::VectorXd random(int64_t size, int64_t seed);
 
-Eigen::MatrixXd random(int rows, int cols, int seed);
+Eigen::MatrixXd random(int64_t rows, int64_t cols, int64_t seed);
 
 // Set Eigen::MatrixXd to zero using memset
 void setZero(Eigen::MatrixXd* A);
@@ -347,7 +347,7 @@ struct Stats {
         T min;
         T max;
         T sum;
-        int count;
+        int64_t count;
     public:
         Stats(): min(std::numeric_limits<T>::max()), max(std::numeric_limits<T>::lowest()), sum(0), count(0) {};
         void addData(T value) {
@@ -359,21 +359,21 @@ struct Stats {
         T      getMin()   const { return this->count == 0 ? 0 : this->min; }
         T      getMax()   const { return this->count == 0 ? 0 : this->max; }
         double getMean()  const { return ((double)this->sum)/((double)this->count); }
-        int    getCount() const { return this->count; }
+        int64_t    getCount() const { return this->count; }
         T      getSum()   const { return this->sum; }
 };
 
 struct Log {
     public:
-        int dofs_nd;
-        int dofs_left_nd;
-        int dofs_left_elim;
-        int dofs_left_spars;
-        long long int fact_nnz;
-        Stats<int> rank_before;
-        Stats<int> rank_after;
-        int ignored;
-        Stats<int> nbrs;
+        int64_t dofs_nd;
+        int64_t dofs_left_nd;
+        int64_t dofs_left_elim;
+        int64_t dofs_left_spars;
+        long long int64_t fact_nnz;
+        Stats<int64_t> rank_before;
+        Stats<int64_t> rank_after;
+        int64_t ignored;
+        Stats<int64_t> nbrs;
 
         Stats<double> cond_diag_elim;
         Stats<double> norm_diag_elim;

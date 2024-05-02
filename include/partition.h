@@ -22,9 +22,9 @@ namespace spaND {
 // Describes the ordering
 struct SepID {
     public:
-        int lvl;
-        int sep;
-        SepID(int l, int s) : lvl(l), sep(s) {};
+        int64_t lvl;
+        int64_t sep;
+        SepID(int64_t l, int64_t s) : lvl(l), sep(s) {};
         SepID() : lvl(-1), sep(0) {} ;
         // Some lexicographics order
         // NOT the matrix ordering
@@ -75,19 +75,19 @@ struct ClusterID {
 };
 
 SepID merge(SepID& s);
-ClusterID merge_if(ClusterID& c, int lvl);
+ClusterID merge_if(ClusterID& c, int64_t lvl);
 
 std::ostream& operator<<(std::ostream& os, const SepID& s);
 std::ostream& operator<<(std::ostream& os, const ClusterID& c);
 
-std::vector<int> partition_RB(SpMat &A, int nlevels, bool verb, Eigen::MatrixXd* Xcoo);
-void partition_metis(std::vector<int> &colptr, std::vector<int> &rowval, std::vector<int> &colptrtmp, std::vector<int> &rowvaltmp, std::vector<int> &dofs, std::vector<int> &parts, bool useVertexSep);
-void partition_geo(std::vector<int> &colptr, std::vector<int> &rowval, std::vector<int> &dofs, std::vector<int> &parts, Eigen::MatrixXd *X, std::vector<int> &invp);
-std::vector<ClusterID> partition_modifiedND(SpMat &A, int nlevels, bool verb, bool useVertexSep, Eigen::MatrixXd* Xcoo);
+std::vector<int64_t> partition_RB(SpMat &A, int64_t nlevels, bool verb, Eigen::MatrixXd* Xcoo);
+void partition_metis(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval, std::vector<int64_t> &colptrtmp, std::vector<int64_t> &rowvaltmp, std::vector<int64_t> &dofs, std::vector<int64_t> &parts, bool useVertexSep);
+void partition_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval, std::vector<int64_t> &dofs, std::vector<int64_t> &parts, Eigen::MatrixXd *X, std::vector<int64_t> &invp);
+std::vector<ClusterID> partition_modifiedND(SpMat &A, int64_t nlevels, bool verb, bool useVertexSep, Eigen::MatrixXd* Xcoo);
 
-int part_at_lvl(int part_leaf, int lvl, int nlevels);
+int64_t part_at_lvl(int64_t part_leaf, int64_t lvl, int64_t nlevels);
 SepID find_highest_common(SepID n1, SepID n2);
-std::vector<ClusterID> partition_recursivebissect(SpMat &A, int nlevels, bool verb, Eigen::MatrixXd* Xcoo);
+std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, bool verb, Eigen::MatrixXd* Xcoo);
 
 }
 

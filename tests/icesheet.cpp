@@ -9,19 +9,19 @@ using namespace Eigen;
 using namespace std;
 using namespace spaND;
 
-int main(int argc, char* argv[]) {
+int64_t main(int64_t argc, char* argv[]) {
     assert(argc == 5);
     string folder(argv[1]);
-    int nlevels = atoi(argv[2]);
+    int64_t nlevels = atoi(argv[2]);
     double tol = atof(argv[3]);
-    int skip = atoi(argv[4]);
+    int64_t skip = atoi(argv[4]);
     cout << "Inputs folder " << folder << " nlevels = " << nlevels << " tol = " << tol << " skip = " << skip << endl;
     string file  = folder + "/jac4.mm";
     string xfile = folder + "/xCoords.mm";
     string yfile = folder + "/yCoords.mm";
     cout << "Reading from " << file << " " << xfile << " " << yfile << endl;
-    SpMat A = mmio::sp_mmread<double,int>(file);
-    int N = A.rows();
+    SpMat A = mmio::sp_mmread<double,int64_t>(file);
+    int64_t N = A.rows();
     cout << "A has " << N << " rows" << endl;
     VectorXd xcoords = mmio::dense_mmread<double>(xfile);
     VectorXd ycoords = mmio::dense_mmread<double>(yfile);
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     MatrixXd X(2, N);
     assert(xcoords.size() == N/2);
     assert(ycoords.size() == N/2);
-    for(int i = 0; i < N; i++) {
+    for(int64_t i = 0; i < N; i++) {
         X(0,i) = xcoords(i/2);
         X(1,i) = ycoords(i/2);
     }
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
     VectorXd x = VectorXd::Zero(N);
     VectorXd b = VectorXd::Random(N);
     timer cg0 = wctime();
-    int iter = cg(A, b, x, t, 500, 1e-12, true);
+    int64_t iter = cg(A, b, x, t, 500, 1e-12, true);
     timer cg1 = wctime();
     cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
     cout << "  CG: " << elapsed(cg0, cg1) << " s." << endl;

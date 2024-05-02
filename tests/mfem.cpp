@@ -49,11 +49,11 @@ using namespace std;
 using namespace Eigen;
 using namespace spaND;
 
-int main(int argc, char *argv[])
+int64_t main(int64_t argc, char *argv[])
 {
     // 1. Parse command-line options.
     const char *mesh_file = "../data/star.mesh";
-    int order = 1;
+    int64_t order = 1;
     bool static_cond = false;
     bool visualization = 1;
 
@@ -80,16 +80,16 @@ int main(int argc, char *argv[])
     //    quadrilateral, tetrahedral, hexahedral, surface and volume meshes with
     //    the same code.
     mfem::Mesh *mesh = new mfem::Mesh(mesh_file, 1, 1);
-    int dim = mesh->Dimension();
+    int64_t dim = mesh->Dimension();
 
     // 3. Refine the mesh to increase the resolution. In this example we do
     //    'ref_levels' of uniform refinement. We choose 'ref_levels' to be the
     //    largest number that gives a final mesh with no more than 50,000
     //    elements.
     {
-        int ref_levels =
-            (int)floor(log(50000./mesh->GetNE())/log(2.)/dim);
-        for (int l = 0; l < ref_levels; l++)
+        int64_t ref_levels =
+            (int64_t)floor(log(50000./mesh->GetNE())/log(2.)/dim);
+        for (int64_t l = 0; l < ref_levels; l++)
         {
             mesh->UniformRefinement();
         }
@@ -120,10 +120,10 @@ int main(int argc, char *argv[])
     //    In this example, the boundary conditions are defined by marking all
     //    the boundary attributes from the mesh as essential (Dirichlet) and
     //    converting them to a list of true dofs.
-    mfem::Array<int> ess_tdof_list;
+    mfem::Array<int64_t> ess_tdof_list;
     if (mesh->bdr_attributes.Size())
     {
-        mfem::Array<int> ess_bdr(mesh->bdr_attributes.Max());
+        mfem::Array<int64_t> ess_bdr(mesh->bdr_attributes.Max());
         ess_bdr = 1;
         fespace->GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
     }
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
     // 9b. Use spaND
     // Run Algo
     MatrixXd Xcoo(3, mesh->GetNV());
-    for(int i = 0; i < mesh->GetNV(); i++) {
+    for(int64_t i = 0; i < mesh->GetNV(); i++) {
         Xcoo(0, i) = mesh->GetVertex(i)[0];
         Xcoo(1, i) = mesh->GetVertex(i)[1];
         Xcoo(2, i) = mesh->GetVertex(i)[2];
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
     } catch (std::exception& ex) {
         cout << ex.what();
     }
-    int iter = cg(A2, b2, x2, t, 500, 1e-12, true);
+    int64_t iter = cg(A2, b2, x2, t, 500, 1e-12, true);
     cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A2*x2-b2).norm() / b2.norm() << endl;
     eigen2mfem(x2, X);
 
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
     if (visualization)
     {
         char vishost[] = "localhost";
-        int  visport   = 19916;
+        int64_t  visport   = 19916;
         mfem::socketstream sol_sock(vishost, visport);
         sol_sock.precision(8);
         sol_sock << "solution\n" << *mesh << x << flush;

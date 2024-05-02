@@ -50,7 +50,7 @@ using namespace spaND;
 
 // Choice for the problem setup. The fluid velocity, initial condition and
 // inflow boundary condition are chosen based on this parameter.
-int problem;
+int64_t problem;
 
 // Velocity coefficient
 void velocity_function(const Vector &x, Vector &v);
@@ -89,7 +89,7 @@ private:
    Tree* t;
 
 public:
-   FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const Vector &_b, double, Eigen::MatrixXd&, double, int);
+   FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const Vector &_b, double, Eigen::MatrixXd&, double, int64_t);
 
    virtual void Mult(const Vector &x, Vector &y) const; // Computes y = f(x, t), i.e., y = M^{-1} (K u + b)
    virtual void ImplicitSolve(const double dt, const Vector &x, Vector &k); // Solves k = f(x + dt*k, t + dt), i.e., solves for k: k = M^{-1} (K (x + dt*k) + b)
@@ -98,24 +98,24 @@ public:
 };
 
 
-int main(int argc, char *argv[])
+int64_t main(int64_t argc, char *argv[])
 {
    // 1. Parse command-line options.
    problem = 0;
    const char *mesh_file = "../data/periodic-hexagon.mesh";
-   int ref_levels = 2;
-   int order = 3;
-   int ode_solver_type = 4;
+   int64_t ref_levels = 2;
+   int64_t order = 3;
+   int64_t ode_solver_type = 4;
    double t_final = 10.0;
    double dt = 0.01;
    bool visualization = true;
    bool visit = false;
    bool binary = false;
-   int vis_steps = 5;
+   int64_t vis_steps = 5;
    double tol = 1e-2;
-   int skip = 4;
+   int64_t skip = 4;
 
-   int precision = 8;
+   int64_t precision = 8;
    cout.precision(precision);
 
    OptionsParser args(argc, argv);
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
    // 2. Read the mesh from the given mesh file. We can handle geometrically
    //    periodic meshes in this code.
    Mesh *mesh = new Mesh(mesh_file, 1, 1);
-   int dim = mesh->Dimension();
+   int64_t dim = mesh->Dimension();
 
    // 3. Define the ODE solver used for time integration. Several explicit
    //    Runge-Kutta methods are available.
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
    //    'ref_levels' of uniform refinement, where 'ref_levels' is a
    //    command-line parameter. If the mesh is of NURBS type, we convert it to
    //    a (piecewise-polynomial) high-order mesh.
-   for (int lev = 0; lev < ref_levels; lev++)
+   for (int64_t lev = 0; lev < ref_levels; lev++)
    {
       mesh->UniformRefinement();
    }
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 
    m.Assemble();
    m.Finalize();
-   int skip_zeros = 0;
+   int64_t skip_zeros = 0;
    k.Assemble(skip_zeros);
    k.Finalize(skip_zeros);
    b.Assemble();
@@ -229,11 +229,11 @@ int main(int argc, char *argv[])
    FiniteElementSpace fesCoo(mesh, &fec, dim);
    GridFunction nodes(&fesCoo);
    mesh->GetNodes(nodes);
-   int N = nodes.Size() / dim;
+   int64_t N = nodes.Size() / dim;
    assert(N == fes.GetVSize());
    Eigen::MatrixXd Xcoo(dim, N);
-   for (int i = 0; i < N ; ++i) {
-      for (int j = 0; j < dim; ++j) {
+   for (int64_t i = 0; i < N ; ++i) {
+      for (int64_t j = 0; j < dim; ++j) {
          Xcoo(j,i) = nodes(j * N + i);
       }
    }
@@ -284,7 +284,7 @@ int main(int argc, char *argv[])
    if (visualization)
    {
       char vishost[] = "localhost";
-      int  visport   = 19916;
+      int64_t  visport   = 19916;
       sout.open(vishost, visport);
       if (!sout)
       {
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
    ode_solver->Init(adv);
 
    bool done = false;
-   for (int ti = 0; !done; )
+   for (int64_t ti = 0; !done; )
    {
       
       ode_solver->Step(u, t, dt);
@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
 
 
 // Implementation of class FE_Evolution
-FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const Vector &_b, double dt, Eigen::MatrixXd &Xcoo, double tol, int skip)
+FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const Vector &_b, double dt, Eigen::MatrixXd &Xcoo, double tol, int64_t skip)
    : TimeDependentOperator(_M.Size()), M(_M), K(_K), b(_b), z(_M.Size())
 {
    M_solver.SetPreconditioner(M_prec);
@@ -395,10 +395,10 @@ FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const
    /** Setup spaND tree and preconditionner **/  
    A = mfem2eigen(T); 
    SpMat AAT = symmetric_graph(A);
-   int N = A.rows();
+   int64_t N = A.rows();
    cout << "Vertices? " << N << endl;
    cout << "NNZ? " << A.nonZeros() << endl;
-   int lvl = (int)ceil(log( double(N) / 64.0)/log(2.0)) - 1;
+   int64_t lvl = (int64_t)ceil(log( double(N) / 64.0)/log(2.0)) - 1;
    cout << "Lvl " << lvl << endl;
    
 #if 0
@@ -428,7 +428,7 @@ FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const
    VectorXd b = VectorXd::Random(A.rows());
    VectorXd x = b;
    cout << "Random RHS GMRES\n";
-   int iter = gmres(A, b, x, *t, 100, 100, 1e-9, true);
+   int64_t iter = gmres(A, b, x, *t, 100, 100, 1e-9, true);
    cout << "GMRES: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
 }
 
@@ -448,7 +448,7 @@ void FE_Evolution::ImplicitSolve(const double dt, const Vector &x, Vector &k)
    // Spand
    VectorXd rhs = mfem2eigen(z);
    VectorXd sol = VectorXd::Zero(rhs.rows());
-   int iter = gmres(A, rhs, sol, *t, 100, 100, 1e-9, true);
+   int64_t iter = gmres(A, rhs, sol, *t, 100, 100, 1e-9, true);
    cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sol-rhs).norm() / rhs.norm() << endl;
    eigen2mfem(sol, k);
 }
@@ -465,11 +465,11 @@ void FE_Evolution::Mult(const Vector &x, Vector &y) const
 // Velocity coefficient
 void velocity_function(const Vector &x, Vector &v)
 {
-   int dim = x.Size();
+   int64_t dim = x.Size();
 
    // map to the reference [-1,1] domain
    Vector X(dim);
-   for (int i = 0; i < dim; i++)
+   for (int64_t i = 0; i < dim; i++)
    {
       double center = (bb_min[i] + bb_max[i]) * 0.5;
       X(i) = 2 * (x(i) - center) / (bb_max[i] - bb_min[i]);
@@ -522,11 +522,11 @@ void velocity_function(const Vector &x, Vector &v)
 // Initial condition
 double u0_function(const Vector &x)
 {
-   int dim = x.Size();
+   int64_t dim = x.Size();
 
    // map to the reference [-1,1] domain
    Vector X(dim);
-   for (int i = 0; i < dim; i++)
+   for (int64_t i = 0; i < dim; i++)
    {
       double center = (bb_min[i] + bb_max[i]) * 0.5;
       X(i) = 2 * (x(i) - center) / (bb_max[i] - bb_min[i]);

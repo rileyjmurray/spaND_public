@@ -35,10 +35,10 @@ class Tree
         PartKind part_kind;     // The kind of partitioning (modified ND or recursive bissection)
         bool use_vertex_sep;    // ModifiedND: Wether to use a vertex separator in algebraic partitioning (true) or bipartition (false)
         bool preserve;          // Wether to preserve phi (true) or not
-        int ilvl;               // Level [0...lvl) have been eliminated ; -1 is nothing eliminated
-        int nlevels;            // Maximum tree depth        
+        int64_t ilvl;               // Level [0...lvl) have been eliminated ; -1 is nothing eliminated
+        int64_t nlevels;            // Maximum tree depth        
         double tol;             // Compression tolerance
-        int skip;               // #levels to skip for sparsification
+        int64_t skip;               // #levels to skip for sparsification
         bool scale;             // Wether to scale the pivot (true) or not
         ScalingKind scale_kind; // The kind of scaling
         SymmKind symm_kind;     // Wether the matrix is SPD (SPD), symmetric indefinite (SYM) or general unsymmetric (GEN)
@@ -51,22 +51,22 @@ class Tree
         bool monitor_flops;
 
         // Helper parameters
-        int max_order;
+        int64_t max_order;
 
         // External data (NOT owned)
         Eigen::MatrixXd* Xcoo;  // The dim x N coordinates matrix
         Eigen::MatrixXd* phi;   // The N x k phi matrix
         
         /** Stats and info **/        
-        int ndofs_left() const;
-        int nclusters_left() const;
+        int64_t ndofs_left() const;
+        int64_t nclusters_left() const;
         void stats() const;
         bool symmetry() const;
         void assert_symmetry();
-        int nphis() const;
+        int64_t nphis() const;
 
         /** Helpers */
-        void init(int lvl);
+        void init(int64_t lvl);
 
         // Eliminating & scaling
         void eliminate_cluster(Cluster*);
@@ -107,9 +107,9 @@ class Tree
 
         // Merge
         void merge_all();
-        pOperation reset_size(Cluster*, std::map<Cluster*,int>*);
-        void update_edges(Cluster*, std::map<Cluster*,int>*);
-        Cluster* shrink_split_scatter_phi(Cluster*, int, std::function<bool(Edge*)>, Eigen::MatrixXd*, Eigen::VectorXd*, Eigen::MatrixXd*, bool, bool);
+        pOperation reset_size(Cluster*, std::map<Cluster*,int64_t>*);
+        void update_edges(Cluster*, std::map<Cluster*,int64_t>*);
+        Cluster* shrink_split_scatter_phi(Cluster*, int64_t, std::function<bool(Edge*)>, Eigen::MatrixXd*, Eigen::VectorXd*, Eigen::MatrixXd*, bool, bool);
 
         // The permutation computed by assembly
         Eigen::VectorXi perm;
@@ -118,14 +118,14 @@ class Tree
         std::list<std::unique_ptr<Operation>> ops;
 
         // Stores the clusters at each level of the cluster hierarchy
-        int current_bottom;
+        int64_t current_bottom;
         std::vector<std::list<pCluster>> bottoms; // bottoms.size() = nlevels
         std::vector<pCluster> others;
         const std::list<pCluster>& bottom_current() const;
         const std::list<pCluster>& bottom_original() const;
 
         // Generate new order ID's
-        int get_new_order();
+        int64_t get_new_order();
 
     public:
 
@@ -136,7 +136,7 @@ class Tree
         void set_phi(Eigen::MatrixXd*);
         void set_preserve(bool);
         void set_tol(double);
-        void set_skip(int);
+        void set_skip(int64_t);
         void set_scaling_kind(ScalingKind);
         void set_symm_kind(SymmKind);
         void set_part_kind(PartKind);
@@ -147,16 +147,16 @@ class Tree
         void set_monitor_flops(bool);
 
         // Basic info, export of data and monitoring
-        int get_N() const;
+        int64_t get_N() const;
         Eigen::VectorXi get_assembly_perm() const;
         SpMat get_trailing_mat() const;
         Eigen::MatrixXd get_current_x() const;
         void print_clusters_hierarchy() const;
         void print_connectivity() const;
         std::list<const Cluster*> get_clusters() const;
-        std::vector<int> get_dof2ID() const;
-        int get_nlevels() const;
-        int get_stop() const;
+        std::vector<int64_t> get_dof2ID() const;
+        int64_t get_nlevels() const;
+        int64_t get_stop() const;
         long long nnz() const ;
 
         // Publicly visible profiling & other log info
@@ -167,7 +167,7 @@ class Tree
         /** Constructor 
          * lvl is the tree depth
          */
-        Tree(int lvl);
+        Tree(int64_t lvl);
 
         /** Partitioning and Ordering 
          * Assumes the matrix A has a symmetric pattern

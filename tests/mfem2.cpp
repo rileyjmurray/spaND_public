@@ -14,17 +14,17 @@ using namespace mfem;
 using namespace Eigen;
 using namespace spaND;
 
-int main(int argc, char *argv[])
+int64_t main(int64_t argc, char *argv[])
 {
     // 1. Parse command-line options.
     const char *mesh_file = "../data/beam-tri.mesh";
-    int order = 1;
+    int64_t order = 1;
     bool static_cond = false;
     bool visualization = 0;
     double tol = 1e-2;
-    int skip = 4;
+    int64_t skip = 4;
     bool preserve = false;
-    int target = 5000;
+    int64_t target = 5000;
 
     mfem::OptionsParser args(argc, argv);
     args.AddOption(&mesh_file, "-m", "--mesh",
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     // 2. Read the mesh from the given mesh file. We can handle triangular,
     //    quadrilateral, tetrahedral or hexahedral elements with the same code.
     mfem::Mesh *mesh = new mfem::Mesh(mesh_file, 1, 1);
-    int dim = mesh->Dimension();
+    int64_t dim = mesh->Dimension();
 
     if (mesh->attributes.Max() < 2 || mesh->bdr_attributes.Max() < 2)
     {
@@ -82,22 +82,22 @@ int main(int argc, char *argv[])
     //    largest number that gives a final mesh with no more than 5,000
     //    elements.
     {
-        int ref_levels =
-            (int)floor(log(double(target)/mesh->GetNE())/log(2.)/dim);
-        for (int l = 0; l < ref_levels; l++)
+        int64_t ref_levels =
+            (int64_t)floor(log(double(target)/mesh->GetNE())/log(2.)/dim);
+        for (int64_t l = 0; l < ref_levels; l++)
         {
             mesh->UniformRefinement();
         }
    }
 
-    int N = mesh->GetNV();
+    int64_t N = mesh->GetNV();
     cout << "Dimension? " << dim << endl;
     cout << "Vertices? " << N << endl;
 
     Eigen::MatrixXd Xcoo(dim, N * dim);
-    for(int i = 0; i < N; i++) {
-        for(int j = 0; j < dim; j++) { // The three spatial dimensions
-            for (int k = 0; k < dim; k++) { // The three PDEs components
+    for(int64_t i = 0; i < N; i++) {
+        for(int64_t j = 0; j < dim; j++) { // The three spatial dimensions
+            for (int64_t k = 0; k < dim; k++) { // The three PDEs components
                 Xcoo(j, i + k * N) = mesh->GetVertex(i)[j];
             }
         }
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     cout << "Coo matrix" << endl;
     cout << Xcoo.leftCols(10).transpose() << endl;
-    int lvl = (int)ceil(log(N * dim / 64.0)/log(2.0));
+    int64_t lvl = (int64_t)ceil(log(N * dim / 64.0)/log(2.0));
 
     // 5. Define a finite element space on the mesh. Here we use vector finite
     //    elements, i.e. dim copies of a scalar finite element space. The vector
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     //    In this example, the boundary conditions are defined by marking only
     //    boundary attribute 1 from the mesh as essential and converting it to a
     //    list of true dofs.
-    mfem::Array<int> ess_tdof_list, ess_bdr(mesh->bdr_attributes.Max());
+    mfem::Array<int64_t> ess_tdof_list, ess_bdr(mesh->bdr_attributes.Max());
     ess_bdr = 0;
     ess_bdr[0] = 1;
     fespace->GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     //    on boundary attribute 2 is indicated by the use of piece-wise constants
     //    coefficient for its last component.
     mfem::VectorArrayCoefficient f(dim);
-    for (int i = 0; i < dim-1; i++)
+    for (int64_t i = 0; i < dim-1; i++)
     {
         f.Set(i, new ConstantCoefficient(0.0));
     }
@@ -207,29 +207,29 @@ int main(int argc, char *argv[])
     assert(dim == 3);
     assert(N % 3 == 0);
     if(preserve) {
-        int N = A2.rows();
-        int N3 = N/3;
+        int64_t N = A2.rows();
+        int64_t N3 = N/3;
         phi = MatrixXd::Zero(N, 12);
         // piecewise 1
-        for(int i = 0; i < N/3; i++) {
+        for(int64_t i = 0; i < N/3; i++) {
             phi(     i,0) = 1;
             phi(  N3+i,1) = 1;
             phi(2*N3+i,2) = 1;
         }
         // piecewise x
-        for(int i = 0; i < N/3; i++) {
+        for(int64_t i = 0; i < N/3; i++) {
             phi(     i,3) = Xcoo(0,i);
             phi(  N3+i,4) = Xcoo(0,i);
             phi(2*N3+i,5) = Xcoo(0,i);
         }
         // piecewise y
-        for(int i = 0; i < N/3; i++) {
+        for(int64_t i = 0; i < N/3; i++) {
             phi(     i,6) = Xcoo(1,i);
             phi(  N3+i,7) = Xcoo(1,i);
             phi(2*N3+i,8) = Xcoo(1,i);
         }
         // piecewise z
-        for(int i = 0; i < N/3; i++) {
+        for(int64_t i = 0; i < N/3; i++) {
             phi(     i,9)  = Xcoo(2,i);
             phi(  N3+i,10) = Xcoo(2,i);
             phi(2*N3+i,11) = Xcoo(2,i);
@@ -253,14 +253,14 @@ int main(int argc, char *argv[])
         timer t3 = wctime();
         cout << ">>>>t_F=" << elapsed(t0, t3) << endl;
         t.print_log();
-        int iter = cg(A2, b2, x2, t, 500, 1e-12, true);
+        int64_t iter = cg(A2, b2, x2, t, 500, 1e-12, true);
         timer t4 = wctime();
         cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A2*x2-b2).norm() / b2.norm() << endl;
         cout << ">>>>t_S=" << elapsed(t3, t4) << endl;
         cout << ">>>>CG=" << iter << endl;
         eigen2mfem(x2, X);
         if(preserve) {
-            for(int i = 0; i < phi.cols(); i++) {
+            for(int64_t i = 0; i < phi.cols(); i++) {
                 VectorXd b3 = A2 * phi.col(i);
                 VectorXd x3 = b3;
                 t.solve(x3);
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
     if (visualization)
     {
        char vishost[] = "localhost";
-       int  visport   = 19916;
+       int64_t  visport   = 19916;
        mfem::socketstream sol_sock(vishost, visport);
        sol_sock.precision(8);
        sol_sock << "solution\n" << *mesh << x << flush;

@@ -50,7 +50,7 @@ typedef std::unique_ptr<Cluster>         pCluster;
 typedef std::unique_ptr<Edge>            pEdge;
 typedef std::unique_ptr<Operation>       pOperation;
 
-typedef Eigen::SparseMatrix<double, 0, int> SpMat;
+typedef Eigen::SparseMatrix<double, 0, int64_t> SpMat;
 typedef Eigen::VectorBlock<Eigen::Matrix<double, -1,  1, 0, -1,  1>, -1> Segment;
 typedef Eigen::Block<Eigen::Matrix<double, -1, -1, 0, -1, -1>, -1, -1> MatrixBlock;
 

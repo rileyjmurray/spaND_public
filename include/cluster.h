@@ -17,13 +17,13 @@ struct Cluster {
     private:
         /* Cluster info */
         // Start of the cluster in the assembly-permuted matrix
-        int start_;
+        int64_t start_;
         // Current size of the cluster in the assembly-permuted matrix
-        int size_;
+        int64_t size_;
         // Level
-        int level_;
+        int64_t level_;
         // Global order of the cluster
-        int order_;
+        int64_t order_;
         // Wether the cluster has been eliminated
         bool eliminated_;
         // Wether to sparsify this cluster or not
@@ -45,13 +45,13 @@ struct Cluster {
         std::vector<double> Rdiag;
     public:
         // Construct a cluser
-        Cluster(int start, int size, int level, int order, bool should_sparsify);
+        Cluster(int64_t start, int64_t size, int64_t level, int64_t order, bool should_sparsify);
         // Wether this cluster should be sparsified
         bool should_sparsify() const;
         // Reset the cluster size and its corresponding 'x'. Any previous x is discarded
-        void reset_size(int);
+        void reset_size(int64_t);
         // Set the size of the cluster. Keep previous x
-        void set_size(int);
+        void set_size(int64_t);
         // Wether this cluster has been eliminated
         bool is_eliminated() const;
         // Set cluster as eliminated and remove edges
@@ -67,9 +67,9 @@ struct Cluster {
         // Iterate over all incoming edges, except pivot
         ItRange<std::list<Edge*>::iterator> edgesInNbr();
         // Number of in/out/pivot edges
-        int nnbr_in_self_out() const;
+        int64_t nnbr_in_self_out() const;
         // Number of out/pivot edges
-        int nnbr_self_out() const;
+        int64_t nnbr_self_out() const;
         // Set x to b
         void set_vector(const Eigen::VectorXd& b);
         // Extract x into b
@@ -79,15 +79,15 @@ struct Cluster {
         // Return the full x
         const pVectorXd& get_x() const;
         // Start of the cluster in permuted ordering
-        int start() const;
+        int64_t start() const;
         // Size of cluster
-        int size() const;
+        int64_t size() const;
         // Original cluster size
-        int original_size() const;
+        int64_t original_size() const;
         // The level at which this cluster should be eliminated
-        int level() const;
+        int64_t level() const;
         // A global cluster ID
-        int order() const;
+        int64_t order() const;
         // Return phi
         Eigen::MatrixXd* phi() const;
         // Set phi
@@ -105,9 +105,9 @@ struct Cluster {
         // Sort out edges (u, v) according to v->order()
         void sort_edges();
         // Returns the depth of this in its cluster hierarchy. 0 is the root.
-        int depth() const;
+        int64_t depth() const;
         // Returns the level at which this cluster should be merged
-        int merge_level() const;
+        int64_t merge_level() const;
         // An informative name about a cluster (any string do)
         virtual std::string get_name() const;
         // virtual function -> need virtual dtor

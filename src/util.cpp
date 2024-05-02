@@ -6,16 +6,16 @@ using namespace std;
 namespace spaND {
 
 bool are_connected(VectorXi &a, VectorXi &b, SpMat &A) {
-    int  bsize = b.size();
+    int64_t  bsize = b.size();
     auto b_begin = b.data();
     auto b_end   = b.data() + b.size();
-    for(int ia = 0; ia < a.size(); ia++) {
+    for(int64_t ia = 0; ia < a.size(); ia++) {
         // Look at all the neighbors of ia
-        int node = a[ia];
+        int64_t node = a[ia];
         for(SpMat::InnerIterator it(A,node); it; ++it) {
             auto neigh = it.row();
             auto id = lower_bound(b_begin, b_end, neigh);
-            int pos = id - b_begin;
+            int64_t pos = id - b_begin;
             if(pos < bsize && b[pos] == neigh) // Found one in b! They are connected.
                 return true;
         }
@@ -25,7 +25,7 @@ bool are_connected(VectorXi &a, VectorXi &b, SpMat &A) {
 
 // lvl=0=leaf
 // assumes a ND binary tree
-bool should_be_disconnected(int lvl1, int lvl2, int sep1, int sep2) {
+bool should_be_disconnected(int64_t lvl1, int64_t lvl2, int64_t sep1, int64_t sep2) {
     while (lvl2 > lvl1) {
         lvl1 += 1;
         sep1 /= 2;
@@ -46,10 +46,10 @@ bool should_be_disconnected(int lvl1, int lvl2, int sep1, int sep2) {
  */
 SpMat symmetric_graph(SpMat& A) {
     assert(A.rows() == A.cols());
-    int n = A.rows();
+    int64_t n = A.rows();
     vector<Triplet<double>> vals(2 * A.nonZeros() + n);
-    int l = 0;
-    for (int k=0; k < A.outerSize(); ++k) {
+    int64_t l = 0;
+    for (int64_t k=0; k < A.outerSize(); ++k) {
         vals[l++] = Triplet<double>(k, k, 1.0);
         for (SpMat::InnerIterator it(A,k); it; ++it) {
             vals[l++] = Triplet<double>(it.col(), it.row(), abs(it.value()));
@@ -74,24 +74,24 @@ timer wctime() {
 
 // All are base-0
 void swap2perm(Eigen::VectorXi* swap, Eigen::VectorXi* perm) {
-    int n = perm->size();
+    int64_t n = perm->size();
     assert(swap->size() == n);
-    for(int i = 0; i < n; i++) {
+    for(int64_t i = 0; i < n; i++) {
         (*perm)[i] = i;
     }
-    for(int i = 0; i < n; i++) {
-        int ipiv = (*swap)[i];
-        int tmp = (*perm)[ipiv];
+    for(int64_t i = 0; i < n; i++) {
+        int64_t ipiv = (*swap)[i];
+        int64_t tmp = (*perm)[ipiv];
         (*perm)[ipiv] = (*perm)[i];
         (*perm)[i] = tmp;
     }
 }
 
 bool isperm(const Eigen::VectorXi* perm) {
-    int n = perm->size();
+    int64_t n = perm->size();
     VectorXi count = VectorXi::Zero(n);
-    for(int i = 0;i < n; i++) {
-        int pi = (*perm)[i];
+    for(int64_t i = 0;i < n; i++) {
+        int64_t pi = (*perm)[i];
         if(pi < 0 || pi >= n) { return false; }
         count[pi] += 1;
     }
@@ -101,7 +101,7 @@ bool isperm(const Eigen::VectorXi* perm) {
 Eigen::VectorXi invperm(const Eigen::VectorXi& perm) {
     assert(isperm(&perm));
     Eigen::VectorXi invperm(perm.size());
-    for(int i = 0; i < perm.size(); i++) {
+    for(int64_t i = 0; i < perm.size(); i++) {
         invperm[perm[i]] = i;
     }
     assert(isperm(&invperm));
@@ -120,15 +120,15 @@ size_t hashv(vector<size_t> vals) {
  * C = alpha A^(/T) * B^(/T) + beta C
  */
 void gemm(MatrixXd* A, MatrixXd* B, MatrixXd* C, CBLAS_TRANSPOSE tA, CBLAS_TRANSPOSE tB, double alpha, double beta) {
-    int m = C->rows();
-    int n = C->cols();    
-    int lda = A->rows();
-    int ldb = B->rows();
-    int ldc = C->rows();
-    int k  = (tA == CblasNoTrans ? A->cols() : A->rows());
-    int k2 = (tB == CblasNoTrans ? B->rows() : B->cols());        
-    int m2 = (tA == CblasNoTrans ? A->rows() : A->cols());
-    int n2 = (tB == CblasNoTrans ? B->cols() : B->rows());
+    int64_t m = C->rows();
+    int64_t n = C->cols();    
+    int64_t lda = A->rows();
+    int64_t ldb = B->rows();
+    int64_t ldc = C->rows();
+    int64_t k  = (tA == CblasNoTrans ? A->cols() : A->rows());
+    int64_t k2 = (tB == CblasNoTrans ? B->rows() : B->cols());        
+    int64_t m2 = (tA == CblasNoTrans ? A->rows() : A->cols());
+    int64_t n2 = (tB == CblasNoTrans ? B->cols() : B->rows());
     assert(k == k2);
     assert(m == m2); 
     assert(n == n2);
@@ -138,33 +138,33 @@ void gemm(MatrixXd* A, MatrixXd* B, MatrixXd* C, CBLAS_TRANSPOSE tA, CBLAS_TRANS
 }
 
 MatrixXd* gemm_new(Eigen::MatrixXd* A, Eigen::MatrixXd* B, CBLAS_TRANSPOSE tA, CBLAS_TRANSPOSE tB, double alpha) {
-    int m = (tA == CblasNoTrans ? A->rows() : A->cols());
-    int n = (tB == CblasNoTrans ? B->cols() : B->rows());
+    int64_t m = (tA == CblasNoTrans ? A->rows() : A->cols());
+    int64_t n = (tB == CblasNoTrans ? B->cols() : B->rows());
     MatrixXd* C = new MatrixXd(m, n);
     gemm(A, B, C, tA, tB, alpha, 0.0);
     return C;
 }
 
 void syrk(MatrixXd* A, MatrixXd* C, CBLAS_TRANSPOSE tA, double alpha, double beta) {
-    int n = C->rows();
-    int k = (tA == CblasNoTrans ? A->cols() : A->rows());
+    int64_t n = C->rows();
+    int64_t k = (tA == CblasNoTrans ? A->cols() : A->rows());
     assert(C->cols() == n);
     if (n == 0 || k == 0)
         return;
-    int lda = A->rows();
+    int64_t lda = A->rows();
     cblas_dsyrk(CblasColMajor, CblasLower, tA, n, k, alpha, A->data(), lda, beta, C->data(), n);
 }
 
-int potf(MatrixXd* A) {
-    int n = A->rows();
+int64_t potf(MatrixXd* A) {
+    int64_t n = A->rows();
     assert(A->cols() == n);
     if (n == 0)
         return 0;
-    int info = LAPACKE_dpotrf(LAPACK_COL_MAJOR, 'L', n, A->data(), n);
+    int64_t info = LAPACKE_dpotrf(LAPACK_COL_MAJOR, 'L', n, A->data(), n);
     return info;
 }
 
-int ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi* p, double* rcond) {
+int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi* p, double* rcond) {
     if(A->rows() == 0) return 0;
     LDLT<Ref<MatrixXd>, Lower> ldlt(*A);
     if(ldlt.info() != ComputationInfo::Success) {
@@ -180,18 +180,18 @@ int ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::Vect
     return 0;
 }
 
-int getf(Eigen::MatrixXd* A, Eigen::VectorXi* p) {
-    int n = A->rows();
+int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* p) {
+    int64_t n = A->rows();
     assert(A->cols() == n);
     assert(p->size() == n);
     VectorXi swap(p->size());
     if(n == 0)
         return 0;
-    int info = LAPACKE_dgetrf(LAPACK_COL_MAJOR, n, n, A->data(), n, swap.data());
+    int64_t info = LAPACKE_dgetrf(LAPACK_COL_MAJOR, n, n, A->data(), n, swap.data());
     if(info != 0) {
         return info;
     } else {
-        for(int i = 0; i < n; i++) {
+        for(int64_t i = 0; i < n; i++) {
             (swap)[i] -= 1;
         }
         swap2perm(&swap, p);
@@ -227,19 +227,19 @@ void split_LU(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::MatrixXd* U) {
 }
 
 double rcond_1_getf(Eigen::MatrixXd* A_LU, double A_1_norm) {
-    int n = A_LU->rows();
+    int64_t n = A_LU->rows();
     assert(A_LU->cols() == n);
     double rcond = 10.0;
-    int info = LAPACKE_dgecon(LAPACK_COL_MAJOR, '1', n, A_LU->data(), n, A_1_norm, &rcond);
+    int64_t info = LAPACKE_dgecon(LAPACK_COL_MAJOR, '1', n, A_LU->data(), n, A_1_norm, &rcond);
     assert(info == 0);
     return rcond;
 }
 
 double rcond_1_potf(Eigen::MatrixXd* A_LLT, double A_1_norm) {
-    int n = A_LLT->rows();
+    int64_t n = A_LLT->rows();
     assert(A_LLT->cols() == n);
     double rcond = 10.0;
-    int info = LAPACKE_dpocon(LAPACK_COL_MAJOR, 'L', n, A_LLT->data(), n, A_1_norm, &rcond);
+    int64_t info = LAPACKE_dpocon(LAPACK_COL_MAJOR, 'L', n, A_LLT->data(), n, A_1_norm, &rcond);
     assert(info == 0);
     return rcond;
 }
@@ -248,14 +248,14 @@ double rcond_1_trcon(Eigen::MatrixXd* LU, char uplo, char diag) {
     assert(LU->rows() == LU->cols());
     if(LU->rows() == 0) return 1.0;
     double rcond;
-    int info = LAPACKE_dtrcon(LAPACK_COL_MAJOR, '1', uplo, diag, LU->rows(), LU->data(), LU->rows(), &rcond);
+    int64_t info = LAPACKE_dtrcon(LAPACK_COL_MAJOR, '1', uplo, diag, LU->rows(), LU->data(), LU->rows(), &rcond);
     assert(info == 0);
     return rcond;
 }
 
 void trsm_right(MatrixXd* L, MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag) {
-    int m = B->rows();
-    int n = B->cols();
+    int64_t m = B->rows();
+    int64_t n = B->cols();
     assert(L->rows() == n);
     assert(L->cols() == n);
     if (m == 0 || n == 0)
@@ -264,8 +264,8 @@ void trsm_right(MatrixXd* L, MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans
 }
 
 void trsm_left(MatrixXd* L, MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag) {
-    int m = B->rows();
-    int n = B->cols();
+    int64_t m = B->rows();
+    int64_t n = B->cols();
     assert(L->rows() == m);
     assert(L->cols() == m);
     if (m == 0 || n == 0)
@@ -274,7 +274,7 @@ void trsm_left(MatrixXd* L, MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans,
 }
 
 void trsv(MatrixXd* LU, Segment* x, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag) {
-    int n = LU->rows();
+    int64_t n = LU->rows();
     assert(LU->cols() == n);
     assert(x->size() == n);
     if (n == 0)
@@ -283,8 +283,8 @@ void trsv(MatrixXd* LU, Segment* x, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLA
 }
 
 void trmv_trans(MatrixXd* L, Segment* x) {
-    int n = L->rows();
-    int m = L->cols();
+    int64_t n = L->rows();
+    int64_t m = L->cols();
     assert(x->size() == n);
     assert(n == m);
     if (n == 0)
@@ -294,8 +294,8 @@ void trmv_trans(MatrixXd* L, Segment* x) {
 
 // A <- L^T * A
 void trmm_trans(MatrixXd* L, MatrixXd* A) {
-    int m = A->rows();
-    int n = A->cols();
+    int64_t m = A->rows();
+    int64_t n = A->cols();
     assert(L->rows() == m);
     assert(L->cols() == m);
     if (m == 0 || n == 0)
@@ -305,8 +305,8 @@ void trmm_trans(MatrixXd* L, MatrixXd* A) {
 
 // x2 -= A21 * x1
 void gemv_notrans(MatrixXd* A21, Segment* x1, Segment* x2) {
-    int m = A21->rows();
-    int n = A21->cols();
+    int64_t m = A21->rows();
+    int64_t n = A21->cols();
     assert(x1->size() == n);
     assert(x2->size() == m);
     if (n == 0 || m == 0)
@@ -316,8 +316,8 @@ void gemv_notrans(MatrixXd* A21, Segment* x1, Segment* x2) {
 
 // x2 -= A12^T x1
 void gemv_trans(MatrixXd* A12, Segment* x1, Segment* x2) {
-    int m = A12->rows();
-    int n = A12->cols();
+    int64_t m = A12->rows();
+    int64_t n = A12->cols();
     assert(x1->size() == m);
     assert(x2->size() == n);
     if (n == 0 || m == 0)
@@ -327,34 +327,34 @@ void gemv_trans(MatrixXd* A12, Segment* x1, Segment* x2) {
 
 // x <- Q * x
 void ormqr_notrans(MatrixXd* v, VectorXd* h, Segment* x) {
-    int m = v->rows();
-    int n = v->cols();
+    int64_t m = v->rows();
+    int64_t n = v->cols();
     assert(h->size() == n);
     assert(x->size() == m);
     if (m == 0) 
         return;
-    int info = LAPACKE_dormqr(LAPACK_COL_MAJOR, 'L', 'N', m, 1, n, v->data(), m, h->data(), x->data(), m); 
+    int64_t info = LAPACKE_dormqr(LAPACK_COL_MAJOR, 'L', 'N', m, 1, n, v->data(), m, h->data(), x->data(), m); 
     assert(info == 0);
 }
 
 // x <- Q^T * x
 void ormqr_trans(MatrixXd* v, VectorXd* h, Segment* x) {
-    int m = x->size();
+    int64_t m = x->size();
     // n = 1
-    int k = v->cols();
+    int64_t k = v->cols();
     assert(h->size() == k);
     assert(v->rows() == m);
     if (m == 0 || k == 0) 
         return;
-    int info = LAPACKE_dormqr(LAPACK_COL_MAJOR, 'L', 'T', m, 1, k, v->data(), m, h->data(), x->data(), m); 
+    int64_t info = LAPACKE_dormqr(LAPACK_COL_MAJOR, 'L', 'T', m, 1, k, v->data(), m, h->data(), x->data(), m); 
     assert(info == 0);
 }
 
 // A <- (Q^/T) * A * (Q^/T)
 void ormqr(MatrixXd* v, VectorXd* h, MatrixXd* A, char side, char trans) {
-    int m = A->rows();
-    int n = A->cols();
-    int k = v->cols(); // number of reflectors
+    int64_t m = A->rows();
+    int64_t n = A->cols();
+    int64_t k = v->cols(); // number of reflectors
     assert(h->size() == k);
     if (m == 0 || n == 0)
         return;
@@ -364,74 +364,74 @@ void ormqr(MatrixXd* v, VectorXd* h, MatrixXd* A, char side, char trans) {
         assert(k <= n);
     if (k == 0)
         return; // No reflectors, so nothing to do
-    int info = LAPACKE_dormqr(LAPACK_COL_MAJOR, side, trans, m, n, k, v->data(), v->rows(), h->data(), A->data(), m);
+    int64_t info = LAPACKE_dormqr(LAPACK_COL_MAJOR, side, trans, m, n, k, v->data(), v->rows(), h->data(), A->data(), m);
     assert(info == 0);
 }
 
 // Create the thin Q in v
 void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
-    int m = v->rows();
-    int k = v->cols();
+    int64_t m = v->rows();
+    int64_t k = v->cols();
     assert(h->size() == k);
     if(m == 0 || k == 0)
         return;
-    int info = LAPACKE_dorgqr(LAPACK_COL_MAJOR, m, k, k, v->data(), m, h->data());
+    int64_t info = LAPACKE_dorgqr(LAPACK_COL_MAJOR, m, k, k, v->data(), m, h->data());
     assert(info == 0);
 }
 
 // RRQR
 void geqp3(MatrixXd* A, VectorXi* jpvt, VectorXd* tau) {
-    int m = A->rows();
-    int n = A->cols();
+    int64_t m = A->rows();
+    int64_t n = A->cols();
     if (m == 0 || n == 0)
         return;
     assert(jpvt->size() == n);
     assert(tau->size() == min(m,n));
-    int info = LAPACKE_dgeqp3(LAPACK_COL_MAJOR, m, n, A->data(), m, jpvt->data(), tau->data());
+    int64_t info = LAPACKE_dgeqp3(LAPACK_COL_MAJOR, m, n, A->data(), m, jpvt->data(), tau->data());
     assert(info == 0);
-    for (int i = 0; i < jpvt->size(); i++)
+    for (int64_t i = 0; i < jpvt->size(); i++)
         (*jpvt)[i] --;
 }
 
 // Full SVD
 void gesvd(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eigen::MatrixXd* VT) {
-    int m = A->rows();
-    int n = A->cols();
-    int k = min(m,n);
+    int64_t m = A->rows();
+    int64_t n = A->cols();
+    int64_t k = min(m,n);
     assert(U->rows() == m && U->cols() == m);
     assert(VT->rows() == n && VT->cols() == n);
     assert(S->size() == k);
     if(k == 0)
         return;
     VectorXd superb(k-1);
-    int info = LAPACKE_dgesvd(LAPACK_COL_MAJOR, 'A', 'A', m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n, superb.data());
+    int64_t info = LAPACKE_dgesvd(LAPACK_COL_MAJOR, 'A', 'A', m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n, superb.data());
     assert(info == 0);
 }
 
 // Full Symmetric EVD
 void syev(Eigen::MatrixXd* A, Eigen::VectorXd* S) {
-    int m = A->rows();
-    int n = A->cols();
+    int64_t m = A->rows();
+    int64_t n = A->cols();
     assert(m == n);
     assert(S->size() == m);
     if(m == 0)
         return;
-    int info = LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'L', m, A->data(), m, S->data());
+    int64_t info = LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'L', m, A->data(), m, S->data());
     assert(info == 0);
 }
 
 // QR
 void geqrf(MatrixXd* A, VectorXd* tau) {
-    int m = A->rows();
-    int n = A->cols();
+    int64_t m = A->rows();
+    int64_t n = A->cols();
     if (m == 0 || n == 0)
         return;
     assert(tau->size() == min(m,n));
-    int info = LAPACKE_dgeqrf(LAPACK_COL_MAJOR, m, n, A->data(), m, tau->data());
+    int64_t info = LAPACKE_dgeqrf(LAPACK_COL_MAJOR, m, n, A->data(), m, tau->data());
     assert(info == 0);
 }
 
-int choose_rank(VectorXd& s, double tol) {
+int64_t choose_rank(VectorXd& s, double tol) {
     if (tol == 0) {
         return s.size();
     } else if (tol >= 1.0) {
@@ -441,7 +441,7 @@ int choose_rank(VectorXd& s, double tol) {
             return s.size();
         } else {
             double sref = abs(s[0]);
-            int rank = 1;
+            int64_t rank = 1;
             while(rank < s.size() && abs(s[rank]) / sref >= tol) {
                 rank++;
             }
@@ -451,25 +451,25 @@ int choose_rank(VectorXd& s, double tol) {
     }
 }
 
-void block2dense(VectorXi &rowval, VectorXi &colptr, VectorXd &nnzval, int i, int j, int li, int lj, MatrixXd *dst, bool transpose) {
+void block2dense(VectorXi &rowval, VectorXi &colptr, VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, MatrixXd *dst, bool transpose) {
     if(transpose) {
         assert(dst->rows() == lj && dst->cols() == li);
     } else {
         assert(dst->rows() == li && dst->cols() == lj);
     }
-    for(int col = 0; col < lj; col++) {
+    for(int64_t col = 0; col < lj; col++) {
         // All elements in column c
-        int start_c = colptr[j + col];
-        int end_c = colptr[j + col + 1];
-        int size = end_c - start_c;
+        int64_t start_c = colptr[j + col];
+        int64_t end_c = colptr[j + col + 1];
+        int64_t size = end_c - start_c;
         auto start = rowval.data() + start_c;
         auto end = rowval.data() + end_c;
         // Find i
         auto found = lower_bound(start, end, i);
-        int id = distance(start, found);
+        int64_t id = distance(start, found);
         // While we are between i and i+i...
         while(id < size) {
-            int row = rowval[start_c + id];
+            int64_t row = rowval[start_c + id];
             if(row >= i + li) {
                 break;
             }
@@ -485,26 +485,26 @@ void block2dense(VectorXi &rowval, VectorXi &colptr, VectorXd &nnzval, int i, in
     }
 }
 
-MatrixXd linspace_nd(int n, int dim) {
+MatrixXd linspace_nd(int64_t n, int64_t dim) {
     MatrixXd X = MatrixXd::Zero(dim, pow(n, dim));
     if (dim == 1) {
-        for(int i = 0; i < n; i++) {
+        for(int64_t i = 0; i < n; i++) {
             X(0,i) = double(i);
         }
     } else if (dim == 2) {
-        int id = 0;
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < n; j++) {
+        int64_t id = 0;
+        for(int64_t i = 0; i < n; i++) {
+            for(int64_t j = 0; j < n; j++) {
                 X(0,id) = i;
                 X(1,id) = j;
                 id ++;
             }
         }
     } else if (dim == 3) {
-        int id = 0;
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < n; j++) {
-                for(int k = 0; k < n; k++) {
+        int64_t id = 0;
+        for(int64_t i = 0; i < n; i++) {
+            for(int64_t j = 0; j < n; j++) {
+                for(int64_t k = 0; k < n; k++) {
                     X(0,id) = i;
                     X(1,id) = j;
                     X(2,id) = k;
@@ -520,21 +520,21 @@ MatrixXd linspace_nd(int n, int dim) {
 SpMat symm_perm(SpMat &A, VectorXi &p) {
     // Create inverse permutation
     VectorXi pinv(p.size());
-    for(int i = 0; i < p.size(); i++)
+    for(int64_t i = 0; i < p.size(); i++)
         pinv[p[i]] = i;
     // Initialize A[p,p]
-    int n = A.rows();
-    int nnz = A.nonZeros();
+    int64_t n = A.rows();
+    int64_t nnz = A.nonZeros();
     assert(n == A.cols()); 
     SpMat App(n, n);
     App.reserve(nnz);
     // Create permuted (I, J, V) values
     vector<Triplet<double>> vals(nnz);
-    int l = 0;
-    for (int k = 0; k < A.outerSize(); k++){
+    int64_t l = 0;
+    for (int64_t k = 0; k < A.outerSize(); k++){
         for (SpMat::InnerIterator it(A, k); it; ++it){
-            int i = it.row();
-            int j = it.col();
+            int64_t i = it.row();
+            int64_t j = it.col();
             double v = it.value();
             vals[l] = Triplet<double>(pinv[i],pinv[j],v);
             l ++;
@@ -546,24 +546,24 @@ SpMat symm_perm(SpMat &A, VectorXi &p) {
 }
 
 // Random [-1,1]
-VectorXd random(int size, int seed) {
+VectorXd random(int64_t size, int64_t seed) {
     mt19937 rng;
     rng.seed(seed);
     uniform_real_distribution<double> dist(-1.0,1.0);
     VectorXd x(size);
-    for(int i = 0;i < size; i++) {
+    for(int64_t i = 0;i < size; i++) {
         x[i] = dist(rng);
     }
     return x;
 }
 
-MatrixXd random(int rows, int cols, int seed) {
+MatrixXd random(int64_t rows, int64_t cols, int64_t seed) {
     mt19937 rng;
     rng.seed(seed);
     uniform_real_distribution<double> dist(-1.0,1.0);
     MatrixXd A(rows, cols);
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
+    for(int64_t i = 0; i < rows; i++) {
+        for(int64_t j = 0; j < cols; j++) {
             A(i,j) = dist(rng);
         }
     }

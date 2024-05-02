@@ -5,7 +5,7 @@ using namespace Eigen;
 
 namespace spaND {
 
-Cluster::Cluster(int start, int size, int level, int order, bool should_sparsify) : 
+Cluster::Cluster(int64_t start, int64_t size, int64_t level, int64_t order, bool should_sparsify) : 
     start_(start), size_(size), level_(level), order_(order), eliminated_(false), sparsify_(should_sparsify),
     parent_(nullptr),
     phi_(nullptr), 
@@ -18,12 +18,12 @@ Cluster::Cluster(int start, int size, int level, int order, bool should_sparsify
 bool Cluster::should_sparsify() const {
     return this->sparsify_;
 }
-void Cluster::reset_size(int size) {
+void Cluster::reset_size(int64_t size) {
     this->size_ = size;
     this->x_ = std::make_unique<Eigen::VectorXd>(this->size());
     this->x_->setZero();
 }
-void Cluster::set_size(int size) {
+void Cluster::set_size(int64_t size) {
     this->size_ = size;
 }
 bool Cluster::is_eliminated() const {
@@ -71,11 +71,11 @@ ItRange<std::list<Edge*>::iterator> Cluster::edgesInNbr() {
     return ItRange<std::list<Edge*>::iterator>(begin, end);
 }
 
-int Cluster::nnbr_in_self_out() const {
+int64_t Cluster::nnbr_in_self_out() const {
     return this->edgesOut.size() + this->edgesIn.size();
 }
 
-int Cluster::nnbr_self_out() const {
+int64_t Cluster::nnbr_self_out() const {
     return this->edgesOut.size();
 }
 
@@ -95,11 +95,11 @@ void Cluster::extract_vector(VectorXd& b) const {
     }
 }
 
-int Cluster::start() const { return start_; }
-int Cluster::size() const { return size_; }
-int Cluster::original_size() const { return x_->size(); }
-int Cluster::level() const { return level_; }
-int Cluster::order() const { return order_; }
+int64_t Cluster::start() const { return start_; }
+int64_t Cluster::size() const { return size_; }
+int64_t Cluster::original_size() const { return x_->size(); }
+int64_t Cluster::level() const { return level_; }
+int64_t Cluster::order() const { return order_; }
 MatrixXd* Cluster::phi() const { return phi_.get(); }
 void Cluster::set_phi(pMatrixXd phi) { 
     assert(phi->rows() == this->size());
@@ -175,20 +175,20 @@ void Cluster::sort_edges() {
     this->assertDuplicates();
 }
 
-void compute_depth(const Cluster* n, int& depth) {
+void compute_depth(const Cluster* n, int64_t& depth) {
     if(n->parent() != nullptr) {
         depth += 1;
         compute_depth(n->parent(), depth);
     }
 }
 
-int Cluster::depth() const {
-    int depth = 0;
+int64_t Cluster::depth() const {
+    int64_t depth = 0;
     compute_depth(this, depth);
     return depth;
 }
 
-int Cluster::merge_level() const {
+int64_t Cluster::merge_level() const {
     return this->level() - this->depth();
 }
 

@@ -13,10 +13,10 @@ using namespace Eigen;
 using namespace spaND;
 
 bool VERB = false;
-int  N_THREADS = 4;
-int  RUN_MANY = 4;
+int64_t  N_THREADS = 4;
+int64_t  RUN_MANY = 4;
 
-SymmKind symm2syk(int symm) {
+SymmKind symm2syk(int64_t symm) {
     switch(symm) {
         case 0: return SymmKind::SPD;
         case 1: return SymmKind::SYM;
@@ -26,7 +26,7 @@ SymmKind symm2syk(int symm) {
     return SymmKind::SPD;
 }
 
-PartKind pki2pk(int pki) {
+PartKind pki2pk(int64_t pki) {
     switch(pki) {
         case 0: return PartKind::MND;
         case 1: return PartKind::RB;
@@ -35,7 +35,7 @@ PartKind pki2pk(int pki) {
     return PartKind::MND;
 }
 
-ScalingKind ski2sk(int ski) {
+ScalingKind ski2sk(int64_t ski) {
     switch(ski) {
         case 0: return ScalingKind::LLT;
         case 1: return ScalingKind::EVD;
@@ -71,10 +71,10 @@ struct params {
 
 vector<params> get_params() {
     vector<params> configs;
-    for(int symm = 0; symm < 3; symm++) {
-        for(int pki = 0; pki < 2; pki++) {
-            for(int ski = 0; ski < 6; ski++) {
-                for(int pres = 0; pres < 2; pres++) {
+    for(int64_t symm = 0; symm < 3; symm++) {
+        for(int64_t pki = 0; pki < 2; pki++) {
+            for(int64_t ski = 0; ski < 6; ski++) {
+                for(int64_t pres = 0; pres < 2; pres++) {
                     PartKind pk = pki2pk(pki);
                     ScalingKind sk = ski2sk(ski); 
                     SymmKind syk = symm2syk(symm);
@@ -87,20 +87,20 @@ vector<params> get_params() {
     return configs;
 };
 
-SpMat neglapl(int n, int d) {
+SpMat neglapl(int64_t n, int64_t d) {
     stringstream s;
     s << "../mats/neglapl_" << d << "_" << n << ".mm";
     string file = s.str();
-    SpMat A = mmio::sp_mmread<double,int>(file);
+    SpMat A = mmio::sp_mmread<double,int64_t>(file);
     return A;
 }
 
-SpMat neglapl_unsym(int n, int d, int seed) {
+SpMat neglapl_unsym(int64_t n, int64_t d, int64_t seed) {
     SpMat A = neglapl(n, d);
     default_random_engine gen;
     gen.seed(seed);
     uniform_real_distribution<double> rand(-0.1, 0.1);
-    for(int k = 0; k < A.outerSize(); ++k) {
+    for(int64_t k = 0; k < A.outerSize(); ++k) {
         for(SpMat::InnerIterator it(A, k); it; ++it) {
             A.coeffRef(it.row(), it.col()) += rand(gen);
         }
@@ -108,10 +108,10 @@ SpMat neglapl_unsym(int n, int d, int seed) {
     return A;
 }
 
-SpMat make_indef(SpMat& A, int seed) {
+SpMat make_indef(SpMat& A, int64_t seed) {
     Eigen::SimplicialLLT<SpMat, Eigen::Lower> sllt(A);
     VectorXd random_diagonal = random(A.rows(), seed);        
-    for(int i = 0; i < A.rows(); i++) {
+    for(int64_t i = 0; i < A.rows(); i++) {
         if(random_diagonal[i] <= 0.9) {
             random_diagonal[i] = -1;
         } else {
@@ -122,13 +122,13 @@ SpMat make_indef(SpMat& A, int seed) {
     return L * (random_diagonal.asDiagonal() * L.transpose());
 }
 
-SpMat random_SpMat(int n, double p, int seed) {
+SpMat random_SpMat(int64_t n, double p, int64_t seed) {
     default_random_engine gen;
     gen.seed(seed);
     uniform_real_distribution<double> dist(0.0,1.0);
     vector<Triplet<double>> triplets;
-    for(int i = 0; i < n; ++i) {
-        for(int j = 0; j < n; ++j) {
+    for(int64_t i = 0; i < n; ++i) {
+        for(int64_t j = 0; j < n; ++j) {
             auto v_ij = dist(gen);
             if(v_ij < p) {
                 triplets.push_back(Triplet<double>(i,j,v_ij));
@@ -140,9 +140,9 @@ SpMat random_SpMat(int n, double p, int seed) {
     return A;
 }
 
-SpMat identity_SpMat(int n) {
+SpMat identity_SpMat(int64_t n) {
     vector<Triplet<double>> triplets;
-    for(int i = 0; i < n; ++i) {
+    for(int64_t i = 0; i < n; ++i) {
         triplets.push_back(Triplet<double>(i,i,1.0));
     }
     SpMat A(n,n);
@@ -152,7 +152,7 @@ SpMat identity_SpMat(int n) {
 
 TEST(MatrixMarket, Sparse) {
     // 1
-    SpMat A = mmio::sp_mmread<double,int>("../mats/test1.mm");
+    SpMat A = mmio::sp_mmread<double,int64_t>("../mats/test1.mm");
     SpMat Aref(2, 3);
     Aref.insert(0, 0) = 1;
     Aref.insert(0, 1) = -2e2;
@@ -161,7 +161,7 @@ TEST(MatrixMarket, Sparse) {
     EXPECT_EQ(A.nonZeros(), 4);
     EXPECT_EQ((Aref - A).norm(), 0.0);
     // 2
-    A = mmio::sp_mmread<double,int>("../mats/test2.mm");
+    A = mmio::sp_mmread<double,int64_t>("../mats/test2.mm");
     Aref = SpMat(3, 3);
     Aref.insert(0, 0) = 1.1;
     Aref.insert(1, 1) = 2e2;
@@ -170,13 +170,13 @@ TEST(MatrixMarket, Sparse) {
     EXPECT_EQ(A.nonZeros(), 4);
     EXPECT_EQ((Aref - A).norm(), 0.0);
     // 3
-    A = mmio::sp_mmread<double,int>("../mats/test3.mm");
+    A = mmio::sp_mmread<double,int64_t>("../mats/test3.mm");
     Aref = SpMat(4, 1);
     Aref.insert(3, 0) = -1;
     EXPECT_EQ(A.nonZeros(), 1);
     EXPECT_EQ((Aref - A).norm(), 0.0);
     // 4
-    A = mmio::sp_mmread<double,int>("../mats/test4.mm");
+    A = mmio::sp_mmread<double,int64_t>("../mats/test4.mm");
     Aref = SpMat(2, 2);
     Aref.insert(1, 0) = -3.3;
     Aref.insert(0, 1) = -3.3;
@@ -205,7 +205,7 @@ TEST(MatrixMarket, Array) {
 
 TEST(Util, AreConnected) {
     // 3x3 laplacian
-    SpMat A = mmio::sp_mmread<double,int>("../mats/neglapl_2_3.mm");
+    SpMat A = mmio::sp_mmread<double,int64_t>("../mats/neglapl_2_3.mm");
     VectorXi a(2);
     VectorXi b(3);
     a << 0, 1;
@@ -310,16 +310,16 @@ TEST(Util, LinspaceNd) {
 }
 
 TEST(Util, SymmPerm) {
-    vector<int> dims  = {2, 2,  2,  3, 3,  3,  3 };
-    vector<int> sizes = {5, 10, 20, 5, 15, 25, 30};
-    for(int test = 0; test < dims.size(); test++) {
-        int s = sizes[test];
-        int d = dims[test];
+    vector<int64_t> dims  = {2, 2,  2,  3, 3,  3,  3 };
+    vector<int64_t> sizes = {5, 10, 20, 5, 15, 25, 30};
+    for(int64_t test = 0; test < dims.size(); test++) {
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
         stringstream ss;
         ss << "../mats/neglapl_" << d << "_" << s << ".mm";
-        SpMat A = mmio::sp_mmread<double,int>(ss.str());
+        SpMat A = mmio::sp_mmread<double,int64_t>(ss.str());
         // Create random perm
-        int N = A.rows();
+        int64_t N = A.rows();
         VectorXi p = VectorXi::LinSpaced(N, 0, N-1);
         random_device rd;
         mt19937 g(rd());
@@ -362,7 +362,7 @@ SpMat symmetric_graph_ref(SpMat A) {
 }
 
 TEST(Util, symmetric_graph) {
-    for(int i = 1; i < 100; i++) {
+    for(int64_t i = 1; i < 100; i++) {
         SpMat A = random_SpMat(i, 0.2, i);
         SpMat AAT = symmetric_graph(A);
         EXPECT_LT( (AAT - symmetric_graph_ref(A)).norm(), 1e-12);
@@ -376,7 +376,7 @@ TEST(Util, symmetric_graph) {
  * Check the partitioning of a square laplacian 5x5
  */
 TEST(PartitionTest, Square) {
-    SpMat A = mmio::sp_mmread<double,int>("../mats/neglapl_2_5.mm");
+    SpMat A = mmio::sp_mmread<double,int64_t>("../mats/neglapl_2_5.mm");
     MatrixXd X = linspace_nd(5, 2);
     Tree t(3);
     t.set_verb(VERB);
@@ -404,7 +404,7 @@ TEST(PartitionTest, Square) {
         SepID(0,2), SepID(0,2), SepID(0,3), SepID(0,3), SepID(0,3),
         SepID(0,2), SepID(0,2), SepID(0,3), SepID(0,3), SepID(0,3), 
     } ;
-    for(int i = 0; i < part.size(); i++) {
+    for(int64_t i = 0; i < part.size(); i++) {
         ASSERT_TRUE(part[i].self  == sepidref[i]);
         ASSERT_TRUE(part[i].l     == leftref[i]);
         ASSERT_TRUE(part[i].r     == rightref[i]);
@@ -415,25 +415,25 @@ TEST(PartitionTest, Square) {
  * Check consistency of the partitioning
  */
 TEST(PartitionTest, Consistency) {
-    vector<int> dims  = {2, 2,  2,   3, 3,  3 };
-    vector<int> sizes = {5, 20, 100, 5, 15, 25};
-    for(int test = 0; test < dims.size(); test++) {
-        int s = sizes[test];
-        int d = dims[test];
+    vector<int64_t> dims  = {2, 2,  2,   3, 3,  3 };
+    vector<int64_t> sizes = {5, 20, 100, 5, 15, 25};
+    for(int64_t test = 0; test < dims.size(); test++) {
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
         stringstream ss;
         ss << "../mats/neglapl_" << d << "_" << s << ".mm";
-        int n = pow(s, d);
+        int64_t n = pow(s, d);
         string file = ss.str();
-        for(int nlevels = 1; nlevels < 8; nlevels++) {
-            for(int geoi = 0; geoi < 2; geoi++) {
-                for(int pki = 0; pki < 2; pki++) {
+        for(int64_t nlevels = 1; nlevels < 8; nlevels++) {
+            for(int64_t geoi = 0; geoi < 2; geoi++) {
+                for(int64_t pki = 0; pki < 2; pki++) {
                     bool geo = (geoi == 0);
                     PartKind pk = pki == 0 ? PartKind::MND : PartKind::RB;
                     // Partition tree
                     MatrixXd X = linspace_nd(s, d);
                     Tree t(nlevels);
                     t.set_verb(VERB);
-                    SpMat A = mmio::sp_mmread<double,int>(file);
+                    SpMat A = mmio::sp_mmread<double,int64_t>(file);
                     t.set_use_geo(geo);
                     t.set_Xcoo(&X);
                     t.set_part_kind(pk);
@@ -441,16 +441,16 @@ TEST(PartitionTest, Consistency) {
                     // (1) Lengths
                     ASSERT_EQ(part.size(), n);
                     // (2) Check ordering integrity
-                    for(int i = 0; i < n; i++) {
+                    for(int64_t i = 0; i < n; i++) {
                         auto pi = part[i].self;
                         for (SpMat::InnerIterator it(A,i); it; ++it) {
-                            int j = it.row();
+                            int64_t j = it.row();
                             auto pj = part[j].self;  
                             ASSERT_FALSE(should_be_disconnected(pi.lvl, pj.lvl, pi.sep, pj.sep));
                         }
                     }
                     // (3) Check left/right integrity          
-                    for(int i = 0; i < n; i++) {
+                    for(int64_t i = 0; i < n; i++) {
                         auto pi = part[i].self;
                         auto li = part[i].l;
                         auto ri = part[i].r;
@@ -486,17 +486,17 @@ TEST(PartitionTest, Consistency) {
  * Check assembly
  */
 TEST(Assembly, Consistency) {
-    vector<int> dims  = {2, 2,  2,  3, 3,  3};
-    vector<int> sizes = {5, 10, 20, 5, 10, 15};
-    for(int spandlorasp = 0; spandlorasp < 2; spandlorasp++) {
-        for(int test = 0; test < dims.size(); test++) { 
-            for(int pki = 0; pki < 2; pki++) {
+    vector<int64_t> dims  = {2, 2,  2,  3, 3,  3};
+    vector<int64_t> sizes = {5, 10, 20, 5, 10, 15};
+    for(int64_t spandlorasp = 0; spandlorasp < 2; spandlorasp++) {
+        for(int64_t test = 0; test < dims.size(); test++) { 
+            for(int64_t pki = 0; pki < 2; pki++) {
                 PartKind pk = pki == 0 ? PartKind::MND : PartKind::RB;       
-                int s = sizes[test];
-                int d = dims[test];
+                int64_t s = sizes[test];
+                int64_t d = dims[test];
                 SpMat Aref = neglapl(s, d);
                 SpMat Arefunsym = neglapl_unsym(s, d, test);
-                for(int nlevels = 2; nlevels < 5 ; nlevels++) {
+                for(int64_t nlevels = 2; nlevels < 5 ; nlevels++) {
                     /**
                      * Symmetric case
                      */
@@ -560,27 +560,27 @@ TEST(ApproxTest, PrintConfigs) {
  * Test that with eps=0, we get exact solutions
  */
 TEST(ApproxTest, Exact) {
-    vector<int> dims  = {2, 2,  2,  3, 3};
-    vector<int> sizes = {5, 10, 20, 5, 15};
+    vector<int64_t> dims  = {2, 2,  2,  3, 3};
+    vector<int64_t> sizes = {5, 10, 20, 5, 15};
     vector<double> tols = {1e-14, 1e-14, 0.0};
-    vector<int> skips   = {0,     4,     1000};
+    vector<int64_t> skips   = {0,     4,     1000};
     vector<params> configs = get_params();
-    for(int test = 0; test < dims.size(); test++) {
+    for(int64_t test = 0; test < dims.size(); test++) {
         cout << "Test " << test << "... ";
-        int count = 0;
-        int s = sizes[test];
-        int d = dims[test];
-        int n = pow(s, d);
-        int nlevelsmin = n < 1000 ? 1 : 8;
+        int64_t count = 0;
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
+        int64_t n = pow(s, d);
+        int64_t nlevelsmin = n < 1000 ? 1 : 8;
         SpMat Aref = neglapl(s, d);
         SpMat Arefunsym = neglapl_unsym(s, d, test);
         SpMat Arefsym = make_indef(Aref, 2019+test);
-        for(int nlevels = nlevelsmin; nlevels < nlevelsmin+5 ; nlevels++) {
+        for(int64_t nlevels = nlevelsmin; nlevels < nlevelsmin+5 ; nlevels++) {
             for(auto c: configs) {
                 SpMat A = (c.syk == SymmKind::SPD ? Aref : (c.syk == SymmKind::SYM ? Arefsym : Arefunsym));
                 assert(! c.preserve);
                 MatrixXd phi = random(Aref.rows(), 3, test+nlevels+2019);
-                for(int it = 0; it < tols.size(); it++) {
+                for(int64_t it = 0; it < tols.size(); it++) {
                     double tol = tols[it];
                     double skip = skips[it];
                     Tree t(nlevels);
@@ -612,24 +612,24 @@ TEST(ApproxTest, Exact) {
  * Test SPD on A (laplacian) and SYM+LDLT on -A (- laplacian) give the same, with or without compression
  */
 TEST(ApproxTest, SPD_vs_LDLT) {
-    vector<int> dims  = {2,  3, 3};
-    vector<int> sizes = {128, 5, 15};
+    vector<int64_t> dims  = {2,  3, 3};
+    vector<int64_t> sizes = {128, 5, 15};
     vector<double> tols = {0,   1e-4, 1e-14};
-    vector<int> skips   = {100, 1,    0};
+    vector<int64_t> skips   = {100, 1,    0};
     vector<params> configs = get_params();
-    for(int test = 0; test < dims.size(); test++) {
+    for(int64_t test = 0; test < dims.size(); test++) {
         cout << "Test " << test << "... ";
-        int count = 0;
-        int s = sizes[test];
-        int d = dims[test];
-        int n = pow(s, d);
-        int nlevelsmin = n < 1000 ? 1 : 8;
+        int64_t count = 0;
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
+        int64_t n = pow(s, d);
+        int64_t nlevelsmin = n < 1000 ? 1 : 8;
         SpMat A = neglapl(s, d);
         SpMat Aneg = -A;
-        for(int nlevels = nlevelsmin; nlevels < nlevelsmin+5 ; nlevels++) {
+        for(int64_t nlevels = nlevelsmin; nlevels < nlevelsmin+5 ; nlevels++) {
             for(auto c: configs) {
                 if(c.sk != ScalingKind::LLT && !c.preserve) continue;
-                for(int it = 0; it < tols.size(); it++) {
+                for(int64_t it = 0; it < tols.size(); it++) {
                     double tol = tols[it];
                     double skip = skips[it];
                     VectorXd b = random(n, test+nlevels+2019+1);
@@ -686,24 +686,24 @@ TEST(ApproxTest, SPD_vs_LDLT) {
  * Test conservation is correct
  */
 TEST(ApproxTest, Preservation) {
-    vector<int> dims  = {2, 2,  2,  3, 3,  3};
-    vector<int> sizes = {5, 10, 20, 5, 10, 25};
-    for(int test = 0; test < dims.size(); test++) {
+    vector<int64_t> dims  = {2, 2,  2,  3, 3,  3};
+    vector<int64_t> sizes = {5, 10, 20, 5, 10, 25};
+    for(int64_t test = 0; test < dims.size(); test++) {
         cout << "Test " << test;
-        int s = sizes[test];
-        int d = dims[test];
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
         stringstream ss;
         ss << "../mats/neglapl_" << d << "_" << s << ".mm";
-        int n = pow(s, d);
+        int64_t n = pow(s, d);
         string file = ss.str();
-        SpMat A_spd = mmio::sp_mmread<double,int>(file);        
+        SpMat A_spd = mmio::sp_mmread<double,int64_t>(file);        
         SpMat A_sym = - A_spd;
-        int nlevelsmin = n < 1000 ? 1 : 8;
+        int64_t nlevelsmin = n < 1000 ? 1 : 8;
         vector<double> tols = {10, 1e-2, 1e-3, 1e-4, 1e-6, 0.0};
-        for(int nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
-            for(int it = 0; it < tols.size(); it++) {
-                for(int skip = 0; skip < 3; skip++) {
-                    for(int symm = 0; symm < 2; symm++) {
+        for(int64_t nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
+            for(int64_t it = 0; it < tols.size(); it++) {
+                for(int64_t skip = 0; skip < 3; skip++) {
+                    for(int64_t symm = 0; symm < 2; symm++) {
                         printf("."); fflush(stdout);
                         SpMat A;
                         if(symm == 0) A = A_spd;
@@ -727,7 +727,7 @@ TEST(ApproxTest, Preservation) {
                             t.set_preserve(true);
                             t.set_phi(&phi);                            
                             t.factorize();
-                            for(int c = 0; c < phi.cols(); c++) {
+                            for(int64_t c = 0; c < phi.cols(); c++) {
                                 VectorXd b = A * phi.col(c);
                                 VectorXd x = b;
                                 t.solve(x);
@@ -765,7 +765,7 @@ TEST(ApproxTest, Preservation) {
                             t.set_preserve(true);
                             t.set_phi(&phi);                            
                             t.factorize();
-                            for(int c = 0; c < phi.cols(); c++) {
+                            for(int64_t c = 0; c < phi.cols(); c++) {
                                 VectorXd b = A * phi.col(c);
                                 VectorXd x = b;
                                 t.solve(x);
@@ -797,25 +797,25 @@ TEST(ApproxTest, Preservation) {
  * with and without preservation
  */
 TEST(ApproxTest, Approx) {
-    vector<int> dims  = {2, 2,  2,  2,   3, 3};
-    vector<int> sizes = {5, 10, 20, 128, 5, 15};
+    vector<int64_t> dims  = {2, 2,  2,  2,   3, 3};
+    vector<int64_t> sizes = {5, 10, 20, 128, 5, 15};
     vector<double> tols = {0.0, 1e-10, 1e-6, 1e-2, 10};
     matrix_hash<VectorXd> hash;
     vector<params> configs = get_params();
-    for(int test = 0; test < dims.size(); test++) {
+    for(int64_t test = 0; test < dims.size(); test++) {
         vector<size_t> allhashes;
-        int count = 0;
+        int64_t count = 0;
         cout << "Test " << test << "... ";
-        int s = sizes[test];
-        int d = dims[test];
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
         SpMat Aref = neglapl(s, d);
         SpMat Arefunsym = neglapl_unsym(s, d, test+2019);
         SpMat Arefsym = - Aref;
-        int n = pow(s, d);
-        int nlevelsmin = n < 1000 ? 1 : 8;
-        for(int nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
-            for(int it = 0; it < tols.size(); it++) {
-                for(int skip = 0; skip < 3; skip++) {
+        int64_t n = pow(s, d);
+        int64_t nlevelsmin = n < 1000 ? 1 : 8;
+        for(int64_t nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
+            for(int64_t it = 0; it < tols.size(); it++) {
+                for(int64_t skip = 0; skip < 3; skip++) {
                     for(auto c: configs) {
                         SpMat A = (c.syk == SymmKind::SPD ? Aref : (c.syk == SymmKind::SYM ? Arefsym : Arefunsym));
                         assert(! c.preserve);
@@ -856,23 +856,23 @@ TEST(ApproxTest, Approx) {
 }
 
 TEST(ApproxTest, ApproxLoRaSp) {
-    vector<int> dims  = {2, 2,  2,  2,   3, 3};
-    vector<int> sizes = {5, 10, 20, 64,  5, 15};
+    vector<int64_t> dims  = {2, 2,  2,  2,   3, 3};
+    vector<int64_t> sizes = {5, 10, 20, 64,  5, 15};
     vector<double> tols = {0.0, 1e-10, 1e-6, 1e-4};
     matrix_hash<VectorXd> hash;
     vector<params> configs = get_params();
-    for(int test = 0; test < dims.size(); test++) {
+    for(int64_t test = 0; test < dims.size(); test++) {
         vector<size_t> allhashes;
-        int count = 0;
+        int64_t count = 0;
         cout << "Test " << test << "... ";
-        int s = sizes[test];
-        int d = dims[test];
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
         SpMat Aref = neglapl(s, d);
         SpMat Arefunsym = neglapl_unsym(s, d, test+2019);
-        int n = pow(s, d);
-        int nlevelsmin = n < 1000 ? 1 : 8;
-        for(int nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
-            for(int it = 0; it < tols.size(); it++) {
+        int64_t n = pow(s, d);
+        int64_t nlevelsmin = n < 1000 ? 1 : 8;
+        for(int64_t nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
+            for(int64_t it = 0; it < tols.size(); it++) {
                 for(auto c: configs) {
                     SpMat A = (c.syk == SymmKind::SPD ? Aref : (c.syk == SymmKind::SYM ? (-Aref) : Arefunsym));
                     Tree t(nlevels);
@@ -915,24 +915,24 @@ TEST(ApproxTest, ApproxLoRaSp) {
  * Test that the code produce reproducable results
  */
 TEST(ApproxTest, Repro) {
-    int    dims[3]      = {2, 2, 2};
-    int    sizes[3]     = {20, 64, 16};
+    int64_t    dims[3]      = {2, 2, 2};
+    int64_t    sizes[3]     = {20, 64, 16};
     double tols[4]      = {1e-5, 10, 1e-8, 0.1};
     double skips[4]     = {1, 2, 0, 1};
-    int    repeat       = 10;
+    int64_t    repeat       = 10;
     vector<params> configs = get_params();
-    for(int test = 0; test < 3; test++) {
+    for(int64_t test = 0; test < 3; test++) {
         printf("Tests "); fflush(stdout);
-        int count = 0;
-        int s = sizes[test];
-        int d = dims[test];
-        int n = pow(s, d);
+        int64_t count = 0;
+        int64_t s = sizes[test];
+        int64_t d = dims[test];
+        int64_t n = pow(s, d);
         SpMat Aref = neglapl(s, d);
         SpMat Arefunsym = neglapl_unsym(s, d, test);        
-        for(int nlevels = 5; nlevels < 7; nlevels++) {
-            for(int pr = 0; pr < 6; pr++) {
+        for(int64_t nlevels = 5; nlevels < 7; nlevels++) {
+            for(int64_t pr = 0; pr < 6; pr++) {
                 for(auto c: configs) {
-                    for(int lrsp = 0; lrsp < 2; lrsp++) {
+                    for(int64_t lrsp = 0; lrsp < 2; lrsp++) {
                         printf("."); fflush(stdout);
                         SpMat A = (c.syk == SymmKind::SPD ? Aref : (c.syk == SymmKind::SYM ? (-Aref) : Arefunsym));
                         MatrixXd phi = random(A.rows(), 3, test+nlevels+pr+2019);
@@ -960,7 +960,7 @@ TEST(ApproxTest, Repro) {
                         auto xref = b;
                         t.solve(xref);
                         count++;
-                        for(int i = 0; i < repeat; i++) {
+                        for(int64_t i = 0; i < repeat; i++) {
                             Tree t2(nlevels);
                             t2.set_verb(VERB);                        
                             t2.set_symm_kind(c.syk);
@@ -994,26 +994,26 @@ TEST(ApproxTest, Repro) {
 }
 
 TEST(Run, Many) {
-    vector<int>    dims  = {2,  2,  2,   3, 3,  3 };
-    vector<int>    sizes = {5,  16, 64,  5, 10, 15};
+    vector<int64_t>    dims  = {2,  2,  2,   3, 3,  3 };
+    vector<int64_t>    sizes = {5,  16, 64,  5, 10, 15};
     vector<double> tols  = {0.0, 1e-2, 1.0, 10.0};
     RUN_MANY = RUN_MANY > dims.size() ? dims.size() : RUN_MANY;
     matrix_hash<VectorXd> hash;
     vector<size_t> allhashes;
     vector<params> configs = get_params();
-    for(int test = 0; test < RUN_MANY; test++) {
+    for(int64_t test = 0; test < RUN_MANY; test++) {
         cout << "Run " << test << "... \n";
-        int count = 0;
-        int n = sizes[test];
-        int d = dims[test];
+        int64_t count = 0;
+        int64_t n = sizes[test];
+        int64_t d = dims[test];
         SpMat Aref = neglapl(n, d);
         SpMat Arefunsym = neglapl_unsym(n, d, test);        
-        int N = Aref.rows();
-        int nlevelsmin = N < 1000 ? 1 : 8;
-        for(int nlevels = nlevelsmin; nlevels < nlevelsmin+3; nlevels++) {
+        int64_t N = Aref.rows();
+        int64_t nlevelsmin = N < 1000 ? 1 : 8;
+        for(int64_t nlevels = nlevelsmin; nlevels < nlevelsmin+3; nlevels++) {
             for(double tol : tols) {
-                for(int skip = 0; skip < 3; skip++) {
-                    for(int geo = 0; geo < 2; geo++) {
+                for(int64_t skip = 0; skip < 3; skip++) {
+                    for(int64_t geo = 0; geo < 2; geo++) {
                         for(auto c: configs) {
                             SpMat A = (c.syk == SymmKind::SPD ? Aref : (c.syk == SymmKind::SYM ? (-Aref) : Arefunsym));
                             MatrixXd phi = random(A.rows(), 3, test+nlevels+2019);
@@ -1043,7 +1043,7 @@ TEST(Run, Many) {
                                                      tol, skip, 
                                                               geo,
                                                                 c.preserve, 
-                                                                   int(c.syk), int(c.pk), int(c.sk), 1, 1,
+                                                                   int64_t(c.syk), int64_t(c.pk), int64_t(c.sk), 1, 1,
                                                                    res, h);
                             count++;
                         }
@@ -1059,15 +1059,15 @@ TEST(Run, Many) {
     cout << "Overall hash: " << h << endl;
 }
 
-int main(int argc, char **argv) {
+int64_t main(int64_t argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
 
     cxxopts::Options options("spaND tests", "Test suite for the spaND algorithms.");
     options.add_options()
         ("help", "Print help")
         ("v,verb", "Verbose (default: false)", cxxopts::value<bool>()->default_value("false"))
-        ("n_threads", "Number of threads", cxxopts::value<int>()->default_value("4"))
-        ("run", "How many Run.Many to run", cxxopts::value<int>()->default_value("4"))
+        ("n_threads", "Number of threads", cxxopts::value<int64_t>()->default_value("4"))
+        ("run", "How many Run.Many to run", cxxopts::value<int64_t>()->default_value("4"))
         ;
     auto result = options.parse(argc, argv);
 
@@ -1078,8 +1078,8 @@ int main(int argc, char **argv) {
     }
 
     VERB = result["verb"].as<bool>();
-    N_THREADS = result["n_threads"].as<int>();
-    RUN_MANY = result["run"].as<int>();
+    N_THREADS = result["n_threads"].as<int64_t>();
+    RUN_MANY = result["run"].as<int64_t>();
     cout << "n_threads: " << N_THREADS << endl;
     cout << "verb: " << VERB << endl;
     cout << "run: " << RUN_MANY << endl;

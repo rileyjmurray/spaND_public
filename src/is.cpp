@@ -9,7 +9,7 @@ using namespace spaND;
 
 namespace spaND {
 
-int ir(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, int iters, double tol, bool verb)
+int64_t ir(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, int64_t iters, double tol, bool verb)
 {
     typedef Eigen::Matrix<double,Eigen::Dynamic,1> VectorType;
     VectorType residual = rhs - mat * x;
@@ -20,7 +20,7 @@ int ir(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, 
     }
     double threshold = tol*tol*rhsNorm2;
     double residualNorm2 = residual.squaredNorm();
-    int i = 1;
+    int64_t i = 1;
     while(residualNorm2 >= threshold && i < iters) {
         precond.solve(residual);
         x += residual;
@@ -36,7 +36,7 @@ int ir(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, 
     return i;
 }
 
-int cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, int iters, double tol, bool verb)
+int64_t cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, int64_t iters, double tol, bool verb)
 {
     using std::sqrt;
     using std::abs;
@@ -46,9 +46,9 @@ int cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, 
     double t_preco  = 0.0;
     timer start     = wctime();
     
-    int maxIters = iters;
+    int64_t maxIters = iters;
     
-    int n = mat.cols();
+    int64_t n = mat.cols();
 
     timer t00 = wctime();
     VectorType residual = rhs - mat * x; // r_0 = b - A x_0
@@ -79,7 +79,7 @@ int cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, 
 
     VectorType z(n), tmp(n);
     double absNew = residual.dot(p);  // the square of the absolute value of r scaled by invM
-    int i = 0;
+    int64_t i = 0;
     while(i < maxIters)
     {
         timer t0 = wctime();
@@ -120,7 +120,7 @@ int cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, 
     return iters;
 };
 
-int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, int iters, int restart, double tol_error, bool verb) {
+int64_t gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precond, int64_t iters, int64_t restart, double tol_error, bool verb) {
 
     timer start     = wctime();
     double t_matvec = 0.0;
@@ -143,10 +143,10 @@ int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precon
     }
 
     RealScalar tol = tol_error;
-    const int maxIters = iters;
+    const int64_t maxIters = iters;
     iters = 0;
 
-    const int m = mat.rows();
+    const int64_t m = mat.rows();
 
     // residual and preconditioned residual
     timer t0 = wctime();    
@@ -183,7 +183,7 @@ int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precon
     r0.makeHouseholder(H0_tail, tau.coeffRef(0), beta);
     w(0) = Scalar(beta);
 
-    for (int k = 1; k <= restart; ++k)
+    for (int64_t k = 1; k <= restart; ++k)
     {
         ++iters;
 
@@ -191,7 +191,7 @@ int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precon
 
         // apply Householder reflections H_{1} ... H_{k-1} to v
         // TODO: use a HouseholderSequence
-        for (int i = k - 1; i >= 0; --i) {
+        for (int64_t i = k - 1; i >= 0; --i) {
             v.tail(m - i).applyHouseholderOnTheLeft(H.col(i).tail(m - i - 1), tau.coeffRef(i), workspace.data());
         }
 
@@ -207,7 +207,7 @@ int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precon
 
         // apply Householder reflections H_{k-1} ... H_{1} to v
         // TODO: use a HouseholderSequence
-        for (int i = 0; i < k; ++i) {
+        for (int64_t i = 0; i < k; ++i) {
             v.tail(m - i).applyHouseholderOnTheLeft(H.col(i).tail(m - i - 1), tau.coeffRef(i), workspace.data());
         }
 
@@ -224,7 +224,7 @@ int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precon
         }
 
         if (k > 1) {
-            for (int i = 0; i < k - 1; ++i) {
+            for (int64_t i = 0; i < k - 1; ++i) {
                 // apply old Givens rotations to v
                 v.applyOnTheLeft(i, i + 1, G[i].adjoint());
             }
@@ -253,7 +253,7 @@ int gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& precon
 
             // use Horner-like scheme to calculate solution vector
             x_new.setZero();
-            for (int i = k - 1; i >= 0; --i) {
+            for (int64_t i = k - 1; i >= 0; --i) {
                 x_new(i) += y(i);
                 // apply Householder reflection H_{i} to x_new
                 x_new.tail(m - i).applyHouseholderOnTheLeft(H.col(i).tail(m - i - 1), tau.coeffRef(i), workspace.data());

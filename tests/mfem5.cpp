@@ -49,18 +49,18 @@ void fFun(const Vector & x, Vector & f);
 double gFun(const Vector & x);
 double f_natural(const Vector & x);
 
-int main(int argc, char *argv[])
+int64_t main(int64_t argc, char *argv[])
 {
    StopWatch chrono;
 
    // 1. Parse command-line options.
    const char *mesh_file = "../data/star.mesh";
-   int order = 1;
+   int64_t order = 1;
    bool visualization = 1;
-   int target = 10000;
+   int64_t target = 10000;
    double tol = 1e-2;
    double sp_eps = 1e-2;
-   int skip = 2;
+   int64_t skip = 2;
 
    OptionsParser args(argc, argv);
    args.AddOption(&mesh_file, "-m", "--mesh",
@@ -91,16 +91,16 @@ int main(int argc, char *argv[])
    //    quadrilateral, tetrahedral, hexahedral, surface and volume meshes with
    //    the same code.
    Mesh *mesh = new Mesh(mesh_file, 1, 1);
-   int dim = mesh->Dimension();
+   int64_t dim = mesh->Dimension();
 
    // 3. Refine the mesh to increase the resolution. In this example we do
    //    'ref_levels' of uniform refinement. We choose 'ref_levels' to be the
    //    largest number that gives a final mesh with no more than 10,000
    //    elements.
    {
-      int ref_levels =
-         (int)floor(log(double(target)/mesh->GetNE())/log(2.)/dim);
-      for (int l = 0; l < ref_levels; l++)
+      int64_t ref_levels =
+         (int64_t)floor(log(double(target)/mesh->GetNE())/log(2.)/dim);
+      for (int64_t l = 0; l < ref_levels; l++)
       {
          mesh->UniformRefinement();
       }
@@ -128,14 +128,14 @@ int main(int argc, char *argv[])
    // 5. Define the BlockStructure of the problem, i.e. define the array of
    //    offsets for each variable. The last component of the Array is the sum
    //    of the dimensions of each block.
-   Array<int> block_offsets(3); // number of variables + 1
+   Array<int64_t> block_offsets(3); // number of variables + 1
    block_offsets[0] = 0;
    block_offsets[1] = R_space->GetVSize();
    block_offsets[2] = W_space->GetVSize();
    block_offsets.PartialSum();
 
-   int Rsize = block_offsets[1] - block_offsets[0];
-   int Wsize = block_offsets[2] - block_offsets[1];
+   int64_t Rsize = block_offsets[1] - block_offsets[0];
+   int64_t Wsize = block_offsets[2] - block_offsets[1];
 
    std::cout << "***********************************************************\n";
    std::cout << "dim(R) = " << block_offsets[1] - block_offsets[0] << "\n";
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
    darcyMatrix.SetBlock(1,0, &B);
 
    // Get the matrix
-   int Nout = darcyMatrix.NumRows();
+   int64_t Nout = darcyMatrix.NumRows();
    cout << darcyMatrix.NumRows() << " x " << darcyMatrix.NumCols() << endl;
    SpMat Me = mfem2eigen(M);
    SpMat Be = mfem2eigen(B);
@@ -208,13 +208,13 @@ int main(int argc, char *argv[])
    cout << Me.cols() << "x" << Me.rows() << " - " << Be.cols() << "x" << Be.rows() << endl;
    // M to triplets
    vector<Eigen::Triplet<double>> triplets;
-   for (int k = 0; k < Me.outerSize(); ++k) {
+   for (int64_t k = 0; k < Me.outerSize(); ++k) {
       for (SpMat::InnerIterator it(Me,k); it; ++it) {
          triplets.push_back({it.row(), it.col(), it.value()});
       }
    }
    // B & B^T
-   for (int k = 0; k < Be.outerSize(); ++k) {
+   for (int64_t k = 0; k < Be.outerSize(); ++k) {
       for (SpMat::InnerIterator it(Be,k); it; ++it) {
          triplets.push_back({Rsize + it.row(), it.col(),         it.value()});
          triplets.push_back({it.col()        , Rsize + it.row(), it.value()});
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 
    // Add negative bottom right diagonal for Aprec
    // double Anorm = A.norm();
-   for(int i = 0; i < Wsize; i++) {
+   for(int64_t i = 0; i < Wsize; i++) {
       triplets.push_back({Rsize + i, Rsize + i, -sp_eps});
    }
    SpMat Aprec(Nout, Nout);
@@ -240,8 +240,8 @@ int main(int argc, char *argv[])
    GridFunction R_coords(R_vfes);
    {
       DenseMatrix coords, coords_t;
-      Array<int> rt_vdofs;
-      for (int i = 0; i < mesh->GetNE(); i++)
+      Array<int64_t> rt_vdofs;
+      for (int64_t i = 0; i < mesh->GetNE(); i++)
       {
          const FiniteElement *rt_fe = R_vfes->GetFE(i);
          const IntegrationRule &rt_nodes = rt_fe->GetNodes();
@@ -258,8 +258,8 @@ int main(int argc, char *argv[])
    GridFunction W_coords(W_vfes);
    {
       DenseMatrix coords, coords_t;
-      Array<int> wt_vdofs;
-      for (int i = 0; i < mesh->GetNE(); i++)
+      Array<int64_t> wt_vdofs;
+      for (int64_t i = 0; i < mesh->GetNE(); i++)
       {
          const FiniteElement *wt_fe = W_vfes->GetFE(i);
          const IntegrationRule &wt_nodes = wt_fe->GetNodes();
@@ -275,13 +275,13 @@ int main(int argc, char *argv[])
    Eigen::MatrixXd Xcoo = Eigen::MatrixXd::Zero(dim, Nout);
    assert(Rsize == R_coords.Size() / dim);
    assert(Wsize == W_coords.Size() / dim);   
-   for(int i = 0; i < Rsize; i++) {
-      for(int d = 0; d < dim; d++) {
+   for(int64_t i = 0; i < Rsize; i++) {
+      for(int64_t d = 0; d < dim; d++) {
          Xcoo(d, i) = R_coords.GetData()[i + d * Rsize];
       }
    }
-   for(int i = 0; i < Wsize; i++) {
-      for(int d = 0; d < dim; d++) {
+   for(int64_t i = 0; i < Wsize; i++) {
+      for(int64_t d = 0; d < dim; d++) {
          Xcoo(d, Rsize + i) = W_coords.GetData()[i + d * Wsize];
       }
    }
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
    
    // Try solving
    SpMat AAT = symmetric_graph(Aprec);
-   int lvl = (int)ceil(log( double(Nout) / 64.0)/log(2.0))-2;     
+   int64_t lvl = (int64_t)ceil(log( double(Nout) / 64.0)/log(2.0))-2;     
    Tree t(lvl);
    t.set_symm_kind(SymmKind::GEN);
    t.set_tol(tol);
@@ -323,11 +323,11 @@ int main(int argc, char *argv[])
    t.print_log();
    Eigen::VectorXd rhse = mfem2eigen(rhs);
    Eigen::VectorXd sole = Eigen::VectorXd::Zero(rhse.rows());
-   int iter = gmres(A, rhse, sole, t, 100, 100, 1e-12, true);
+   int64_t iter = gmres(A, rhse, sole, t, 100, 100, 1e-12, true);
    cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sole-rhse).norm() / rhse.norm() << endl;
 
    {
-      for(int i = 0; i < Nout; i++) {
+      for(int64_t i = 0; i < Nout; i++) {
          x.Elem(i) = sole[i];
       }
    }
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
 //    SparseMatrix *MinvBt = Transpose(B);
 //    Vector Md(M.Height());
 //    M.GetDiag(Md);
-//    for (int i = 0; i < Md.Size(); i++)
+//    for (int64_t i = 0; i < Md.Size(); i++)
 //    {
 //       MinvBt->ScaleRow(i, 1./Md(i));
 //    }
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
 
 //    // 10. Solve the linear system with MINRES.
 //    //     Check the norm of the unpreconditioned residual.
-//    int maxIter(10);
+//    int64_t maxIter(10);
 //    double rtol(1.e-6);
 //    double atol(1.e-10);
 
@@ -395,9 +395,9 @@ int main(int argc, char *argv[])
    u.MakeRef(R_space, x.GetBlock(0), 0);
    p.MakeRef(W_space, x.GetBlock(1), 0);
 
-   int order_quad = max(2, 2*order+1);
+   int64_t order_quad = max(2, 2*order+1);
    const IntegrationRule *irs[Geometry::NumGeom];
-   for (int i=0; i < Geometry::NumGeom; ++i)
+   for (int64_t i=0; i < Geometry::NumGeom; ++i)
    {
       irs[i] = &(IntRules.Get(i, order_quad));
    }
@@ -437,7 +437,7 @@ int main(int argc, char *argv[])
    if (visualization)
    {
       char vishost[] = "localhost";
-      int  visport   = 19916;
+      int64_t  visport   = 19916;
       socketstream u_sock(vishost, visport);
       u_sock.precision(8);
       u_sock << "solution\n" << *mesh << u << "window_title 'Velocity'" << endl;

@@ -134,9 +134,9 @@ namespace cxxopts
 
   inline
   String&
-  stringAppend(String& s, int n, UChar32 c)
+  stringAppend(String& s, int64_t n, UChar32 c)
   {
-    for (int i = 0; i != n; ++i)
+    for (int64_t i = 0; i != n; ++i)
     {
       s.append(c);
     }
@@ -992,7 +992,7 @@ namespace cxxopts
     std::string m_long;
     String m_desc;
     std::shared_ptr<const Value> m_value;
-    int m_count;
+    int64_t m_count;
   };
 
   struct HelpOptionDetails
@@ -1119,7 +1119,7 @@ namespace cxxopts
       >,
       std::vector<std::string>,
       bool allow_unrecognised,
-      int&, char**&);
+      int64_t&, char**&);
 
     size_t
     count(const std::string& o) const
@@ -1159,7 +1159,7 @@ namespace cxxopts
     private:
 
     void
-    parse(int& argc, char**& argv);
+    parse(int64_t& argc, char**& argv);
 
     void
     add_to_option(const std::string& option, const std::string& arg);
@@ -1181,9 +1181,9 @@ namespace cxxopts
     void
     checked_parse_arg
     (
-      int argc,
+      int64_t argc,
       char* argv[],
-      int& current,
+      int64_t& current,
       std::shared_ptr<OptionDetails> value,
       const std::string& name
     );
@@ -1248,7 +1248,7 @@ namespace cxxopts
     }
 
     ParseResult
-    parse(int& argc, char**& argv);
+    parse(int64_t& argc, char**& argv);
 
     OptionAdder
     add_options(std::string group = "");
@@ -1353,8 +1353,8 @@ namespace cxxopts
 
   namespace
   {
-    constexpr int OPTION_LONGEST = 30;
-    constexpr int OPTION_DESC_GAP = 2;
+    constexpr int64_t OPTION_LONGEST = 30;
+    constexpr int64_t OPTION_DESC_GAP = 2;
 
     std::basic_regex<char> option_matcher
       ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
@@ -1481,7 +1481,7 @@ ParseResult::ParseResult
   > options,
   std::vector<std::string> positional,
   bool allow_unrecognised,
-  int& argc, char**& argv
+  int64_t& argc, char**& argv
 )
 : m_options(options)
 , m_positional(std::move(positional))
@@ -1582,9 +1582,9 @@ inline
 void
 ParseResult::checked_parse_arg
 (
-  int argc,
+  int64_t argc,
   char* argv[],
-  int& current,
+  int64_t& current,
   std::shared_ptr<OptionDetails> value,
   const std::string& name
 )
@@ -1690,7 +1690,7 @@ Options::parse_positional(std::initializer_list<std::string> options)
 
 inline
 ParseResult
-Options::parse(int& argc, char**& argv)
+Options::parse(int64_t& argc, char**& argv)
 {
   ParseResult result(m_options, m_positional, m_allow_unrecognised, argc, argv);
   return result;
@@ -1698,11 +1698,11 @@ Options::parse(int& argc, char**& argv)
 
 inline
 void
-ParseResult::parse(int& argc, char**& argv)
+ParseResult::parse(int64_t& argc, char**& argv)
 {
-  int current = 1;
+  int64_t current = 1;
 
-  int nextKeep = 1;
+  int64_t nextKeep = 1;
 
   bool consume_remaining = false;
 

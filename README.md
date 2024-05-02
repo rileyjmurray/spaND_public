@@ -15,7 +15,7 @@ This is indicated when needed.
 
 Necessary:
 - Download Eigen (header library only) : http://eigen.tuxfamily.org/index.php?title=Main_Page
-- Download, build and install Metis in **Int 32 bits mode** : http://glaros.dtc.umn.edu/gkhome/metis/metis/overview (so that you can pass it `int`s)
+- Download, build and install Metis in **Int 32 bits mode** : http://glaros.dtc.umn.edu/gkhome/metis/metis/overview (so that you can pass it `int64_t`s)
 - Download, build and install Openblas : https://www.openblas.net/ or Intel MKL
 
 Optional, for testing and custom experiments only:
