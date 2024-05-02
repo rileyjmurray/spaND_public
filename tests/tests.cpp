@@ -1059,7 +1059,7 @@ TEST(Run, Many) {
     cout << "Overall hash: " << h << endl;
 }
 
-int64_t main(int64_t argc, char **argv) {
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
 
     cxxopts::Options options("spaND tests", "Test suite for the spaND algorithms.");
@@ -1069,7 +1069,8 @@ int64_t main(int64_t argc, char **argv) {
         ("n_threads", "Number of threads", cxxopts::value<int64_t>()->default_value("4"))
         ("run", "How many Run.Many to run", cxxopts::value<int64_t>()->default_value("4"))
         ;
-    auto result = options.parse(argc, argv);
+    int64_t argc64 = argc;
+    auto result = options.parse(argc64, argv);
 
     if (result.count("help"))
     {

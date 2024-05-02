@@ -98,7 +98,7 @@ public:
 };
 
 
-int64_t main(int64_t argc, char *argv[])
+int main(int argc, char *argv[])
 {
    // 1. Parse command-line options.
    problem = 0;

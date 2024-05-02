@@ -14,7 +14,7 @@ using namespace mfem;
 using namespace Eigen;
 using namespace spaND;
 
-int64_t main(int64_t argc, char *argv[])
+int main(int argc, char *argv[])
 {
     // 1. Parse command-line options.
     const char *mesh_file = "../data/beam-tri.mesh";

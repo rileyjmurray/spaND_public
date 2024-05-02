@@ -39,7 +39,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(DEPS)
 
 # Executables
 tests: tests.cpp $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(INCLUDE) $(LINK) -pthread libgtest.a -isystem $(GTESTDIR)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(INCLUDE) $(LINK) -pthread -isystem -I$(GTESTDIR) -L$(GTESTLIB) -lgtest
 
 mfem: mfem.cpp $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(INCLUDE) $(LINK) -I$(MFEMDIR) -L$(MFEMLIB) -lmfem

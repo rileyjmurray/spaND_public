@@ -9,7 +9,7 @@ using namespace Eigen;
 using namespace std;
 using namespace spaND;
 
-int64_t main(int64_t argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     assert(argc == 5);
     string folder(argv[1]);
     int64_t nlevels = atoi(argv[2]);
