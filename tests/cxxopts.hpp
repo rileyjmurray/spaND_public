@@ -487,14 +487,14 @@ namespace cxxopts
           {
             if (u > static_cast<U>(-(std::numeric_limits<T>::min)()))
             {
-              throw argument_incorrect_type(text);
+              throw std::argument_incorrect_type(text);
             }
           }
           else
           {
             if (u > static_cast<U>((std::numeric_limits<T>::max)()))
             {
-              throw argument_incorrect_type(text);
+              throw std::argument_incorrect_type(text);
             }
           }
         }
@@ -530,7 +530,7 @@ namespace cxxopts
     T
     checked_negate(T&&, const std::string& text, std::false_type)
     {
-      throw argument_incorrect_type(text);
+      throw std::argument_incorrect_type(text);
     }
 
     template <typename T>
@@ -542,7 +542,7 @@ namespace cxxopts
 
       if (match.length() == 0)
       {
-        throw argument_incorrect_type(text);
+        throw std::argument_incorrect_type(text);
       }
 
       if (match.length(4) > 0)
@@ -580,12 +580,12 @@ namespace cxxopts
         }
         else
         {
-          throw argument_incorrect_type(text);
+          throw std::argument_incorrect_type(text);
         }
 
         if (umax - digit < result * base)
         {
-          throw argument_incorrect_type(text);
+          throw std::argument_incorrect_type(text);
         }
 
         result = result * base + digit;
@@ -611,7 +611,7 @@ namespace cxxopts
       std::stringstream in(text);
       in >> value;
       if (!in) {
-        throw argument_incorrect_type(text);
+        throw std::argument_incorrect_type(text);
       }
     }
 
@@ -691,7 +691,7 @@ namespace cxxopts
         return;
       }
 
-      throw argument_incorrect_type(text);
+      throw std::argument_incorrect_type(text);
     }
 
     inline
