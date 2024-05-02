@@ -5,6 +5,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <metis.h>
+#include <blas.hh>
+#include <lapack.hh>
 
 namespace spaND {
 
@@ -19,6 +21,14 @@ struct Log;
 enum class ScalingKind { SVD, PLU, PLUQ, EVD, LLT, LDLT };
 enum class PartKind { MND, RB };
 enum class SymmKind { SPD, SYM, GEN };
+
+using blas::Layout;
+using blas::Op;
+using blas::Side;
+using blas::Uplo;
+using blas::Diag;
+using lapack::Norm;
+using lapack::Job;
 
 inline std::string scaling2str(ScalingKind sk) {
     return (sk == ScalingKind::LLT  ? "LLT" :

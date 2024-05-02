@@ -642,7 +642,7 @@ void Tree::trsm_potf_edgeIn(Edge* edge){
     MatrixXd* Asn  = edge->A();
     MatrixXd* L    = self->pivot()->A();
     timer t_ = wctime();
-    trsm_left(L, Asn, CblasLower, CblasNoTrans, CblasNonUnit); // Lss^(-1) Asn
+    trsm_left(L, Asn, Uplo::Lower, Op::NoTrans, Diag::NonUnit); // Lss^(-1) Asn
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
@@ -656,7 +656,7 @@ void Tree::trsm_potf_edgeOut(Edge* edge){
     MatrixXd* Ans  = edge->A();    
     MatrixXd* L    = self->pivot()->A();
     timer t_ = wctime();
-    trsm_right(L, Ans, CblasLower, CblasTrans, CblasNonUnit); // Ans Lss^-T
+    trsm_right(L, Ans, Uplo::Lower, Op::Trans, Diag::NonUnit); // Ans Lss^-T
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
@@ -669,7 +669,7 @@ void Tree::trsm_getf_edgeIn(Edge* edge, MatrixXd* L, VectorXi* p){
     MatrixXd* Asn  = edge->A();
     timer t_ = wctime();
     (*Asn) = p->asPermutation().transpose() * (*Asn);
-    trsm_left(L, Asn, CblasLower, CblasNoTrans, CblasNonUnit); // Lss^-1 Pss^T Asn
+    trsm_left(L, Asn, Uplo::Lower, Op::NoTrans, Diag::NonUnit); // Lss^-1 Pss^T Asn
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
@@ -682,7 +682,7 @@ void Tree::trsm_getf_edgeOut(Edge* edge, MatrixXd* U, VectorXi* q){
     MatrixXd* Ans  = edge->A();
     timer t_ = wctime();
     (*Ans) = (*Ans) * q->asPermutation().transpose();
-    trsm_right(U, Ans, CblasUpper, CblasNoTrans, CblasNonUnit); // Ans Qss^T Uss^-1
+    trsm_right(U, Ans, Uplo::Upper, Op::NoTrans, Diag::NonUnit); // Ans Qss^T Uss^-1
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
@@ -695,7 +695,7 @@ void Tree::trsm_ldlt_edgeIn(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi* p) 
     MatrixXd* Asn  = edge->A();
     timer t_ = wctime();
     (*Asn) = p->asPermutation().transpose() * (*Asn);
-    trsm_left( L, Asn, CblasLower, CblasNoTrans, CblasNonUnit); // Lss^-1 Pss^T Asn
+    trsm_left( L, Asn, Uplo::Lower, Op::NoTrans, Diag::NonUnit); // Lss^-1 Pss^T Asn
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
@@ -708,7 +708,7 @@ void Tree::trsm_ldlt_edgeOut(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi* p)
     MatrixXd* Ans  = edge->A();
     timer t_ = wctime();
     (*Ans) = (*Ans) * p->asPermutation();
-    trsm_right(L, Ans, CblasLower, CblasTrans, CblasNonUnit); // Ans Pss Lss^-T
+    trsm_right(L, Ans, Uplo::Lower, Op::Trans, Diag::NonUnit); // Ans Pss Lss^-T
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
@@ -776,9 +776,9 @@ void Tree::gemm_edges(Edge* edge1, Edge* edge2, VectorXd* diag, bool transpose_e
     timer t_ = wctime();
     if(diag == nullptr) {
         if(n1 == n2 && this->symmetry()) {
-            syrk(An1s, An1n2, transpose_edge_1 ? CblasTrans : CblasNoTrans, -1.0, 1.0);
+            syrk(An1s, An1n2, transpose_edge_1 ? Op::Trans : Op::NoTrans, -1.0, 1.0);
         } else {
-            gemm(An1s, Asn2, An1n2, transpose_edge_1 ? CblasTrans : CblasNoTrans, transpose_edge_2 ? CblasTrans : CblasNoTrans, -1.0, 1.0);
+            gemm_spand(An1s, Asn2, An1n2, transpose_edge_1 ? Op::Trans : Op::NoTrans, transpose_edge_2 ? Op::Trans : Op::NoTrans, -1.0, 1.0);
         }
     } else {
         if     ( (! transpose_edge_1) && (! transpose_edge_2)) (*An1n2).noalias() -= (*An1s)             * (diag->cwiseInverse().asDiagonal()) * (*Asn2);

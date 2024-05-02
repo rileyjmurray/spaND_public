@@ -95,11 +95,11 @@ void GemmSymmIn::bwd() {
 ScalingLLT::ScalingLLT(Cluster* n1, pMatrixXd LLT) : s(n1->head_x()), LLT(std::move(LLT)) {}
 
 void ScalingLLT::fwd() {
-    trsv(LLT.get(), &s, CblasLower, CblasNoTrans, CblasNonUnit);
+    trsv(LLT.get(), &s, Uplo::Lower, Op::NoTrans, Diag::NonUnit);
 }
 
 void ScalingLLT::bwd() {
-    trsv(LLT.get(), &s, CblasLower, CblasTrans, CblasNonUnit);
+    trsv(LLT.get(), &s, Uplo::Lower, Op::Trans, Diag::NonUnit);
 }
 
 long long ScalingLLT::nnz() {
@@ -113,10 +113,10 @@ ScalingPLUQ::ScalingPLUQ(Cluster* s, pMatrixXd L, pMatrixXd U, pVectorXi p, pVec
     xs(s->head_x()), L(std::move(L)), U(std::move(U)), p(std::move(p)), q(std::move(q)) {}
 void ScalingPLUQ::fwd() {
     xs = p->asPermutation().transpose() * xs;
-    trsv(L.get(), &xs, CblasLower, CblasNoTrans, CblasNonUnit);
+    trsv(L.get(), &xs, Uplo::Lower, Op::NoTrans, Diag::NonUnit);
 }
 void ScalingPLUQ::bwd() {
-    trsv(U.get(), &xs, CblasUpper, CblasNoTrans, CblasNonUnit);
+    trsv(U.get(), &xs, Uplo::Upper, Op::NoTrans, Diag::NonUnit);
     xs = q->asPermutation().transpose() * xs;
 }
 long long ScalingPLUQ::nnz() {            
@@ -130,10 +130,10 @@ ScalingLDLT::ScalingLDLT(Cluster* n1, pMatrixXd L, pVectorXd s, pVectorXi p) :
     xs(n1->head_x()), L(std::move(L)), s(move(s)), p(move(p)) {}
 void ScalingLDLT::fwd() {
     xs = p->asPermutation().transpose() * xs;
-    trsv(L.get(), &xs, CblasLower, CblasNoTrans, CblasNonUnit);
+    trsv(L.get(), &xs, Uplo::Lower, Op::NoTrans, Diag::NonUnit);
 }
 void ScalingLDLT::bwd() {
-    trsv(L.get(), &xs, CblasLower, CblasTrans, CblasNonUnit);
+    trsv(L.get(), &xs, Uplo::Lower, Op::Trans, Diag::NonUnit);
     xs = p->asPermutation() * xs;
 }
 void ScalingLDLT::diag() {

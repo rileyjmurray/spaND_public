@@ -12,13 +12,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <random>
-#ifdef USE_MKL
-#include <mkl_cblas.h>
-#include <mkl_lapacke.h>
-#else
-#include <cblas.h>
-#include <lapacke.h>
-#endif
 
 #include "spaND.h"
 
@@ -42,17 +35,17 @@ timer wctime();
  * C <- alpha A^T * B^T + beta C
  * Gemm
  */
-void gemm(Eigen::MatrixXd* A, Eigen::MatrixXd* B, Eigen::MatrixXd* C, CBLAS_TRANSPOSE tA, CBLAS_TRANSPOSE tB, double alpha, double beta);
+void gemm_spand(Eigen::MatrixXd* A, Eigen::MatrixXd* B, Eigen::MatrixXd* C, Op tA, Op tB, double alpha, double beta);
 
 /** Return a new
  * C <- alpha A^(/T) * B^(/T)
  **/
-Eigen::MatrixXd* gemm_new(Eigen::MatrixXd* A, Eigen::MatrixXd* B, CBLAS_TRANSPOSE tA, CBLAS_TRANSPOSE tB, double alpha);
+Eigen::MatrixXd* gemm_new(Eigen::MatrixXd* A, Eigen::MatrixXd* B, Op tA, Op tB, double alpha);
 
 /**
  * C <- alpha A * A^T + beta C (or A^T * A)
  */
-void syrk(Eigen::MatrixXd* A, Eigen::MatrixXd* C, CBLAS_TRANSPOSE tA, double alpha, double beta);
+void syrk(Eigen::MatrixXd* A, Eigen::MatrixXd* C, Op tA, double alpha, double beta);
 
 /** 
  * A <- L, L L^T = A
@@ -100,7 +93,7 @@ double rcond_1_trcon(Eigen::MatrixXd* LU, char uplo, char diag);
  * B <- B * U^(-1)
  * B <- B * U^(-T)
  */
-void trsm_right(Eigen::MatrixXd* L, Eigen::MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag);
+void trsm_right(Eigen::MatrixXd* L, Eigen::MatrixXd* B, Uplo uplo, Op trans, Diag diag);
 
 /**
  * B <- L^(-1) * B
@@ -108,7 +101,7 @@ void trsm_right(Eigen::MatrixXd* L, Eigen::MatrixXd* B, CBLAS_UPLO uplo, CBLAS_T
  * B <- U^(-1) * B
  * B <- U^(-T) * B
  */
-void trsm_left(Eigen::MatrixXd* L, Eigen::MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag);
+void trsm_left(Eigen::MatrixXd* L, Eigen::MatrixXd* B, Uplo uplo, Op trans, Diag diag);
 
 /**
  * x <- L^(-1) * x
@@ -116,7 +109,7 @@ void trsm_left(Eigen::MatrixXd* L, Eigen::MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TR
  * x <- U^(-1) * x
  * x <- U^(-T) * x
  */
-void trsv(Eigen::MatrixXd* L, Segment* x, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag);
+void trsv(Eigen::MatrixXd* L, Segment* x, Uplo uplo, Op trans, Diag diag);
 
 /**
  * x <- L^T * x

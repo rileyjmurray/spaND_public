@@ -119,40 +119,40 @@ size_t hashv(vector<size_t> vals) {
 /**
  * C = alpha A^(/T) * B^(/T) + beta C
  */
-void gemm(MatrixXd* A, MatrixXd* B, MatrixXd* C, CBLAS_TRANSPOSE tA, CBLAS_TRANSPOSE tB, double alpha, double beta) {
+void gemm_spand(MatrixXd* A, MatrixXd* B, MatrixXd* C, Op tA, Op tB, double alpha, double beta) {
     int64_t m = C->rows();
     int64_t n = C->cols();    
     int64_t lda = A->rows();
     int64_t ldb = B->rows();
     int64_t ldc = C->rows();
-    int64_t k  = (tA == CblasNoTrans ? A->cols() : A->rows());
-    int64_t k2 = (tB == CblasNoTrans ? B->rows() : B->cols());        
-    int64_t m2 = (tA == CblasNoTrans ? A->rows() : A->cols());
-    int64_t n2 = (tB == CblasNoTrans ? B->cols() : B->rows());
+    int64_t k  = (tA == Op::NoTrans ? A->cols() : A->rows());
+    int64_t k2 = (tB == Op::NoTrans ? B->rows() : B->cols());        
+    int64_t m2 = (tA == Op::NoTrans ? A->rows() : A->cols());
+    int64_t n2 = (tB == Op::NoTrans ? B->cols() : B->rows());
     assert(k == k2);
     assert(m == m2); 
     assert(n == n2);
     if(m == 0 || n == 0 || k == 0)
         return;
-    cblas_dgemm(CblasColMajor, tA, tB, m, n, k, alpha, A->data(), lda, B->data(), ldb, beta, C->data(), ldc);
+    blas::gemm(Layout::ColMajor, tA, tB, m, n, k, alpha, A->data(), lda, B->data(), ldb, beta, C->data(), ldc);
 }
 
-MatrixXd* gemm_new(Eigen::MatrixXd* A, Eigen::MatrixXd* B, CBLAS_TRANSPOSE tA, CBLAS_TRANSPOSE tB, double alpha) {
-    int64_t m = (tA == CblasNoTrans ? A->rows() : A->cols());
-    int64_t n = (tB == CblasNoTrans ? B->cols() : B->rows());
+MatrixXd* gemm_new(Eigen::MatrixXd* A, Eigen::MatrixXd* B, Op tA, Op tB, double alpha) {
+    int64_t m = (tA == Op::NoTrans ? A->rows() : A->cols());
+    int64_t n = (tB == Op::NoTrans ? B->cols() : B->rows());
     MatrixXd* C = new MatrixXd(m, n);
-    gemm(A, B, C, tA, tB, alpha, 0.0);
+    gemm_spand(A, B, C, tA, tB, alpha, 0.0);
     return C;
 }
 
-void syrk(MatrixXd* A, MatrixXd* C, CBLAS_TRANSPOSE tA, double alpha, double beta) {
+void syrk(MatrixXd* A, MatrixXd* C, Op tA, double alpha, double beta) {
     int64_t n = C->rows();
-    int64_t k = (tA == CblasNoTrans ? A->cols() : A->rows());
+    int64_t k = (tA == Op::NoTrans ? A->cols() : A->rows());
     assert(C->cols() == n);
     if (n == 0 || k == 0)
         return;
     int64_t lda = A->rows();
-    cblas_dsyrk(CblasColMajor, CblasLower, tA, n, k, alpha, A->data(), lda, beta, C->data(), n);
+    blas::syrk(Layout::ColMajor, Uplo::Lower, tA, n, k, alpha, A->data(), lda, beta, C->data(), n);
 }
 
 int64_t potf(MatrixXd* A) {
@@ -160,7 +160,7 @@ int64_t potf(MatrixXd* A) {
     assert(A->cols() == n);
     if (n == 0)
         return 0;
-    int64_t info = LAPACKE_dpotrf(LAPACK_COL_MAJOR, 'L', n, A->data(), n);
+    int64_t info = lapack::potrf(Uplo::Lower n, A->data(), n);
     return info;
 }
 
@@ -187,7 +187,7 @@ int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* p) {
     VectorXi swap(p->size());
     if(n == 0)
         return 0;
-    int64_t info = LAPACKE_dgetrf(LAPACK_COL_MAJOR, n, n, A->data(), n, swap.data());
+    int64_t info = lapack::getrf(n, n, A->data(), n, swap.data());
     if(info != 0) {
         return info;
     } else {
@@ -230,7 +230,7 @@ double rcond_1_getf(Eigen::MatrixXd* A_LU, double A_1_norm) {
     int64_t n = A_LU->rows();
     assert(A_LU->cols() == n);
     double rcond = 10.0;
-    int64_t info = LAPACKE_dgecon(LAPACK_COL_MAJOR, '1', n, A_LU->data(), n, A_1_norm, &rcond);
+    int64_t info = lapack::gecon(Norm::One, n, A_LU->data(), n, A_1_norm, &rcond);
     assert(info == 0);
     return rcond;
 }
@@ -239,47 +239,47 @@ double rcond_1_potf(Eigen::MatrixXd* A_LLT, double A_1_norm) {
     int64_t n = A_LLT->rows();
     assert(A_LLT->cols() == n);
     double rcond = 10.0;
-    int64_t info = LAPACKE_dpocon(LAPACK_COL_MAJOR, 'L', n, A_LLT->data(), n, A_1_norm, &rcond);
+    int64_t info = lapack::pocon(Uplo::Lower, n, A_LLT->data(), n, A_1_norm, &rcond);
     assert(info == 0);
     return rcond;
 }
 
-double rcond_1_trcon(Eigen::MatrixXd* LU, char uplo, char diag) {
+double rcond_1_trcon(Eigen::MatrixXd* LU, Uplo uplo, Diag diag) {
     assert(LU->rows() == LU->cols());
     if(LU->rows() == 0) return 1.0;
     double rcond;
-    int64_t info = LAPACKE_dtrcon(LAPACK_COL_MAJOR, '1', uplo, diag, LU->rows(), LU->data(), LU->rows(), &rcond);
+    int64_t info = lapack::trcon(Norm::One, uplo, diag, LU->rows(), LU->data(), LU->rows(), &rcond);
     assert(info == 0);
     return rcond;
 }
 
-void trsm_right(MatrixXd* L, MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag) {
+void trsm_right(MatrixXd* L, MatrixXd* B, Uplo uplo, Op trans, Diag diag) {
     int64_t m = B->rows();
     int64_t n = B->cols();
     assert(L->rows() == n);
     assert(L->cols() == n);
     if (m == 0 || n == 0)
         return;
-    cblas_dtrsm(CblasColMajor, CblasRight, uplo, trans, diag, m, n, 1.0, L->data(), n, B->data(), m);
+    blas::trsm(Layout::ColMajor, Side::Right, uplo, trans, diag, m, n, 1.0, L->data(), n, B->data(), m);
 }
 
-void trsm_left(MatrixXd* L, MatrixXd* B, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag) {
+void trsm_left(MatrixXd* L, MatrixXd* B, Uplo uplo, Op trans, Diag diag) {
     int64_t m = B->rows();
     int64_t n = B->cols();
     assert(L->rows() == m);
     assert(L->cols() == m);
     if (m == 0 || n == 0)
         return;
-    cblas_dtrsm(CblasColMajor, CblasLeft, uplo, trans, diag, m, n, 1.0, L->data(), m, B->data(), m);
+    blas::trsm(Layout::ColMajor, Side::Left, uplo, trans, diag, m, n, 1.0, L->data(), m, B->data(), m);
 }
 
-void trsv(MatrixXd* LU, Segment* x, CBLAS_UPLO uplo, CBLAS_TRANSPOSE trans, CBLAS_DIAG diag) {
+void trsv(MatrixXd* LU, Segment* x, Uplo uplo, Op trans, Diag diag) {
     int64_t n = LU->rows();
     assert(LU->cols() == n);
     assert(x->size() == n);
     if (n == 0)
         return;
-    cblas_dtrsv(CblasColMajor, uplo, trans, diag, n, LU->data(), n, x->data(), 1);
+    blas::trsv(Layout::ColMajor, uplo, trans, diag, n, LU->data(), n, x->data(), 1);
 }
 
 void trmv_trans(MatrixXd* L, Segment* x) {
@@ -289,7 +289,7 @@ void trmv_trans(MatrixXd* L, Segment* x) {
     assert(n == m);
     if (n == 0)
         return;
-    cblas_dtrmv(CblasColMajor, CblasLower, CblasTrans, CblasNonUnit, L->rows(), L->data(), L->rows(), x->data(), 1);
+    blas::trmv(Layout::ColMajor, Uplo::Lower, Op::Trans, Diag::NonUnit, L->rows(), L->data(), L->rows(), x->data(), 1);
 }
 
 // A <- L^T * A
@@ -300,7 +300,7 @@ void trmm_trans(MatrixXd* L, MatrixXd* A) {
     assert(L->cols() == m);
     if (m == 0 || n == 0)
         return;
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasLower, CblasTrans, CblasNonUnit, m, n, 1.0, L->data(), m, A->data(), m);
+    blas::trmm(Layout::ColMajor, Side::Left, Uplo::Lower, Op::Trans, Diag::NonUnit, m, n, 1.0, L->data(), m, A->data(), m);
 }
 
 // x2 -= A21 * x1
@@ -311,7 +311,7 @@ void gemv_notrans(MatrixXd* A21, Segment* x1, Segment* x2) {
     assert(x2->size() == m);
     if (n == 0 || m == 0)
         return;
-    cblas_dgemv(CblasColMajor, CblasNoTrans, m, n, -1.0, A21->data(), m, x1->data(), 1, 1.0, x2->data(), 1);
+    blas::gemv(Layout::ColMajor, Op::NoTrans, m, n, -1.0, A21->data(), m, x1->data(), 1, 1.0, x2->data(), 1);
 }
 
 // x2 -= A12^T x1
@@ -322,7 +322,7 @@ void gemv_trans(MatrixXd* A12, Segment* x1, Segment* x2) {
     assert(x2->size() == n);
     if (n == 0 || m == 0)
         return;
-    cblas_dgemv(CblasColMajor, CblasTrans, m, n, -1.0, A12->data(), m, x1->data(), 1, 1.0, x2->data(), 1);
+    blas::gemv(Layout::ColMajor, Op::Trans, m, n, -1.0, A12->data(), m, x1->data(), 1, 1.0, x2->data(), 1);
 }
 
 // x <- Q * x
@@ -333,7 +333,7 @@ void ormqr_notrans(MatrixXd* v, VectorXd* h, Segment* x) {
     assert(x->size() == m);
     if (m == 0) 
         return;
-    int64_t info = LAPACKE_dormqr(LAPACK_COL_MAJOR, 'L', 'N', m, 1, n, v->data(), m, h->data(), x->data(), m); 
+    int64_t info = lapack::ormqr(Side::Left, Op::NoTrans, m, 1, n, v->data(), m, h->data(), x->data(), m); 
     assert(info == 0);
 }
 
@@ -346,25 +346,25 @@ void ormqr_trans(MatrixXd* v, VectorXd* h, Segment* x) {
     assert(v->rows() == m);
     if (m == 0 || k == 0) 
         return;
-    int64_t info = LAPACKE_dormqr(LAPACK_COL_MAJOR, 'L', 'T', m, 1, k, v->data(), m, h->data(), x->data(), m); 
+    int64_t info = lapack::ormqr(Side::Left, Op::Trans, m, 1, k, v->data(), m, h->data(), x->data(), m); 
     assert(info == 0);
 }
 
 // A <- (Q^/T) * A * (Q^/T)
-void ormqr(MatrixXd* v, VectorXd* h, MatrixXd* A, char side, char trans) {
+void ormqr(MatrixXd* v, VectorXd* h, MatrixXd* A, Side side, Op trans) {
     int64_t m = A->rows();
     int64_t n = A->cols();
     int64_t k = v->cols(); // number of reflectors
     assert(h->size() == k);
     if (m == 0 || n == 0)
         return;
-    if(side == 'L') // Q * A or Q^T * A
+    if(side == Side::Left) // Q * A or Q^T * A
         assert(k <= m);
-    if(side == 'R') // A * Q or A * Q^T
+    if(side == Side::Right) // A * Q or A * Q^T
         assert(k <= n);
     if (k == 0)
         return; // No reflectors, so nothing to do
-    int64_t info = LAPACKE_dormqr(LAPACK_COL_MAJOR, side, trans, m, n, k, v->data(), v->rows(), h->data(), A->data(), m);
+    int64_t info = lapack::ormqr(side, trans, m, n, k, v->data(), v->rows(), h->data(), A->data(), m);
     assert(info == 0);
 }
 
@@ -375,7 +375,7 @@ void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
     assert(h->size() == k);
     if(m == 0 || k == 0)
         return;
-    int64_t info = LAPACKE_dorgqr(LAPACK_COL_MAJOR, m, k, k, v->data(), m, h->data());
+    int64_t info = lapack::orgqr(m, k, k, v->data(), m, h->data());
     assert(info == 0);
 }
 
@@ -387,7 +387,7 @@ void geqp3(MatrixXd* A, VectorXi* jpvt, VectorXd* tau) {
         return;
     assert(jpvt->size() == n);
     assert(tau->size() == min(m,n));
-    int64_t info = LAPACKE_dgeqp3(LAPACK_COL_MAJOR, m, n, A->data(), m, jpvt->data(), tau->data());
+    int64_t info = lapack::geqp3(m, n, A->data(), m, jpvt->data(), tau->data());
     assert(info == 0);
     for (int64_t i = 0; i < jpvt->size(); i++)
         (*jpvt)[i] --;
@@ -404,7 +404,7 @@ void gesvd(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eigen::Ma
     if(k == 0)
         return;
     VectorXd superb(k-1);
-    int64_t info = LAPACKE_dgesvd(LAPACK_COL_MAJOR, 'A', 'A', m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n, superb.data());
+    int64_t info = lapack::gesvd(Job::AllVec, Job::AllVec, m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n, superb.data());
     assert(info == 0);
 }
 
@@ -416,7 +416,7 @@ void syev(Eigen::MatrixXd* A, Eigen::VectorXd* S) {
     assert(S->size() == m);
     if(m == 0)
         return;
-    int64_t info = LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'L', m, A->data(), m, S->data());
+    int64_t info = lapack::syev(Job::Vec, Uplo::Lower, m, A->data(), m, S->data());
     assert(info == 0);
 }
 
@@ -427,7 +427,7 @@ void geqrf(MatrixXd* A, VectorXd* tau) {
     if (m == 0 || n == 0)
         return;
     assert(tau->size() == min(m,n));
-    int64_t info = LAPACKE_dgeqrf(LAPACK_COL_MAJOR, m, n, A->data(), m, tau->data());
+    int64_t info = lapack::geqrf(m, n, A->data(), m, tau->data());
     assert(info == 0);
 }
 
