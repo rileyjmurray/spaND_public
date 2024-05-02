@@ -103,10 +103,10 @@ struct ScalingPLUQ : public Operation {
         Segment xs;
         pMatrixXd L; // _not_ unit-diagonal
         pMatrixXd U; 
-        pVectorXi p;
-        pVectorXi q;
+        pVectorXi64 p;
+        pVectorXi64 q;
     public:
-        ScalingPLUQ(Cluster* n1, pMatrixXd L, pMatrixXd U, pVectorXi p, pVectorXi q);
+        ScalingPLUQ(Cluster* n1, pMatrixXd L, pMatrixXd U, pVectorXi64 p, pVectorXi64 q);
         void fwd();
         void bwd();
         long long nnz();
@@ -118,9 +118,9 @@ struct ScalingLDLT : public Operation {
         Segment xs;
         pMatrixXd L;
         pVectorXd s;
-        pVectorXi p;
+        pVectorXi64 p;
     public:
-        ScalingLDLT(Cluster* n1, pMatrixXd L, pVectorXd s, pVectorXi p);
+        ScalingLDLT(Cluster* n1, pMatrixXd L, pVectorXd s, pVectorXi64 p);
         void fwd();
         void bwd();
         void diag();

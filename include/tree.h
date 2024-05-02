@@ -79,16 +79,16 @@ class Tree
         void trsm_potf_edgeOut(Edge*);
         
         // PLUQ
-        void getf_cluster(Cluster*, pMatrixXd*, pMatrixXd*, pVectorXi*, pVectorXi*);
-        void panel_getf(Cluster*, Eigen::MatrixXd*, Eigen::MatrixXd*, Eigen::VectorXi*, Eigen::VectorXi*);
-        void trsm_getf_edgeIn(Edge*, Eigen::MatrixXd*, Eigen::VectorXi*);
-        void trsm_getf_edgeOut(Edge*, Eigen::MatrixXd*, Eigen::VectorXi*);
+        void getf_cluster(Cluster*, pMatrixXd*, pMatrixXd*, pVectorXi64*, pVectorXi64*);
+        void panel_getf(Cluster*, Eigen::MatrixXd*, Eigen::MatrixXd*, Eigen::VectorXi64*, Eigen::VectorXi64*);
+        void trsm_getf_edgeIn(Edge*, Eigen::MatrixXd*, Eigen::VectorXi64*);
+        void trsm_getf_edgeOut(Edge*, Eigen::MatrixXd*, Eigen::VectorXi64*);
 
         // LDLT
-        void ldlt_cluster(Cluster*, pMatrixXd*, pVectorXd*, pVectorXi*);
-        void panel_ldlt(Cluster*, Eigen::MatrixXd*, Eigen::VectorXi*);
-        void trsm_ldlt_edgeIn(Edge*, Eigen::MatrixXd*, Eigen::VectorXi*);
-        void trsm_ldlt_edgeOut(Edge*, Eigen::MatrixXd*, Eigen::VectorXi*);
+        void ldlt_cluster(Cluster*, pMatrixXd*, pVectorXd*, pVectorXi64*);
+        void panel_ldlt(Cluster*, Eigen::MatrixXd*, Eigen::VectorXi64*);
+        void trsm_ldlt_edgeIn(Edge*, Eigen::MatrixXd*, Eigen::VectorXi64*);
+        void trsm_ldlt_edgeOut(Edge*, Eigen::MatrixXd*, Eigen::VectorXi64*);
         
         void schur_symmetric(Cluster*);
         void schur_symmetric(Cluster*, Eigen::VectorXd*);
@@ -112,7 +112,7 @@ class Tree
         Cluster* shrink_split_scatter_phi(Cluster*, int64_t, std::function<bool(Edge*)>, Eigen::MatrixXd*, Eigen::VectorXd*, Eigen::MatrixXd*, bool, bool);
 
         // The permutation computed by assembly
-        Eigen::VectorXi perm;
+        Eigen::VectorXi64 perm;
 
         // Store the operations
         std::list<std::unique_ptr<Operation>> ops;
@@ -148,7 +148,7 @@ class Tree
 
         // Basic info, export of data and monitoring
         int64_t get_N() const;
-        Eigen::VectorXi get_assembly_perm() const;
+        Eigen::VectorXi64 get_assembly_perm() const;
         SpMat get_trailing_mat() const;
         Eigen::MatrixXd get_current_x() const;
         void print_clusters_hierarchy() const;

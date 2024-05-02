@@ -17,12 +17,12 @@
 
 namespace spaND {
 
-bool are_connected(Eigen::VectorXi &a, Eigen::VectorXi &b, SpMat &A);
+bool are_connected(Eigen::VectorXi64 &a, Eigen::VectorXi64 &b, SpMat &A);
 bool should_be_disconnected(int64_t lvl1, int64_t lvl2, int64_t sep1, int64_t sep2);
 double elapsed(timeval& start, timeval& end);
-void swap2perm(Eigen::VectorXi* swap, Eigen::VectorXi* perm);
-bool isperm(const Eigen::VectorXi* perm);
-Eigen::VectorXi invperm(const Eigen::VectorXi& perm);
+void swap2perm(Eigen::VectorXi64* swap, Eigen::VectorXi64* perm);
+bool isperm(const Eigen::VectorXi64* perm);
+Eigen::VectorXi64 invperm(const Eigen::VectorXi64& perm);
 SpMat symmetric_graph(SpMat& A);
 
 typedef timeval timer;
@@ -53,7 +53,7 @@ void syrk(Eigen::MatrixXd* A, Eigen::MatrixXd* C, Op tA, double alpha, double be
  */ 
 int64_t potf(Eigen::MatrixXd* A);
 
-int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi* p, double* rcond);
+int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi64* p, double* rcond);
 
 /**
  * A <- [L\U] (lower and upper)
@@ -63,7 +63,7 @@ int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::
  * U is not
  * Return != 0 if getf failed (singular)
  */
-int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* swap);
+int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi64* swap);
 
 /**
  * A = P L U Q
@@ -71,7 +71,7 @@ int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* swap);
  * L is unit diagonal
  * U is not
  */
-void fpgetf(Eigen::MatrixXd* A, Eigen::VectorXi* p, Eigen::VectorXi* q);
+void fpgetf(Eigen::MatrixXd* A, Eigen::VectorXi64* p, Eigen::VectorXi64* q);
 
 /**
  * A = L U
@@ -134,21 +134,21 @@ void gemv_trans(Eigen::MatrixXd* A12, Segment* x1, Segment* x2);
 /**
  * AP = QR
  */
-void geqp3(Eigen::MatrixXd* A, Eigen::VectorXi* jpvt, Eigen::VectorXd* tau);
+void geqp3_spand(Eigen::MatrixXd* A, Eigen::VectorXi64* jpvt, Eigen::VectorXd* tau);
 
 /**
  * A = U S VT
  * Compute the full SVD, where if A is mxn, U is mxm, V is nxn, and S is min(M,N)
  * VT is V^T, *not* V.
  */
-void gesvd(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eigen::MatrixXd* VT);
+void gesvd_spand(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eigen::MatrixXd* VT);
 
 /**
  * A = U S U^T 
  * A <- U
  * Full Symmetric EVD
  */
-void syev(Eigen::MatrixXd* A, Eigen::VectorXd* S);
+void syev_spand(Eigen::MatrixXd* A, Eigen::VectorXd* S);
 
 /**
  * x <- Q * x
@@ -167,12 +167,12 @@ void ormqr_trans(Eigen::MatrixXd* v, Eigen::VectorXd* h, Segment* x);
  * A <- Q   * A
  * A <- Q^T * A
  */
-void ormqr(Eigen::MatrixXd* v, Eigen::VectorXd* h, Eigen::MatrixXd* A, char side, char trans);
+void ormqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h, Eigen::MatrixXd* A, char side, char trans);
 
 /**
  * Create the thin Q
  */
-void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h);
+void orgqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h);
 
 /** 
  * Create a square Q
@@ -182,7 +182,7 @@ void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h);
 /**
  * A = QR
  */
-void geqrf(Eigen::MatrixXd* A, Eigen::VectorXd* tau);
+void geqrf_spand(Eigen::MatrixXd* A, Eigen::VectorXd* tau);
 
 int64_t choose_rank(Eigen::VectorXd& s, double tol);
 
@@ -192,7 +192,7 @@ std::size_t hashv(std::vector<size_t> vals);
 // The code is from `hash_combine` function of the Boost library. See
 // http://www.boost.org/doc/libs/1_55_0/doc/html/hash/reference.html#boost.hash_combine .
 template<typename T>
-struct matrix_hash : std::unary_function<T, size_t> {
+struct matrix_hash {
   std::size_t operator()(T const& matrix) const {
     // Note that it is oblivious to the storage order of Eigen matrix (column- or
     // row-major). It will give you the same hash value for two different matrices if they
@@ -206,12 +206,12 @@ struct matrix_hash : std::unary_function<T, size_t> {
   }
 };
 
-void block2dense(Eigen::VectorXi &rowval, Eigen::VectorXi &colptr, Eigen::VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, Eigen::MatrixXd *dst, bool transpose);
+void block2dense(Eigen::VectorXi64 &rowval, Eigen::VectorXi64 &colptr, Eigen::VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, Eigen::MatrixXd *dst, bool transpose);
 
 Eigen::MatrixXd linspace_nd(int64_t n, int64_t dim);
 
 // Returns A[p,p]
-SpMat symm_perm(SpMat &A, Eigen::VectorXi &p);
+SpMat symm_perm(SpMat &A, Eigen::VectorXi64 &p);
 
 // Random vector with seed
 Eigen::VectorXd random(int64_t size, int64_t seed);
@@ -362,7 +362,7 @@ struct Log {
         int64_t dofs_left_nd;
         int64_t dofs_left_elim;
         int64_t dofs_left_spars;
-        long long int64_t fact_nnz;
+        long long int fact_nnz;
         Stats<int64_t> rank_before;
         Stats<int64_t> rank_after;
         int64_t ignored;

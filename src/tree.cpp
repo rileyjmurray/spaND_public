@@ -1,6 +1,14 @@
 #include "spaND.h"
+#include <map>
+#include <string>
+#include <vector>
+#include <list>
+#include <set>
+#include <iostream>
+#include <algorithm>
+#include <functional>
 
-using namespace std;
+
 using namespace Eigen;
 
 namespace spaND {
@@ -9,9 +17,9 @@ namespace spaND {
  *  Export Tree data to text file
  */
 
-void write_clustering(const Tree& t, const MatrixXd& X, string fn) {
-    vector<int64_t> dof2ID = t.get_dof2ID();
-    ofstream clustering_s(fn);
+void write_clustering(const Tree& t, const MatrixXd& X, std::string fn) {
+    std::vector<int64_t> dof2ID = t.get_dof2ID();
+    std::ofstream clustering_s{fn};
     clustering_s << t.get_N() << ";" << X.rows() << ";" << t.get_nlevels() << "\n";
     clustering_s << "X;id" << "\n";
     for(int64_t i = 0; i < t.get_N(); i++) {
@@ -25,8 +33,8 @@ void write_clustering(const Tree& t, const MatrixXd& X, string fn) {
     clustering_s.close();
 }
 
-void write_merging(const Tree& t, string fn) {
-    ofstream merging_s(fn);
+void write_merging(const Tree& t, std::string fn) {
+    std::ofstream merging_s(fn);
     merging_s << "child;parent" << "\n";
     for(auto n: t.get_clusters()) {
         if(n->parent() != nullptr) {
@@ -36,8 +44,8 @@ void write_merging(const Tree& t, string fn) {
     merging_s.close();
 }
 
-void write_clusters(const Tree& t, string fn) {
-    ofstream clusters_s(fn);
+void write_clusters(const Tree& t, std::string fn) {
+    std::ofstream clusters_s(fn);
     clusters_s << "id;lvl;mergeLvl;name" << "\n";
     for(auto n: t.get_clusters()) {
         clusters_s << n->order() << ";" << n->level() << ";" << n->merge_level() << ";" << n->get_name() << "\n";
@@ -45,8 +53,8 @@ void write_clusters(const Tree& t, string fn) {
     clusters_s.close();
 }
 
-void write_stats(const Tree& t, string fn) {
-    ofstream stats_s(fn);
+void write_stats(const Tree& t, std::string fn) {
+    std::ofstream stats_s(fn);
     stats_s << "id;size;rank;Rdiag" << "\n";
     for(auto n: t.get_clusters()) {
         stats_s << n->order() << ";" << n->original_size() << ";" << n->size() << ";";
@@ -57,8 +65,8 @@ void write_stats(const Tree& t, string fn) {
 }
 
 
-void write_log_flops(const Tree& t, string fn) {         
-    ofstream flops(fn);
+void write_log_flops(const Tree& t, std::string fn) {         
+    std::ofstream flops(fn);
     for(int64_t l = 0; l < t.tprof_flops.size(); l++) {
         for(const auto& f: t.tprof_flops[l].pivot) {
             flops << l << ";pivot;" << f.rows << ";0;0;" << f.time << "\n";
@@ -101,11 +109,11 @@ void Tree::init(int64_t nlevels) {
     this->monitor_condition_pivots = false;
     this->monitor_unsymmetry = false;
     this->monitor_Rdiag = false;
-    this->tprof = vector<Profile>(nlevels, Profile());
-    this->tprof_flops = vector<ProfileFlops>(nlevels, ProfileFlops());
+    this->tprof = std::vector<Profile>(nlevels, Profile());
+    this->tprof_flops = std::vector<ProfileFlops>(nlevels, ProfileFlops());
     this->monitor_flops = false;
-    this->log   = vector<Log>(nlevels, Log());
-    this->bottoms = vector<list<pCluster>>(nlevels);
+    this->log   = std::vector<Log>(nlevels, Log());
+    this->bottoms = std::vector<std::list<pCluster>>(nlevels);
     this->current_bottom = 0;
     this->max_order = 0;
 }
@@ -159,10 +167,10 @@ int64_t Tree::get_stop() const {
     int64_t stop = get_N();
     for(int64_t lvl = 0; lvl < this->log.size(); lvl++) {
         if(this->log[lvl].dofs_left_elim > 0) {
-            stop = min(stop, this->log[lvl].dofs_left_elim);
+            stop = std::min(stop, this->log[lvl].dofs_left_elim);
         }
         if(this->log[lvl].dofs_left_spars > 0) {
-            stop = min(stop, this->log[lvl].dofs_left_spars);
+            stop = std::min(stop, this->log[lvl].dofs_left_spars);
         }
     }
     return stop;
@@ -172,16 +180,16 @@ int64_t Tree::get_nlevels() const {
     return this->nlevels;
 }
 
-VectorXi Tree::get_assembly_perm() const {
+VectorXi64 Tree::get_assembly_perm() const {
     return this->perm;
 }
 
-const list<pCluster>& Tree::bottom_current() const {
+const std::list<pCluster>& Tree::bottom_current() const {
     assert(current_bottom < bottoms.size());
     return bottoms[current_bottom];
 }
 
-const list<pCluster>& Tree::bottom_original() const {
+const std::list<pCluster>& Tree::bottom_original() const {
     assert(bottoms.size() > 0);
     return bottoms[0];
 }
@@ -224,10 +232,10 @@ void Tree::stats() const {
 }
 
 void print_nodes_hierarchy(Cluster* n, int64_t indent) {        
-    for(int64_t i = 0; i < indent; i++) cout << "  ";
-    if(indent == 0) cout << "* ";
-    if(indent >  0) cout << "|_";
-    cout << n->order() << ": " << n->start() << ", " << n->size() << ", " << n->level() << ", " << n->get_name() << "\n";
+    for(int64_t i = 0; i < indent; i++) std::cout << "  ";
+    if(indent == 0) std::cout << "* ";
+    if(indent >  0) std::cout << "|_";
+    std::cout << n->order() << ": " << n->start() << ", " << n->size() << ", " << n->level() << ", " << n->get_name() << "\n";
     for(auto c: n->children()) {
         print_nodes_hierarchy(c, indent + 1);
     }
@@ -235,13 +243,13 @@ void print_nodes_hierarchy(Cluster* n, int64_t indent) {
 
 void Tree::print_clusters_hierarchy() const {
     // (1) Find all cluster hierarchy roots
-    set<Cluster*> roots;
+    std::set<Cluster*> roots;
     for(int64_t l = 0; l < bottoms.size(); l++) {
         for(const auto& n: bottoms[l]) {
             if(n->parent() == nullptr) roots.insert(n.get());
         }
     }
-    vector<Cluster*> roots_sorted(roots.begin(), roots.end());
+    std::vector<Cluster*> roots_sorted(roots.begin(), roots.end());
     // (2) Print hierarchy
     for(auto r: roots_sorted) {
         print_nodes_hierarchy(r, 0);
@@ -262,8 +270,8 @@ void Tree::print_connectivity() const {
     }
 }
 
-list<const Cluster*> Tree::get_clusters() const {
-    list<const Cluster*> all;
+std::list<const Cluster*> Tree::get_clusters() const {
+    std::list<const Cluster*> all;
     for(int64_t l = 0; l < bottoms.size(); l++) {
         for(const auto& n: bottoms[l]) {
             all.push_back(n.get());
@@ -272,8 +280,8 @@ list<const Cluster*> Tree::get_clusters() const {
     return all;
 }
 
-vector<int64_t> Tree::get_dof2ID() const {
-    vector<int64_t> ids(this->get_N());
+std::vector<int64_t> Tree::get_dof2ID() const {
+    std::vector<int64_t> ids(this->get_N());
     assert(bottoms.size() > 0);
     for(const auto& n: bottoms[0]) {
         for(int64_t i = 0; i < n->original_size(); i++) {
@@ -303,7 +311,7 @@ bool Tree::want_sparsify(Cluster* self) {
  *  Creates clusters & parents suitable for assembly/factorize
  *  Returns an informative struct with the partition & info on the hierarchy
  */
-vector<ClusterID> Tree::partition(SpMat &A) {
+std::vector<ClusterID> Tree::partition(SpMat &A) {
     assert(this->ilvl == 0);
     timer tstart = wctime();
     // Basic stuff
@@ -314,16 +322,16 @@ vector<ClusterID> Tree::partition(SpMat &A) {
         assert(this->Xcoo != nullptr);
         assert(this->Xcoo->cols() == N);
     }
-    vector<ClusterID> part;
+    std::vector<ClusterID> part;
     bool use_vertex_sep = true;
     // Print
     if(this->verb) {
         if(this->part_kind == PartKind::MND) {
-            if (this->geo) cout << "MND geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << endl;
-            else           cout << "MND algebraic (with vertex sep ? " << use_vertex_sep << ") partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << endl;
+            if (this->geo) std::cout << "MND geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << std::endl;
+            else           std::cout << "MND algebraic (with vertex sep ? " << use_vertex_sep << ") partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << std::endl;
         } else if(this->part_kind == PartKind::RB) {
-            if (this->geo) cout << "RB geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << endl;
-            else           cout << "RB algebraic partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << endl;
+            if (this->geo) std::cout << "RB geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << std::endl;
+            else           std::cout << "RB algebraic partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << std::endl;
         }
     }
     // Compute the self/left/right partitioning
@@ -341,28 +349,28 @@ vector<ClusterID> Tree::partition(SpMat &A) {
         this->log[l].dofs_left_nd = this->log[l+1].dofs_nd + this->log[l+1].dofs_left_nd;
     }
     // Compute the ordering & associated permutation
-    perm = VectorXi::LinSpaced(N, 0, N-1);
+    perm = VectorXi64::LinSpaced(N, 0, N-1);
     // Sort according to the ND ordering FIRST & the cluster merging process THEN
-    vector<ClusterID> partmerged = part;
+    std::vector<ClusterID> partmerged = part;
     auto compIJ = [&partmerged](int64_t i, int64_t j){return (partmerged[i] < partmerged[j]);};
-    stable_sort(perm.data(), perm.data() + perm.size(), compIJ); // !!! STABLE SORT MATTERS !!!
+    std::stable_sort(perm.data(), perm.data() + perm.size(), compIJ); // !!! STABLE SORT MATTERS !!!
     for(int64_t lvl = 1; lvl < nlevels; lvl++) {
-        transform(partmerged.begin(), partmerged.end(), partmerged.begin(), [&lvl](ClusterID s){return merge_if(s, lvl);}); // lvl matters    
-        stable_sort(perm.data(), perm.data() + perm.size(), compIJ); // !!! STABLE SORT MATTERS !!!
+        std::transform(partmerged.begin(), partmerged.end(), partmerged.begin(), [&lvl](ClusterID s){return merge_if(s, lvl);}); // lvl matters    
+        std::stable_sort(perm.data(), perm.data() + perm.size(), compIJ); // !!! STABLE SORT MATTERS !!!
     }
     // Apply permutation
-    vector<ClusterID> partpermed(N);
-    transform(perm.data(), perm.data() + perm.size(), partpermed.begin(), [&](int64_t i){return part[i];});
+    std::vector<ClusterID> partpermed(N);
+    std::transform(perm.data(), perm.data() + perm.size(), partpermed.begin(), [&](int64_t i){return part[i];});
     // Create the initial clusters
-    map<Cluster*, ClusterID> clusters_ids;
-    map<Cluster*, ClusterID> parents_ids;
-    vector<Stats<int64_t>> clustersstats(nlevels, Stats<int64_t>());
+    std::map<Cluster*, ClusterID> clusters_ids;
+    std::map<Cluster*, ClusterID> parents_ids;
+    std::vector<Stats<int64_t>> clustersstats(nlevels, Stats<int64_t>());
     for(int64_t k = 0; k < N; ) {
         int64_t knext = k+1;
         ClusterID id = partpermed[k];
         while(knext < N && partpermed[knext] == id) { knext += 1; }
         int64_t size = knext - k;
-        auto self = make_unique<Cluster>(k, size, id.self.lvl, get_new_order(), id.l.lvl == 0 && id.r.lvl == 0);
+        auto self = std::make_unique<Cluster>(k, size, id.self.lvl, get_new_order(), id.l.lvl == 0 && id.r.lvl == 0);
         clusters_ids[self.get()] = id;
         clustersstats[self->level()].addData(self->size());
         bottoms[0].push_back(move(self));
@@ -392,7 +400,7 @@ vector<ClusterID> Tree::partition(SpMat &A) {
         for(auto k = begin; k != end;) {
             // Figures out who gets merged together
             auto idparent = parents_ids.at(k->get());
-            vector<Cluster*> children;
+            std::vector<Cluster*> children;
             // Find all the guys that get merged with him
             children.push_back(k->get());
             int64_t children_start = (*k)->start();
@@ -403,7 +411,7 @@ vector<ClusterID> Tree::partition(SpMat &A) {
                 children_size += (*k)->size();
                 k++;                
             }
-            auto parent = make_unique<Cluster>(children_start, children_size, idparent.self.lvl, get_new_order(), idparent.l.lvl == lvl && idparent.r.lvl == lvl);
+            auto parent = std::make_unique<Cluster>(children_start, children_size, idparent.self.lvl, get_new_order(), idparent.l.lvl == lvl && idparent.r.lvl == lvl);
             for(auto c: children) {
                 c->set_parent(parent.get());
                 parent->add_children(c);                
@@ -431,28 +439,28 @@ void Tree::partition_lorasp(SpMat& A) {
     }
     // Print
     if(this->verb) {        
-        if (this->geo) cout << "RB geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << endl;
-        else           cout << "RB algebraic partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << endl;
+        if (this->geo) std::cout << "RB geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << std::endl;
+        else           std::cout << "RB algebraic partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << std::endl;
     }    
-    vector<int64_t> parts = partition_RB(A, nlevels, this->verb, this->Xcoo);
-    vector<int64_t> partpermed = parts;
+    std::vector<int64_t> parts = partition_RB(A, nlevels, this->verb, this->Xcoo);
+    std::vector<int64_t> partpermed = parts;
     // Compute the ordering & associated permutation
-    perm = VectorXi::LinSpaced(N, 0, N-1);
+    perm = VectorXi64::LinSpaced(N, 0, N-1);
     // Sort according to parts
     auto compIJ = [&parts](int64_t i, int64_t j){return (parts[i] < parts[j]);};
-    sort(perm.data(), perm.data() + perm.size(), compIJ);    
+    std::sort(perm.data(), perm.data() + perm.size(), compIJ);    
     // Apply permutation
-    transform(perm.data(), perm.data() + perm.size(), partpermed.begin(), [&](int64_t i){return parts[i];});
+    std::transform(perm.data(), perm.data() + perm.size(), partpermed.begin(), [&](int64_t i){return parts[i];});
     // Create the initial clusters
-    map<Cluster*, int64_t> clusters_ids; // Basically the partition ID
-    map<Cluster*, int64_t> parents_ids;
+    std::map<Cluster*, int64_t> clusters_ids; // Basically the partition ID
+    std::map<Cluster*, int64_t> parents_ids;
     int64_t lvltop = nlevels-1;
     for(int64_t k = 0; k < N; ) {
         int64_t knext = k+1;
         int64_t id = partpermed[k];
         while(knext < N && partpermed[knext] == id) { knext += 1; }
         int64_t size = knext - k;
-        auto self = make_unique<Cluster>(k, size, lvltop, get_new_order(), true);
+        auto self = std::make_unique<Cluster>(k, size, lvltop, get_new_order(), true);
         clusters_ids[self.get()] = self->order();
         bottoms[0].push_back(move(self));
         k = knext;
@@ -474,7 +482,7 @@ void Tree::partition_lorasp(SpMat& A) {
         for(auto k = begin; k != end;) {
             // Figures out who gets merged together
             auto idparent = parents_ids.at(k->get());
-            vector<Cluster*> children;
+            std::vector<Cluster*> children;
             // Find all the guys that get merged with him
             children.push_back(k->get());
             int64_t children_start = (*k)->start();
@@ -485,7 +493,7 @@ void Tree::partition_lorasp(SpMat& A) {
                 children_size += (*k)->size();
                 k++;                
             }
-            auto parent = make_unique<Cluster>(children_start, children_size, lvltop, get_new_order(), true);
+            auto parent = std::make_unique<Cluster>(children_start, children_size, lvltop, get_new_order(), true);
             for(auto c: children) {
                 c->set_parent(parent.get());
                 parent->add_children(c);                
@@ -508,7 +516,7 @@ void Tree::assemble(SpMat& A) {
     assert(N >= 0);
     timer tstart = wctime();        
     int64_t nlevels = this->nlevels;
-    if(this->verb) cout << "Assembling (Size " << N << " with " << nlevels << " levels and symmetry " << this->symmetry() << ")" << endl;    
+    if(this->verb) std::cout << "Assembling (Size " << N << " with " << nlevels << " levels and symmetry " << this->symmetry() << ")" << std::endl;    
     // Verify the clusters hierarchy
     for(const auto& n: this->bottom_current()) {
         assert(n->depth() == n->level());
@@ -520,14 +528,14 @@ void Tree::assemble(SpMat& A) {
     timer t1 = wctime();
     // Get CSC format    
     int64_t nnz = App.nonZeros();
-    VectorXi rowval = Map<VectorXi>(App.innerIndexPtr(), nnz);
-    VectorXi colptr = Map<VectorXi>(App.outerIndexPtr(), N + 1);
-    VectorXd nnzval = Map<VectorXd>(App.valuePtr(), nnz);
+    VectorXi64 rowval = Eigen::Map<VectorXi64>(App.innerIndexPtr(), nnz);
+    VectorXi64 colptr = Eigen::Map<VectorXi64>(App.outerIndexPtr(), N + 1);
+    VectorXd nnzval = Eigen::Map<VectorXd>(App.valuePtr(), nnz);
     // Some edge stats
-    vector<Stats<int64_t>> edgesizestats(nlevels, Stats<int64_t>());
-    vector<Stats<int64_t>> nedgestats(nlevels, Stats<int64_t>());
+    std::vector<Stats<int64_t>> edgesizestats(nlevels, Stats<int64_t>());
+    std::vector<Stats<int64_t>> nedgestats(nlevels, Stats<int64_t>());
     // Create all edges
-    vector<Cluster*> cmap(N);
+    std::vector<Cluster*> cmap(N);
     for(auto& self : bottom_original()) {
         assert(self->start() >= 0);
         for(int64_t k = self->start(); k < self->start() + self->size(); k++) { cmap[k] = self.get(); }
@@ -536,7 +544,7 @@ void Tree::assemble(SpMat& A) {
         // Get all neighbors in column
         int64_t col  = self->start();
         int64_t size = self->size();
-        set<Cluster*> nbrs;
+        std::set<Cluster*> nbrs;
         for (int64_t j = col; j < col + size; ++j) {
             // Get the column
             for (SpMat::InnerIterator it(App,j); it; ++it) {
@@ -548,11 +556,11 @@ void Tree::assemble(SpMat& A) {
         nbrs.insert(self.get());
         // Go and get the actual edges
         for (auto nbr : nbrs) {
-            pMatrixXd A = make_unique<MatrixXd>(nbr->size(), self->size());
+            pMatrixXd A = std::make_unique<MatrixXd>(nbr->size(), self->size());
             setZero(A.get());
             block2dense(rowval, colptr, nnzval, nbr->start(), self->start(), nbr->size(), self->size(), A.get(), false);
             edgesizestats[self->level()].addData(nbr->size() * self->size());
-            pEdge e = make_unique<Edge>(self.get(), nbr, move(A), true);
+            pEdge e = std::make_unique<Edge>(self.get(), nbr, move(A), true);
             self->add_edge(move(e));
         }
         nedgestats[self->level()].addData(nbrs.size());
@@ -585,37 +593,37 @@ void Tree::potf_cluster(Cluster* self) {
     int64_t info = potf(Ass); // Ass = L L^T
     timer t__ = wctime();    
     if(info != 0) {
-        cout << "Not SPD!" << endl;
-        throw runtime_error("Error: Non-SPD Pivot\n");
+        std::cout << "Not SPD!" << std::endl;
+        throw std::runtime_error("Error: Non-SPD Pivot\n");
     }
     this->tprof[this->ilvl].potf += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
 }
 
 // Scale pivot Ass = P L D LT PT, returns P, L, D
-void Tree::ldlt_cluster(Cluster* self, pMatrixXd* L, pVectorXd* d, pVectorXi* p) {
-    *p = make_unique<VectorXi>(self->size());
-    *d = make_unique<VectorXd>(self->size());
-    *L = make_unique<MatrixXd>(self->size(), self->size());
+void Tree::ldlt_cluster(Cluster* self, pMatrixXd* L, pVectorXd* d, pVectorXi64* p) {
+    *p = std::make_unique<VectorXi64>(self->size());
+    *d = std::make_unique<VectorXd>(self->size());
+    *L = std::make_unique<MatrixXd>(self->size(), self->size());
     MatrixXd* Ass  = self->pivot()->A();
     double rcond = 1.0;
     timer t_ = wctime();
     int64_t info = ldlt(Ass, L->get(), d->get(), p->get(), &rcond);
     timer t__ = wctime();
     if(info != 0) {
-        cout << "Singular Pivot in LDLT!" << endl;
-        throw runtime_error("Error: Singular Pivot\n");
+        std::cout << "Singular Pivot in LDLT!" << std::endl;
+        throw std::runtime_error("Error: Singular Pivot\n");
     }
     this->tprof[this->ilvl].ldlt += elapsed(t_, t__);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
 }
 
 // Scale pivot Ass = P L U Q, returns L, U, P, Q
-void Tree::getf_cluster(Cluster* self, pMatrixXd* L, pMatrixXd* U, pVectorXi* p, pVectorXi* q) {
-    *p = make_unique<VectorXi>(self->size());
-    *q = make_unique<VectorXi>(self->size());
-    *L = make_unique<MatrixXd>(self->size(), self->size());            
-    *U = make_unique<MatrixXd>(self->size(), self->size());
+void Tree::getf_cluster(Cluster* self, pMatrixXd* L, pMatrixXd* U, pVectorXi64* p, pVectorXi64* q) {
+    *p = std::make_unique<VectorXi64>(self->size());
+    *q = std::make_unique<VectorXi64>(self->size());
+    *L = std::make_unique<MatrixXd>(self->size(), self->size());            
+    *U = std::make_unique<MatrixXd>(self->size(), self->size());
     MatrixXd* Ass  = self->pivot()->A();
     timer t_ = wctime();
     if(this->scale_kind == ScalingKind::PLUQ) {
@@ -623,10 +631,10 @@ void Tree::getf_cluster(Cluster* self, pMatrixXd* L, pMatrixXd* U, pVectorXi* p,
     } else {
         int64_t info = getf(Ass, p->get()); // Ass = P L U
         if(info != 0) {
-            cout << "Singular Pivot!" << endl;
-            throw runtime_error("Error: Singular Pivot\n");
+            std::cout << "Singular Pivot!" << std::endl;
+            throw std::runtime_error("Error: Singular Pivot\n");
         }
-        *(*q) = VectorXi::LinSpaced(self->size(), 0, self->size()-1);
+        *(*q) = VectorXi64::LinSpaced(self->size(), 0, self->size()-1);
     }
     timer t__ = wctime();    
     split_LU(Ass, L->get(), U->get());
@@ -665,7 +673,7 @@ void Tree::trsm_potf_edgeOut(Edge* edge){
 // Assume A = P L U Q
 // edge->n2 is self, edge->n1 is the nbr
 // edge is n -> s
-void Tree::trsm_getf_edgeIn(Edge* edge, MatrixXd* L, VectorXi* p){
+void Tree::trsm_getf_edgeIn(Edge* edge, MatrixXd* L, VectorXi64* p){
     MatrixXd* Asn  = edge->A();
     timer t_ = wctime();
     (*Asn) = p->asPermutation().transpose() * (*Asn);
@@ -678,7 +686,7 @@ void Tree::trsm_getf_edgeIn(Edge* edge, MatrixXd* L, VectorXi* p){
 // Assumes A = P U L Q
 // edge->n1 is self, edge->n2 is the nbr
 // edge is s -> n
-void Tree::trsm_getf_edgeOut(Edge* edge, MatrixXd* U, VectorXi* q){
+void Tree::trsm_getf_edgeOut(Edge* edge, MatrixXd* U, VectorXi64* q){
     MatrixXd* Ans  = edge->A();
     timer t_ = wctime();
     (*Ans) = (*Ans) * q->asPermutation().transpose();
@@ -691,7 +699,7 @@ void Tree::trsm_getf_edgeOut(Edge* edge, MatrixXd* U, VectorXi* q){
 // A = P L S LT PT with S a sign
 // edge->n2 is self, edge->n1 is the nbr
 // edge is n -> s
-void Tree::trsm_ldlt_edgeIn(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi* p) {
+void Tree::trsm_ldlt_edgeIn(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi64* p) {
     MatrixXd* Asn  = edge->A();
     timer t_ = wctime();
     (*Asn) = p->asPermutation().transpose() * (*Asn);
@@ -704,7 +712,7 @@ void Tree::trsm_ldlt_edgeIn(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi* p) 
 // A = P L S LT PT with S a sign
 // edge->n1 is self, edge->n2 is the nbr
 // edge is s -> n
-void Tree::trsm_ldlt_edgeOut(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi* p) {
+void Tree::trsm_ldlt_edgeOut(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi64* p) {
     MatrixXd* Ans  = edge->A();
     timer t_ = wctime();
     (*Ans) = (*Ans) * p->asPermutation();
@@ -723,7 +731,7 @@ void Tree::panel_potf(Cluster* self) {
     }
 }
 
-void Tree::panel_ldlt(Cluster* self, MatrixXd* L, VectorXi* p) {
+void Tree::panel_ldlt(Cluster* self, MatrixXd* L, VectorXi64* p) {
     for(auto edge : self->edgesInNbr()) {
         trsm_ldlt_edgeIn(edge, L, p);
     }
@@ -732,7 +740,7 @@ void Tree::panel_ldlt(Cluster* self, MatrixXd* L, VectorXi* p) {
     }
 }
 
-void Tree::panel_getf(Cluster* self, MatrixXd* L, MatrixXd* U, VectorXi* p, VectorXi* q) {
+void Tree::panel_getf(Cluster* self, MatrixXd* L, MatrixXd* U, VectorXi64* p, VectorXi64* q) {
     for(auto edge : self->edgesInNbr()) {
         trsm_getf_edgeIn(edge, L, p);
     }
@@ -762,9 +770,9 @@ void Tree::gemm_edges(Edge* edge1, Edge* edge2, VectorXd* diag, bool transpose_e
     auto end   = n2->edgesOutAll().end();
     auto found = find_if(begin, end, [&](Edge* e){ return e->n2 == n1; } );
     if (found == end) { // An1n2 doesn't exist - create fill in
-        pMatrixXd An1n2 = make_unique<MatrixXd>(n1->size(), n2->size());
+        pMatrixXd An1n2 = std::make_unique<MatrixXd>(n1->size(), n2->size());
         setZero(An1n2.get());
-        pEdge e = make_unique<Edge>(n2, n1, move(An1n2), false);
+        pEdge e = std::make_unique<Edge>(n2, n1, move(An1n2), false);
         n2->add_edge(move(e));
         auto begin = n2->edgesOutAll().begin();
         auto end   = n2->edgesOutAll().end();
@@ -795,7 +803,7 @@ void Tree::gemm_edges(Edge* edge1, Edge* edge2, VectorXd* diag, bool transpose_e
 // Scale a cluster to make it identity
 void Tree::scale_cluster(Cluster* self) {
     timer t0, t1, t2;
-    pMatrixXd NewPiv = make_unique<MatrixXd>();
+    pMatrixXd NewPiv = std::make_unique<MatrixXd>();
     if (this->scale_kind == ScalingKind::LLT) {
         // Factor pivot in-place
         t0 = wctime();
@@ -807,12 +815,12 @@ void Tree::scale_cluster(Cluster* self) {
         if(preserve) {
             trmm_trans(self->pivot()->A(), self->phi());
         }
-        this->ops.push_back(make_unique<ScalingLLT>(self, self->pivot()->get_A()));
+        this->ops.push_back(std::make_unique<ScalingLLT>(self, self->pivot()->get_A()));
         *NewPiv = MatrixXd::Identity(self->size(), self->size());        
     } else if (this->scale_kind == ScalingKind::LDLT) {
         pMatrixXd L = nullptr;
         pVectorXd s = nullptr;
-        pVectorXi p = nullptr;
+        pVectorXi64 p = nullptr;
         t0 = wctime();
         ldlt_cluster(self, &L, &s, &p);
         assert(L != nullptr && s != nullptr && p != nullptr);
@@ -826,14 +834,14 @@ void Tree::scale_cluster(Cluster* self) {
             trmm_trans(L.get(), self->phi());
         }
         VectorXd* diag = s.get();
-        this->ops.push_back(make_unique<ScalingLDLT>(self, move(L), move(s), move(p))); // Fwd, Bwd and Diag
+        this->ops.push_back(std::make_unique<ScalingLDLT>(self, move(L), move(s), move(p))); // Fwd, Bwd and Diag
         *NewPiv = diag->asDiagonal();
     } else if (this->scale_kind == ScalingKind::PLUQ || this->scale_kind == ScalingKind::PLU) {
         // Factor pivot in-place
         pMatrixXd L = nullptr;
         pMatrixXd U = nullptr;
-        pVectorXi p = nullptr;
-        pVectorXi q = nullptr;
+        pVectorXi64 p = nullptr;
+        pVectorXi64 q = nullptr;
         t0 = wctime();
         getf_cluster(self, &L, &U, &p, &q);
         assert(L != nullptr && U != nullptr && p != nullptr && q != nullptr);
@@ -844,10 +852,10 @@ void Tree::scale_cluster(Cluster* self) {
         t2 = wctime();
         // Record
         assert(! preserve);
-        this->ops.push_back(make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q)));
+        this->ops.push_back(std::make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q)));
         *NewPiv = MatrixXd::Identity(self->size(), self->size());
     } else {
-        cout << "Wrong scaling kind" << endl;
+        std::cout << "Wrong scaling kind" << std::endl;
         assert(false);
     }
     self->pivot()->set_A(move(NewPiv));
@@ -884,10 +892,10 @@ void Tree::schur_symmetric(Cluster* self, VectorXd* Adiag) {
 
 void Tree::record_schur_symmetric(Cluster* self, VectorXd* Adiag) {
     for(auto edge : self->edgesOutNbr()) {
-        this->ops.push_back(make_unique<GemmSymmOut>(self, edge->n2, edge->get_A(), Adiag));
+        this->ops.push_back(std::make_unique<GemmSymmOut>(self, edge->n2, edge->get_A(), Adiag));
     }
     for(auto edge : self->edgesInNbr()) {
-        this->ops.push_back(make_unique<GemmSymmIn>(self, edge->n1, edge->get_A(), Adiag));
+        this->ops.push_back(std::make_unique<GemmSymmIn>(self, edge->n1, edge->get_A(), Adiag));
     }
 }
 
@@ -906,12 +914,12 @@ void Tree::eliminate_cluster(Cluster* self){
         schur_symmetric(self, nullptr);
         t3 = wctime(); 
         // Record
-        this->ops.push_back(make_unique<ScalingLLT>(self, self->pivot()->get_A())); // Fwd and Bwd
+        this->ops.push_back(std::make_unique<ScalingLLT>(self, self->pivot()->get_A())); // Fwd and Bwd
         record_schur_symmetric(self, nullptr);
     } else if (this->scale_kind == ScalingKind::LDLT) {
         pMatrixXd L = nullptr;
         pVectorXd s = nullptr;
-        pVectorXi p = nullptr;
+        pVectorXi64 p = nullptr;
         t0 = wctime();
         ldlt_cluster(self, &L, &s, &p);
         assert(L != nullptr && s != nullptr && p != nullptr);
@@ -924,14 +932,14 @@ void Tree::eliminate_cluster(Cluster* self){
         schur_symmetric(self, diag);
         t3 = wctime(); 
         // Record
-        this->ops.push_back(make_unique<ScalingLDLT>(self, move(L), move(s), move(p))); // Fwd, Bwd and Diag
+        this->ops.push_back(std::make_unique<ScalingLDLT>(self, move(L), move(s), move(p))); // Fwd, Bwd and Diag
         record_schur_symmetric(self, diag);        
     } else if (this->scale_kind == ScalingKind::PLUQ || this->scale_kind == ScalingKind::PLU) {
         // Factor pivot in-place
         pMatrixXd L = nullptr;
         pMatrixXd U = nullptr;
-        pVectorXi p = nullptr;
-        pVectorXi q = nullptr;
+        pVectorXi64 p = nullptr;
+        pVectorXi64 q = nullptr;
         t0 = wctime();
         getf_cluster(self, &L, &U, &p, &q);
         assert(L != nullptr && U != nullptr && p != nullptr && q != nullptr);
@@ -947,15 +955,15 @@ void Tree::eliminate_cluster(Cluster* self){
         }
         t3 = wctime(); 
         // Record
-        this->ops.push_back(make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q))); // Fwd and Bwd
+        this->ops.push_back(std::make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q))); // Fwd and Bwd
         for(auto edge : self->edgesOutNbr()) {
-            this->ops.push_back(make_unique<GemmOut>(self, edge->n2, edge->get_A())); // Fwd only
+            this->ops.push_back(std::make_unique<GemmOut>(self, edge->n2, edge->get_A())); // Fwd only
         }
         for(auto edge : self->edgesInNbr()) {
-            this->ops.push_back(make_unique<GemmIn>(self, edge->n1, edge->get_A())); // Bwd only
+            this->ops.push_back(std::make_unique<GemmIn>(self, edge->n1, edge->get_A())); // Bwd only
         }
     } else {
-        cout << "Wrong scaling choice" << endl;
+        std::cout << "Wrong scaling choice" << std::endl;
         assert(false);
     }
     // Update data structure
@@ -977,12 +985,12 @@ void Tree::eliminate_cluster(Cluster* self){
  * 
  * sibling is sent to the end and given a last order
  */
-Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size, function<bool(Edge*)> pred, MatrixXd* v, VectorXd* h, MatrixXd* Asn, bool is_pivot_I, bool keep_sibling_if_pred_false) {
+Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size, std::function<bool(Edge*)> pred, MatrixXd* v, VectorXd* h, MatrixXd* Asn, bool is_pivot_I, bool keep_sibling_if_pred_false) {
     assert(original->size() >= original_size);
     assert(original->size() == original->original_size());
     // Create a new sibling cluster
     int64_t sibling_size = original->size() - original_size;
-    pCluster psibling = make_unique<Cluster>(original->start() + original_size, 
+    pCluster psibling = std::make_unique<Cluster>(original->start() + original_size, 
                                              original->size()  - original_size, 
                                              original->level(),
                                              get_new_order(),
@@ -993,9 +1001,9 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     if(preserve) {
         MatrixXd* phi_original = original->phi();
         // Apply Q on phi
-        ormqr(v, h, phi_original, 'L', 'T'); // Ass <- Q^T Ass
+        ormqr_spand(v, h, phi_original, 'L', 'T'); // Ass <- Q^T Ass
         // Split and shrink phi        
-        sibling->set_phi(make_unique<MatrixXd>(sibling_size, phi_original->cols()));        
+        sibling->set_phi(std::make_unique<MatrixXd>(sibling_size, phi_original->cols()));        
         assert(phi_original->rows() == original_size + sibling_size);
         (*sibling->phi()) = phi_original->middleRows(original_size, sibling_size);
         phi_original->conservativeResize(original_size, NoChange_t::NoChange);
@@ -1018,12 +1026,12 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
         // From Q^T original for both
         } else {
             MatrixXd* Apn = edge->A();
-            ormqr(v, h, Apn, 'L', 'T'); // Q^T Apn
+            ormqr_spand(v, h, Apn, 'L', 'T'); // Q^T Apn
             // Allocate sibling
             if(keep_sibling_if_pred_false) {
-                pMatrixXd Asn = make_unique<MatrixXd>(sibling_size,  n->size());
+                pMatrixXd Asn = std::make_unique<MatrixXd>(sibling_size,  n->size());
                 (*Asn) = Apn->middleRows(original_size, sibling_size);
-                pEdge Ens = make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
+                pEdge Ens = std::make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
                 n->add_edge(move(Ens));
             }
             // Shrink original
@@ -1046,18 +1054,18 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
         // From original Q for both
         } else {
             MatrixXd* Anp = edge->A();
-            ormqr(v, h, Anp, 'R', 'N'); // Anp Q
+            ormqr_spand(v, h, Anp, 'R', 'N'); // Anp Q
             // Allocate sibling
             if(keep_sibling_if_pred_false) {
                 if(! this->symmetry()) {
-                    pMatrixXd Ans = make_unique<MatrixXd>(n->size(), sibling_size);
+                    pMatrixXd Ans = std::make_unique<MatrixXd>(n->size(), sibling_size);
                     (*Ans) = Anp->middleCols(original_size, sibling_size);
-                    pEdge Esn = make_unique<Edge>(sibling, n, move(Ans), edge->is_original());
+                    pEdge Esn = std::make_unique<Edge>(sibling, n, move(Ans), edge->is_original());
                     sibling->add_edge(move(Esn));
                 } else {
-                    pMatrixXd Asn = make_unique<MatrixXd>(sibling_size, n->size());
+                    pMatrixXd Asn = std::make_unique<MatrixXd>(sibling_size, n->size());
                     (*Asn) = Anp->middleCols(original_size, sibling_size).transpose();
-                    pEdge Ens = make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
+                    pEdge Ens = std::make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
                     n->add_edge(move(Ens));
                 }
             }
@@ -1069,29 +1077,29 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     // Self edges
     MatrixXd* piv = original->pivot()->A();
     if(! is_pivot_I) {
-        ormqr(v, h, piv, 'R', 'N'); // Ass <- Ass Q 
-        ormqr(v, h, piv, 'L', 'T'); // Ass <- Q^T Ass
+        ormqr_spand(v, h, piv, 'R', 'N'); // Ass <- Ass Q 
+        ormqr_spand(v, h, piv, 'L', 'T'); // Ass <- Q^T Ass
     }
     // Diagonal
-    pMatrixXd Aoo = make_unique<MatrixXd>(original_size, original_size);
-    pMatrixXd Ass = make_unique<MatrixXd>(sibling_size,  sibling_size);
+    pMatrixXd Aoo = std::make_unique<MatrixXd>(original_size, original_size);
+    pMatrixXd Ass = std::make_unique<MatrixXd>(sibling_size,  sibling_size);
     (*Aoo) = piv->block(0,             0,             original_size, original_size); // Aoo : s -> s
     (*Ass) = piv->block(original_size, original_size, sibling_size,  sibling_size);  // Ass : s -> s
     // Create s-s pivot
-    pEdge Ess = make_unique<Edge>(sibling,   sibling,  move(Ass), true);
+    pEdge Ess = std::make_unique<Edge>(sibling,   sibling,  move(Ass), true);
     sibling->add_edge(move(Ess));
     // Create s-o and o-s edges, if needed
     if(! is_pivot_I) {
         // Create s-o edge
-        pMatrixXd Aso = make_unique<MatrixXd>(sibling_size,  original_size);
+        pMatrixXd Aso = std::make_unique<MatrixXd>(sibling_size,  original_size);
         (*Aso) = piv->block(original_size, 0,             sibling_size,  original_size); // Aso : o -> s                
-        pEdge Eso = make_unique<Edge>(original,  sibling,  move(Aso), true);
+        pEdge Eso = std::make_unique<Edge>(original,  sibling,  move(Aso), true);
         original->add_edge(move(Eso));
         // Create o-s edge
         if(! this->symmetry()) {
-            pMatrixXd Aos = make_unique<MatrixXd>(original_size, sibling_size);
+            pMatrixXd Aos = std::make_unique<MatrixXd>(original_size, sibling_size);
             (*Aos) = piv->block(0,             original_size, original_size, sibling_size);  // Aos : s -> o
-            pEdge Eos = make_unique<Edge>(sibling,   original, move(Aos), true);
+            pEdge Eos = std::make_unique<Edge>(sibling,   original, move(Aos), true);
             sibling->add_edge(move(Eos));
         }
     }
@@ -1099,11 +1107,11 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     original->pivot()->set_A(move(Aoo));
     // Store new sibling somewhere, return a view on it
     this->others.push_back(move(psibling));
-    this->ops.push_back(make_unique<Split>(original, sibling));
+    this->ops.push_back(std::make_unique<Split>(original, sibling));
     return sibling;
 }
 
-pOperation Tree::reset_size(Cluster* snew, map<Cluster*, int64_t>* posparent) {
+pOperation Tree::reset_size(Cluster* snew, std::map<Cluster*, int64_t>* posparent) {
     assert(current_bottom > 0);
     assert(this->ilvl == current_bottom-1);
     // Update sizes & posparent
@@ -1117,7 +1125,7 @@ pOperation Tree::reset_size(Cluster* snew, map<Cluster*, int64_t>* posparent) {
     if(preserve) {
         assert(snew->children().size() > 0);
         auto kid = snew->children()[0];
-        snew->set_phi(make_unique<MatrixXd>(snew->size(), kid->phi()->cols()));
+        snew->set_phi(std::make_unique<MatrixXd>(snew->size(), kid->phi()->cols()));
         int64_t row = 0;
         for(auto sold : snew->children()) {
             assert(sold->phi()->rows() == sold->size());
@@ -1127,14 +1135,14 @@ pOperation Tree::reset_size(Cluster* snew, map<Cluster*, int64_t>* posparent) {
         }  
         assert(row == snew->size());
     }
-    return make_unique<Merge>(snew);
+    return std::make_unique<Merge>(snew);
 }
 
-void Tree::update_edges(Cluster* snew, map<Cluster*,int64_t>* posparent) {
+void Tree::update_edges(Cluster* snew, std::map<Cluster*,int64_t>* posparent) {
     assert(current_bottom > 0);
     assert(this->ilvl == current_bottom-1);
     // Figure out edges that gets together
-    map<Cluster*,bool> edges_merged; // old neighbor => original?
+    std::map<Cluster*,bool> edges_merged; // old neighbor => original?
     for(auto sold : snew->children()){
         for(auto eold : sold->edgesOutAll()){
             auto nold = eold->n2;
@@ -1154,11 +1162,11 @@ void Tree::update_edges(Cluster* snew, map<Cluster*,int64_t>* posparent) {
         auto nnew = nnew_orig.first;
         auto original = nnew_orig.second;
         timer t0 = wctime();
-        pMatrixXd A = make_unique<MatrixXd>(nnew->size(), snew->size());
+        pMatrixXd A = std::make_unique<MatrixXd>(nnew->size(), snew->size());
         setZero(A.get());
         timer t1 = wctime();
         this->tprof[this->ilvl].merge_alloc += elapsed(t0, t1);
-        pEdge e = make_unique<Edge>(snew, nnew, move(A), original);
+        pEdge e = std::make_unique<Edge>(snew, nnew, move(A), original);
         snew->add_edge(move(e));
     }
     snew->sort_edges(); // Make the edge ordering reproducible (set above can make it ~random)
@@ -1186,7 +1194,7 @@ void Tree::update_edges(Cluster* snew, map<Cluster*,int64_t>* posparent) {
 // Get [Asn] for all n != s (symmetric and unsymmetric case)
 // Order is always
 // [before, after]
-pMatrixXd Tree::assemble_Asn(Cluster* self, function<bool(Edge*)> pred) {
+pMatrixXd Tree::assemble_Asn(Cluster* self, std::function<bool(Edge*)> pred) {
     timer t0 = wctime();
     int64_t rows = self->size();
     // How many columns & prealloc
@@ -1199,7 +1207,7 @@ pMatrixXd Tree::assemble_Asn(Cluster* self, function<bool(Edge*)> pred) {
         if(pred(edge))
             cols += edge->n2->size();
     }
-    auto Asn = make_unique<MatrixXd>(rows, cols);
+    auto Asn = std::make_unique<MatrixXd>(rows, cols);
     // Fill
     int64_t c = 0;
     for(auto edge : self->edgesInNbr()) {
@@ -1239,7 +1247,7 @@ pMatrixXd Tree::assemble_Asphi(Cluster* self) {
         cols += nphis;
     }    
     // Build matrix [phis, Asn*phin] into Q1
-    auto Asnp = make_unique<MatrixXd>(rows, cols);
+    auto Asnp = std::make_unique<MatrixXd>(rows, cols);
     int64_t c = 0;
     for(auto edge : self->edgesInNbr()) {
         Asnp->middleCols(c, nphis) = (*edge->A()) * (*(edge->n1->phi()));
@@ -1265,10 +1273,10 @@ void Tree::sparsify_preserve_only(Cluster* self) {
     if(cols >= rows) return;
     // Orthogonalize
     timer t1 = wctime();
-    int64_t rank = min(rows, cols);
-    pVectorXd h = make_unique<VectorXd>(rank); // new
+    int64_t rank = std::min(rows, cols);
+    pVectorXd h = std::make_unique<VectorXd>(rank); // new
     timer tgeqrf_0 = wctime();
-    geqrf(Asnp.get(), h.get());
+    geqrf_spand(Asnp.get(), h.get());
     timer tgeqrf_1 = wctime();
     this->tprof[this->ilvl].geqrf += elapsed(tgeqrf_0, tgeqrf_1);
     timer t2 = wctime();
@@ -1277,7 +1285,7 @@ void Tree::sparsify_preserve_only(Cluster* self) {
     // Record
     MatrixXd* pv = v.get();
     VectorXd* ph = h.get();
-    this->ops.push_back(make_unique<Orthogonal>(self, move(v), move(h)));        
+    this->ops.push_back(std::make_unique<Orthogonal>(self, move(v), move(h)));        
     // Scatter Q, shrink and split
     Cluster* sibling = this->shrink_split_scatter_phi(self, rank, [](Edge*e){(void)e; return false;}, pv, ph, nullptr, is_pivot_I, false);    
     // Eliminate sibling
@@ -1289,7 +1297,7 @@ void Tree::sparsify_preserve_only(Cluster* self) {
 }
 
 // RRQR only
-void Tree::sparsify_adaptive_only(Cluster* self, function<bool(Edge*)> pred) {
+void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred) {
     bool is_pivot_I = (this->symm_kind != SymmKind::SYM);
     MatrixXd* Ass = self->pivot()->A();
     if(is_pivot_I) {
@@ -1302,33 +1310,33 @@ void Tree::sparsify_adaptive_only(Cluster* self, function<bool(Edge*)> pred) {
     auto Asn = this->assemble_Asn(self, pred);
     int64_t rows = Asn->rows();
     int64_t cols = Asn->cols();
-    VectorXi jpvt = VectorXi::Zero(cols);
-    VectorXd ht   = VectorXd(min(rows, cols));
+    VectorXi64 jpvt = VectorXi64::Zero(cols);
+    VectorXd ht   = VectorXd(std::min(rows, cols));
     // GEQP3
     timer t1 = wctime();
-    geqp3(Asn.get(), &jpvt, &ht);
+    geqp3_spand(Asn.get(), &jpvt, &ht);
     timer t2 = wctime();
     this->tprof[this->ilvl].geqp3 += elapsed(t1, t2);
     if(this->monitor_flops) this->tprof_flops[this->ilvl].rrqr.push_back({Asn->rows(), Asn->cols(), elapsed(t1, t2)});    
     // Truncate ?
     VectorXd diag = Asn->diagonal();
-    if(this->monitor_Rdiag) { self->Rdiag = vector<double>(diag.data(), diag.data() + diag.size()); }
+    if(this->monitor_Rdiag) { self->Rdiag = std::vector<double>(diag.data(), diag.data() + diag.size()); }
     int64_t rank = choose_rank(diag, tol);
     if (rank >= rows) { // No point, nothing to do
         return;
     }
     // Save Q
     timer tQ_0 = wctime();
-    pMatrixXd v = make_unique<MatrixXd>(rows, rank);
+    pMatrixXd v = std::make_unique<MatrixXd>(rows, rank);
     *v = Asn->leftCols(rank);
-    pVectorXd h = make_unique<VectorXd>(rank);
+    pVectorXd h = std::make_unique<VectorXd>(rank);
     *h = ht.topRows(rank);
     timer tQ_1 = wctime();
     this->tprof[this->ilvl].buildq += elapsed(tQ_0, tQ_1);
     // Record Q
     MatrixXd* pv = v.get();
     VectorXd* ph = h.get();
-    this->ops.push_back(make_unique<Orthogonal>(self, move(v), move(h)));
+    this->ops.push_back(std::make_unique<Orthogonal>(self, move(v), move(h)));
     // Compute shrinked edges
     timer tS_0 = wctime();
     MatrixXd AsnP = Asn->topRows(rank).triangularView<Upper>();
@@ -1357,26 +1365,26 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
     assert(Asnphi->rows() == rows);
     assert(Asnphi->cols() == cols1);
     // QR
-    int64_t rank1 = min(rows, cols1);
+    int64_t rank1 = std::min(rows, cols1);
     VectorXd h1 = VectorXd(rank1);
     timer tgeqrf_0 = wctime();
-    geqrf(Asnphi.get(), &h1);
+    geqrf_spand(Asnphi.get(), &h1);
     timer tgeqrf_1 = wctime();
     this->tprof[this->ilvl].geqrf += elapsed(tgeqrf_0, tgeqrf_1);
     // Build Q1
     Asnphi->conservativeResize(rows, rank1);
     pMatrixXd Q1 = move(Asnphi);
-    orgqr(Q1.get(), &h1);
+    orgqr_spand(Q1.get(), &h1);
     // (2) Get edge
     auto Asn = this->assemble_Asn(self, [](Edge* e){(void)e; return true;}); // Asn    
     int64_t cols2 = Asn->cols();
-    VectorXi jpvt = VectorXi::Zero(cols2);
-    VectorXd h2   = VectorXd(min(rows, cols2));
+    VectorXi64 jpvt = VectorXi64::Zero(cols2);
+    VectorXd h2   = VectorXd(std::min(rows, cols2));
     // Remove Q1
     (*Asn) -= (*Q1) * (Q1->transpose() * (*Asn));
     // GEQP3
     timer tgeqp3_0 = wctime();
-    geqp3(Asn.get(), &jpvt, &h2);
+    geqp3_spand(Asn.get(), &jpvt, &h2);
     timer tgeqp3_1 = wctime();
     this->tprof[this->ilvl].geqp3 += elapsed(tgeqp3_0, tgeqp3_1);
     // Truncate ?
@@ -1389,19 +1397,19 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
     // Build Q2
     Asn->conservativeResize(rows, rank2);
     h2.conservativeResize(rank2);
-    orgqr(Asn.get(), &h2);
+    orgqr_spand(Asn.get(), &h2);
     pMatrixXd Q2 = move(Asn);
     // Concatenate [Q1, Q2] & orthogonalize
-    pMatrixXd v = make_unique<MatrixXd>(rows, rank);
-    pVectorXd h = make_unique<VectorXd>(rank);
+    pMatrixXd v = std::make_unique<MatrixXd>(rows, rank);
+    pVectorXd h = std::make_unique<VectorXd>(rank);
     *v << *Q1, *Q2;
     timer tgeqrf_2 = wctime();
-    geqrf(v.get(), h.get());
+    geqrf_spand(v.get(), h.get());
     timer tgeqrf_3 = wctime();
     MatrixXd* pv = v.get();
     VectorXd* ph = h.get();
     this->tprof[this->ilvl].geqrf += elapsed(tgeqrf_2, tgeqrf_3);        
-    this->ops.push_back(make_unique<Orthogonal>(self, move(v), move(h))); 
+    this->ops.push_back(std::make_unique<Orthogonal>(self, move(v), move(h))); 
     // Scatter Q, shrink and split
     Cluster* sibling = this->shrink_split_scatter_phi(self, rank, [](Edge*e){(void)e; return false;}, pv, ph, nullptr, is_pivot_I, false);
     // Eliminate sibling
@@ -1434,7 +1442,7 @@ void Tree::sparsify_cluster(Cluster* self) {
 
 void Tree::merge_all() {
     current_bottom++;
-    map<Cluster*,int64_t> posparent;
+    std::map<Cluster*,int64_t> posparent;
     for(auto& self : this->bottom_current()) {
         pOperation op = this->reset_size(self.get(), &posparent);
         this->ops.push_back(move(op));
@@ -1459,19 +1467,19 @@ void Tree::factorize() {
     }
  
     if(this->verb) {
-        cout << "spaND Factorization started" << endl;
-        cout << "  N:          " << get_N()  << endl;
-        cout << "  #levels:    " << nlevels  << endl;
-        cout << "  verbose?:   " << verb     << endl;
-        cout << "  tol?:       " << tol      << endl;
-        cout << "  #skip:      " << skip     << endl;
-        cout << "  symmetrykd? " << symm2str(symm_kind) << endl;                                    
-        cout << "  scalingkd?  " << scaling2str(scale_kind) << endl;
-        cout << "  want_spars? " << use_want_sparsify << endl;
-        cout << "  mon cond?   " << monitor_condition_pivots << endl;
-        cout << "  preserving? " << preserve << endl;
+        std::cout << "spaND Factorization started" << std::endl;
+        std::cout << "  N:          " << get_N()  << std::endl;
+        std::cout << "  #levels:    " << nlevels  << std::endl;
+        std::cout << "  verbose?:   " << verb     << std::endl;
+        std::cout << "  tol?:       " << tol      << std::endl;
+        std::cout << "  #skip:      " << skip     << std::endl;
+        std::cout << "  symmetrykd? " << symm2str(symm_kind) << std::endl;                                    
+        std::cout << "  scalingkd?  " << scaling2str(scale_kind) << std::endl;
+        std::cout << "  want_spars? " << use_want_sparsify << std::endl;
+        std::cout << "  mon cond?   " << monitor_condition_pivots << std::endl;
+        std::cout << "  preserving? " << preserve << std::endl;
         if(preserve)
-            cout << "  preserving " << this->nphis() << " vectors" << endl;
+            std::cout << "  preserving " << this->nphis() << " vectors" << std::endl;
     }
     
     // Create the phi
@@ -1479,7 +1487,7 @@ void Tree::factorize() {
         MatrixXd phi_ = this->perm.asPermutation().transpose() * (*phi);        
         // Store phi
         for(auto& self : bottom_original()) {
-            self->set_phi(make_unique<MatrixXd>(self->size(), phi_.cols()));
+            self->set_phi(std::make_unique<MatrixXd>(self->size(), phi_.cols()));
             (*self->phi()) = phi_.middleRows(self->start(), self->size());
         }
     }
@@ -1563,14 +1571,14 @@ void Tree::factorize_lorasp() {
 
     timer tstart = wctime();    
     if(this->verb) {
-        cout << "LoRaSp Factorization started" << endl;
-        cout << "  N:          " << get_N()  << endl;
-        cout << "  #levels:    " << nlevels  << endl;
-        cout << "  verbose?:   " << verb     << endl;
-        cout << "  tol?:       " << tol      << endl;
-        cout << "  symmetrykd? " << symm2str(symm_kind) << endl;
-        cout << "  scalingkd?  " << scaling2str(scale_kind) << endl;
-        cout << "  mon cond?   " << monitor_condition_pivots << endl;
+        std::cout << "LoRaSp Factorization started" << std::endl;
+        std::cout << "  N:          " << get_N()  << std::endl;
+        std::cout << "  #levels:    " << nlevels  << std::endl;
+        std::cout << "  verbose?:   " << verb     << std::endl;
+        std::cout << "  tol?:       " << tol      << std::endl;
+        std::cout << "  symmetrykd? " << symm2str(symm_kind) << std::endl;
+        std::cout << "  scalingkd?  " << scaling2str(scale_kind) << std::endl;
+        std::cout << "  mon cond?   " << monitor_condition_pivots << std::endl;
     }
 
     // Factorization
@@ -1729,7 +1737,7 @@ void Tree::print_log() const {
 /** Return the current trailing matrix **/
 SpMat Tree::get_trailing_mat() const {
     // Build matrix at current stage
-    vector<Triplet<double>> values(0);
+    std::vector<Triplet<double>> values(0);
     for(auto& s : bottom_current()) {
         int64_t s1 = s->start();
         assert(s1 >= 0);

@@ -206,23 +206,23 @@ TEST(MatrixMarket, Array) {
 TEST(Util, AreConnected) {
     // 3x3 laplacian
     SpMat A = mmio::sp_mmread<double,int64_t>("../mats/neglapl_2_3.mm");
-    VectorXi a(2);
-    VectorXi b(3);
+    VectorXi64 a(2);
+    VectorXi64 b(3);
     a << 0, 1;
     b << 6, 7, 8;
     EXPECT_FALSE(are_connected(a, b, A));
-    a = VectorXi(2);
-    b = VectorXi(3);
+    a = VectorXi64(2);
+    b = VectorXi64(3);
     a << 0, 1;
     b << 2, 5, 8;
     EXPECT_TRUE(are_connected(a, b, A));
-    a = VectorXi(2);
-    b = VectorXi(1);
+    a = VectorXi64(2);
+    b = VectorXi64(1);
     a << 3, 4;
     b << 5;
     EXPECT_TRUE(are_connected(a, b, A));
-    a = VectorXi(1);
-    b = VectorXi(1);
+    a = VectorXi64(1);
+    b = VectorXi64(1);
     a << 6;
     b << 6;
     EXPECT_TRUE(are_connected(a, b, A));
@@ -269,8 +269,8 @@ TEST(Util, Block2Dense) {
         A.insert(2, 2) = -2.0;
         A.insert(1, 3) = 3.0;
         A.makeCompressed();
-        VectorXi rowval = Map<VectorXi>(A.innerIndexPtr(), A.nonZeros());
-        VectorXi colptr = Map<VectorXi>(A.outerIndexPtr(), 6);
+        VectorXi64 rowval = Map<VectorXi64>(A.innerIndexPtr(), A.nonZeros());
+        VectorXi64 colptr = Map<VectorXi64>(A.outerIndexPtr(), 6);
         VectorXd nnzval = Map<VectorXd>(A.valuePtr(), A.nonZeros());
         MatrixXd Ad = MatrixXd::Zero(3, 3);
         block2dense(rowval, colptr, nnzval, 1, 1, 3, 3, &Ad, false);
@@ -287,8 +287,8 @@ TEST(Util, Block2Dense) {
         A.insert(2, 1) = 4.0;
         A.insert(0, 3) = 5.0;
         A.makeCompressed();
-        VectorXi rowval = Map<VectorXi>(A.innerIndexPtr(), A.nonZeros());
-        VectorXi colptr = Map<VectorXi>(A.outerIndexPtr(), 5);
+        VectorXi64 rowval = Map<VectorXi64>(A.innerIndexPtr(), A.nonZeros());
+        VectorXi64 colptr = Map<VectorXi64>(A.outerIndexPtr(), 5);
         VectorXd nnzval = Map<VectorXd>(A.valuePtr(), A.nonZeros());
         MatrixXd Ad = MatrixXd::Zero(3, 2);
         block2dense(rowval, colptr, nnzval, 0, 0, 2, 3, &Ad, true);
@@ -320,7 +320,7 @@ TEST(Util, SymmPerm) {
         SpMat A = mmio::sp_mmread<double,int64_t>(ss.str());
         // Create random perm
         int64_t N = A.rows();
-        VectorXi p = VectorXi::LinSpaced(N, 0, N-1);
+        VectorXi64 p = VectorXi64::LinSpaced(N, 0, N-1);
         random_device rd;
         mt19937 g(rd());
         shuffle(p.data(), p.data() + N, g);
@@ -332,10 +332,10 @@ TEST(Util, SymmPerm) {
 }
 
 TEST(Util, isperm) {
-    VectorXi perm1(10);
-    VectorXi perm2(10);
-    VectorXi noperm1(10);
-    VectorXi noperm2(5);
+    VectorXi64 perm1(10);
+    VectorXi64 perm2(10);
+    VectorXi64 noperm1(10);
+    VectorXi64 noperm2(5);
     perm1 << 0, 9, 8, 1, 4, 2, 3, 7, 5, 6;
     perm2 << 0, 1, 2, 3, 4, 5, 6, 7, 8, 9;
     noperm1 << 0, 9, 8, 1, 4, 2, 3, 5, 5, 6;
@@ -347,9 +347,9 @@ TEST(Util, isperm) {
 }
 
 TEST(Util, swap2perm) {
-    VectorXi swap(6);
-    VectorXi perm(6);
-    VectorXi permRef(6);
+    VectorXi64 swap(6);
+    VectorXi64 perm(6);
+    VectorXi64 permRef(6);
     swap << 3, 3, 2, 5, 4, 5;
     permRef << 3, 0, 2, 5, 4, 1;
     swap2perm(&swap, &perm); // perm.asPermutation().transpose() * x <=> x[perm]
@@ -510,7 +510,7 @@ TEST(Assembly, Consistency) {
                         else                 t.partition_lorasp(Aref);
                         t.assemble(Aref);
                         // Get permutation
-                        VectorXi p = t.get_assembly_perm();
+                        VectorXi64 p = t.get_assembly_perm();
                         // Check it's indeed a permutation
                         ASSERT_TRUE(isperm(&p));
                         auto P = p.asPermutation();
@@ -532,7 +532,7 @@ TEST(Assembly, Consistency) {
                         else                 t.partition_lorasp(Arefunsym);
                         t.assemble(Arefunsym);                
                         // Get permutation
-                        VectorXi p = t.get_assembly_perm();
+                        VectorXi64 p = t.get_assembly_perm();
                         // Check it's indeed a permutation
                         ASSERT_TRUE(isperm(&p));
                         auto P = p.asPermutation();

@@ -9,7 +9,7 @@ using namespace Eigen;
 using namespace std;
 using namespace spaND;
 
-int64_t main(int64_t argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 
     cxxopts::Options options("spaND", "General driver for spaND. Load a matrix, an optional coordinate file. Then, assemble the matrix, partition it, factor it and solve Ax=b using GMRES.");
     options.add_options()
@@ -18,23 +18,23 @@ int64_t main(int64_t argc, char* argv[]) {
         ("verbose", "Verbose mode", cxxopts::value<bool>()->default_value("true"))
         // General
         ("m,matrix", "Matrix MM coordinate file (mandatory)", cxxopts::value<string>())
-        ("l,lvl", "# of levels (mandatory). If 0, uses lvl=ceil(log2(N/64))+1 instead", cxxopts::value<int64_t>())
+        ("l,lvl", "# of levels (mandatory). If 0, uses lvl=ceil(log2(N/64))+1 instead", cxxopts::value<int>())
         ("symm_kind", "Wether the matrix is SPD, symmetric SYM or general GEN", cxxopts::value<string>()->default_value("SPD"))
         ("part_kind", "Partition kind (modified ND - MND) or recursive bissection based (RB)", cxxopts::value<string>()->default_value("MND"))
         ("lorasp", "Wether to use LoRaSp (true) or spaND (false) (default: false)", cxxopts::value<bool>()->default_value("false"))
         // Geometry
         ("coordinates", "Coordinates MM array file. If provided, will do a geometric partitioning.", cxxopts::value<string>())
-        ("n,coordinates_n", "If provided with -n, will use a tensor n^d & geometric partitioning. Overwrites --coordinates", cxxopts::value<int64_t>()->default_value("-1"))
-        ("d,coordinates_d", "If provided with -d, will use a tensor n^d & geometric partitioning. Overwrites --coordinates", cxxopts::value<int64_t>()->default_value("-1"))
+        ("n,coordinates_n", "If provided with -n, will use a tensor n^d & geometric partitioning. Overwrites --coordinates", cxxopts::value<int>()->default_value("-1"))
+        ("d,coordinates_d", "If provided with -d, will use a tensor n^d & geometric partitioning. Overwrites --coordinates", cxxopts::value<int>()->default_value("-1"))
         // Compression choices
         ("t,tol", "Tolerance", cxxopts::value<double>()->default_value("1e-1"))            
-        ("skip", "Skip sparsification", cxxopts::value<int64_t>()->default_value("0"))        
+        ("skip", "Skip sparsification", cxxopts::value<int>()->default_value("0"))        
         ("preserve", "Wether to preserve the 1 vector or not (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("scaling_kind", "The scaling kind, LLT, EVD, SVD, PLU or PLUQ", cxxopts::value<string>()->default_value("LLT"))
         ("use_want_sparsify", "Wether to use want_sparsify (true) or not (default: true)", cxxopts::value<bool>()->default_value("true"))
         // Iterative method
         ("solver","Wether to use CG, GMRES or IR", cxxopts::value<string>()->default_value("CG"))
-        ("i,iterations","Iterative solver iterations", cxxopts::value<int64_t>()->default_value("100"))
+        ("i,iterations","Iterative solver iterations", cxxopts::value<int>()->default_value("100"))
         ("solver_tol","Iterative solver tolerance", cxxopts::value<double>()->default_value("1e-12"))
         // Problem transformation, to try some functions of A
         ("flip_sign", "Wether to solve with -A (true) or not (default: false)", cxxopts::value<bool>()->default_value("false"))
@@ -50,12 +50,13 @@ int64_t main(int64_t argc, char* argv[]) {
         ("print_clusters_hierarchy", "Print the clusters hierarchy (lots of output!)", cxxopts::value<bool>()->default_value("false"))
         ("write_log_flops", "Print the flops log to file", cxxopts::value<string>())
         // Detail
-        ("n_threads", "Number of threads", cxxopts::value<int64_t>()->default_value("1"))
+        ("n_threads", "Number of threads", cxxopts::value<int>()->default_value("1"))
         // For indefinite saddle point systems
-        ("sp_mid", "Saddle point middle point", cxxopts::value<int64_t>()->default_value("-1"))
+        ("sp_mid", "Saddle point middle point", cxxopts::value<int>()->default_value("-1"))
         ("sp_eps", "Saddle point epsilon point", cxxopts::value<double>()->default_value("0.0"))       
         ;
-    auto result = options.parse(argc, argv);
+    int64_t argc64 = (int64_t) argc;
+    auto result = options.parse(argc64, argv);
 
     if (result.count("help")) {
         std::cout << options.help({"", "Group"}) << endl;
@@ -68,8 +69,8 @@ int64_t main(int64_t argc, char* argv[]) {
     }
     string matrix = result["matrix"].as<string>();
     string coordinates;
-    int64_t cn = result["coordinates_n"].as<int64_t>();
-    int64_t cd = result["coordinates_d"].as<int64_t>();
+    int cn = result["coordinates_n"].as<int>();
+    int cd = result["coordinates_d"].as<int>();
     std::cout << "<<<<cn=" << cn << std::endl;
     std::cout << "<<<<cd=" << cd << std::endl;
     bool geo_file = (result.count("coordinates") > 0);
@@ -83,8 +84,8 @@ int64_t main(int64_t argc, char* argv[]) {
         coordinates = result["coordinates"].as<string>();
     }
     double tol = result["tol"].as<double>();
-    int64_t skip = result["skip"].as<int64_t>();
-    int64_t nlevels = result["lvl"].as<int64_t>();
+    int skip = result["skip"].as<int>();
+    int nlevels = result["lvl"].as<int>();
     bool preserve = result["preserve"].as<bool>();
     string s0 = result["symm_kind"].as<string>();
     SymmKind symmk = (s0 == "SPD" ? SymmKind::SPD :
@@ -102,14 +103,14 @@ int64_t main(int64_t argc, char* argv[]) {
     bool useCG = (result["solver"].as<string>() == "CG");
     bool useGMRES = (result["solver"].as<string>() == "GMRES");
     bool useIR = (result["solver"].as<string>() == "IR");
-    int64_t iterations = result["iterations"].as<int64_t>();
+    int iterations = result["iterations"].as<int>();
     double solver_tol = result["solver_tol"].as<double>();
     if(!useCG && !useGMRES && !useIR) {
         std::cout << "Wrong solver picked. Should be CG, IR or GMRES" << endl;
         return 1;
     }
     bool use_want_sparsify = result["use_want_sparsify"].as<bool>();
-    int64_t n_threads = result["n_threads"].as<int64_t>();
+    int n_threads = result["n_threads"].as<int>();
     (void) n_threads;
     bool flip_sign = result["flip_sign"].as<bool>();
     vector<double> rational_coeffs;
@@ -118,7 +119,7 @@ int64_t main(int64_t argc, char* argv[]) {
             rational_coeffs.push_back(v);
         }
         std::cout << "Using rational coeffs: ";
-        for(int64_t i = 0; i < rational_coeffs.size(); i++) {
+        for(int i = 0; i < rational_coeffs.size(); i++) {
             std::cout << rational_coeffs[i] << " A^" << i << " + ";
         }
         std::cout << endl;
@@ -129,8 +130,8 @@ int64_t main(int64_t argc, char* argv[]) {
     bool use_lorasp = result["lorasp"].as<bool>();
     
     // Load a matrix
-    SpMat A = mmio::sp_mmread<double,int64_t>(matrix);
-    int64_t N = A.rows();
+    SpMat A = mmio::sp_mmread<double,int>(matrix);
+    int N = A.rows();
     std::cout << "<<<<matrix=" << matrix << std::endl;
     std::cout << "Matrix " << N << "x" << N << " loaded from " << matrix << endl;
     
@@ -147,13 +148,13 @@ int64_t main(int64_t argc, char* argv[]) {
         std::cout << "Solving with rational coefficients instead" << endl;
         // Create identity
         vector<Triplet<double>> tripletList;
-        for(int64_t i = 0; i < N; i++) { tripletList.push_back({i,i,1.0}); }
+        for(int i = 0; i < N; i++) { tripletList.push_back({i,i,1.0}); }
         SpMat I(N,N);
         I.setFromTriplets(tripletList.begin(), tripletList.end());
         // Creating a_0 I + a_1 A + a_2 A^2 ...
         SpMat An = I;
         SpMat RatA = SpMat(N,N);
-        for(int64_t i = 0; i < rational_coeffs.size(); i++) {
+        for(int i = 0; i < rational_coeffs.size(); i++) {
             RatA = RatA + rational_coeffs[i] * An;
             An = An * A;
         }
@@ -168,15 +169,15 @@ int64_t main(int64_t argc, char* argv[]) {
     SpMat Aprec = A;
     bool is_saddlepoint = result.count("sp_mid") && result.count("sp_eps");
     if(is_saddlepoint) {
-        int64_t sp_mid = result["sp_mid"].as<int64_t>();
+        int sp_mid = result["sp_mid"].as<int>();
         double sp_eps = result["sp_eps"].as<double>();
         std::cout << "A[~sp_mid,~sp_mid]:\n" << A.block(sp_mid-2, sp_mid-2, 5, 5) << endl;
         std::cout << "System is saddle point" << endl;
         std::cout << "Rebuilding matrix by adding " << sp_eps << " on diagonal at entries [" << sp_mid << ";" << N << "[" << endl;
         vector<Triplet<double>> tripletList;
-        for(int64_t i = sp_mid; i < N; i++) { tripletList.push_back({i,i,sp_eps}); }
-        for(int64_t k = 0; k < A.outerSize(); ++k) {
-            for (SpMat::InnerIterator it(A,k); it; ++it) { tripletList.push_back({int64_t(it.row()),int64_t(it.col()),it.value()}); }
+        for(int i = sp_mid; i < N; i++) { tripletList.push_back({i,i,sp_eps}); }
+        for(int k = 0; k < A.outerSize(); ++k) {
+            for (SpMat::InnerIterator it(A,k); it; ++it) { tripletList.push_back({int(it.row()),int(it.col()),it.value()}); }
         }
         Aprec = SpMat(N,N);
         Aprec.setFromTriplets(tripletList.begin(), tripletList.end());
@@ -342,7 +343,7 @@ int64_t main(int64_t argc, char* argv[]) {
         VectorXd b = VectorXd::Random(N);
         if(useCG) {            
             timer cg0 = wctime();
-            int64_t iter = cg(A, b, x, t, iterations, solver_tol, verb);
+            int iter = cg(A, b, x, t, iterations, solver_tol, verb);
             timer cg1 = wctime();
             std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
             std::cout << "  CG: " << elapsed(cg0, cg1) << " s." << endl;
@@ -350,7 +351,7 @@ int64_t main(int64_t argc, char* argv[]) {
             std::cout << "<<<<tCG=" << elapsed(cg0, cg1) << endl;
         } else if(useGMRES) {
             timer gmres0 = wctime();
-            int64_t iter = gmres(A, b, x, t, iterations, iterations, solver_tol, verb);
+            int iter = gmres(A, b, x, t, iterations, iterations, solver_tol, verb);
             timer gmres1 = wctime();
             std::cout << "GMRES: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
             std::cout << "  GMRES: " << elapsed(gmres0, gmres1) << " s." << endl;
@@ -358,7 +359,7 @@ int64_t main(int64_t argc, char* argv[]) {
             std::cout << "<<<<tGMRES=" << elapsed(gmres0, gmres1) << endl;
         } else if(useIR) {
             timer ir0 = wctime();
-            int64_t iter = ir(A, b, x, t, iterations, solver_tol, verb);
+            int iter = ir(A, b, x, t, iterations, solver_tol, verb);
             timer ir1 = wctime();
             std::cout << "IR: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
             std::cout << "  IR: " << elapsed(ir0, ir1) << " s." << endl;

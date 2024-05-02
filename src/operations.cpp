@@ -109,7 +109,7 @@ std::string ScalingLLT::name() {
     return "ScalingLLT";
 }
 
-ScalingPLUQ::ScalingPLUQ(Cluster* s, pMatrixXd L, pMatrixXd U, pVectorXi p, pVectorXi q) : 
+ScalingPLUQ::ScalingPLUQ(Cluster* s, pMatrixXd L, pMatrixXd U, pVectorXi64 p, pVectorXi64 q) : 
     xs(s->head_x()), L(std::move(L)), U(std::move(U)), p(std::move(p)), q(std::move(q)) {}
 void ScalingPLUQ::fwd() {
     xs = p->asPermutation().transpose() * xs;
@@ -126,7 +126,7 @@ std::string ScalingPLUQ::name() {
     return "ScalingPLUQ";
 }
 
-ScalingLDLT::ScalingLDLT(Cluster* n1, pMatrixXd L, pVectorXd s, pVectorXi p) : 
+ScalingLDLT::ScalingLDLT(Cluster* n1, pMatrixXd L, pVectorXd s, pVectorXi64 p) : 
     xs(n1->head_x()), L(std::move(L)), s(move(s)), p(move(p)) {}
 void ScalingLDLT::fwd() {
     xs = p->asPermutation().transpose() * xs;

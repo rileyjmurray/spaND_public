@@ -8,6 +8,10 @@
 #include <blas.hh>
 #include <lapack.hh>
 
+namespace Eigen {
+    typedef Eigen::Matrix<int64_t, Eigen::Dynamic, 1> VectorXi64;
+}
+
 namespace spaND {
 
 struct Edge;
@@ -53,9 +57,11 @@ inline std::string part2str(PartKind pk) {
            "ErrorUnknownPart"));    
 };
 
-typedef std::unique_ptr<Eigen::MatrixXd> pMatrixXd;
-typedef std::unique_ptr<Eigen::VectorXd> pVectorXd;
-typedef std::unique_ptr<Eigen::VectorXi> pVectorXi;
+typedef std::unique_ptr<Eigen::MatrixXd>   pMatrixXd;
+typedef std::unique_ptr<Eigen::VectorXd>   pVectorXd;
+typedef std::unique_ptr<Eigen::VectorXi>   pVectorXi;
+typedef std::unique_ptr<Eigen::VectorXi64> pVectorXi64;
+
 typedef std::unique_ptr<Cluster>         pCluster;
 typedef std::unique_ptr<Edge>            pEdge;
 typedef std::unique_ptr<Operation>       pOperation;

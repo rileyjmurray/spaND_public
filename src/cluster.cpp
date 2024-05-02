@@ -192,7 +192,7 @@ int64_t Cluster::merge_level() const {
     return this->level() - this->depth();
 }
 
-string Cluster::get_name() const {
+std::string Cluster::get_name() const {
     return to_string(this->order_);
 }
 

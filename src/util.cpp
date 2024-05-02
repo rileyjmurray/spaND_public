@@ -5,7 +5,7 @@ using namespace std;
 
 namespace spaND {
 
-bool are_connected(VectorXi &a, VectorXi &b, SpMat &A) {
+bool are_connected(VectorXi64 &a, VectorXi64 &b, SpMat &A) {
     int64_t  bsize = b.size();
     auto b_begin = b.data();
     auto b_end   = b.data() + b.size();
@@ -47,7 +47,7 @@ bool should_be_disconnected(int64_t lvl1, int64_t lvl2, int64_t sep1, int64_t se
 SpMat symmetric_graph(SpMat& A) {
     assert(A.rows() == A.cols());
     int64_t n = A.rows();
-    vector<Triplet<double>> vals(2 * A.nonZeros() + n);
+    std::vector<Triplet<double>> vals(2 * A.nonZeros() + n);
     int64_t l = 0;
     for (int64_t k=0; k < A.outerSize(); ++k) {
         vals[l++] = Triplet<double>(k, k, 1.0);
@@ -72,43 +72,49 @@ timer wctime() {
     return time;
 }
 
-// All are base-0
-void swap2perm(Eigen::VectorXi* swap, Eigen::VectorXi* perm) {
-    int64_t n = perm->size();
-    assert(swap->size() == n);
-    for(int64_t i = 0; i < n; i++) {
+template <typename VEC1, typename VEC2>
+void swap2perm(VEC1* swap, VEC2* perm) {
+    using VEC1_int = typename VEC1::Scalar;
+    using VEC2_int = typename VEC2::Scalar;
+    VEC2_int n = perm->size();
+    assert(swap->size() == (VEC1_int) n);
+    for(VEC2_int i = 0; i < n; i++) {
         (*perm)[i] = i;
     }
-    for(int64_t i = 0; i < n; i++) {
-        int64_t ipiv = (*swap)[i];
-        int64_t tmp = (*perm)[ipiv];
+    for(int i = 0; i < n; i++) {
+        VEC1_int ipiv = (*swap)[i];
+        VEC2_int tmp  = (*perm)[ipiv];
         (*perm)[ipiv] = (*perm)[i];
         (*perm)[i] = tmp;
     }
 }
 
-bool isperm(const Eigen::VectorXi* perm) {
-    int64_t n = perm->size();
-    VectorXi count = VectorXi::Zero(n);
+template <typename iVEC>
+bool isperm(const iVEC* perm) {
+    using iVEC_scalar_t = typename iVEC::Scalar;
+    auto n = perm->size();
+    iVEC count = iVEC::Zero(n);
     for(int64_t i = 0;i < n; i++) {
-        int64_t pi = (*perm)[i];
+        iVEC_scalar_t pi = (*perm)[i];
         if(pi < 0 || pi >= n) { return false; }
         count[pi] += 1;
     }
     return (count.cwiseEqual(1)).all();
 }
 
-Eigen::VectorXi invperm(const Eigen::VectorXi& perm) {
+template <typename iVEC>
+iVEC invperm(const iVEC& perm) {
+    using iVEC_scalar_t = typename iVEC::Scalar;
     assert(isperm(&perm));
-    Eigen::VectorXi invperm(perm.size());
-    for(int64_t i = 0; i < perm.size(); i++) {
+    iVEC invperm(perm.size());
+    for(iVEC_scalar_t i = 0; i < perm.size(); i++) {
         invperm[perm[i]] = i;
     }
     assert(isperm(&invperm));
     return invperm;    
 }
 
-size_t hashv(vector<size_t> vals) {
+size_t hashv(std::vector<size_t> vals) {
     size_t seed = 0;
     for (size_t i = 0; i < vals.size(); ++i) {
       seed ^= vals[i] + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -160,13 +166,13 @@ int64_t potf(MatrixXd* A) {
     assert(A->cols() == n);
     if (n == 0)
         return 0;
-    int64_t info = lapack::potrf(Uplo::Lower n, A->data(), n);
+    int64_t info = lapack::potrf(Uplo::Lower, n, A->data(), n);
     return info;
 }
 
-int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi* p, double* rcond) {
+int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi64* p, double* rcond) {
     if(A->rows() == 0) return 0;
-    LDLT<Ref<MatrixXd>, Lower> ldlt(*A);
+    Eigen::LDLT<Ref<MatrixXd>, Lower> ldlt(*A);
     if(ldlt.info() != ComputationInfo::Success) {
         return 1;
     }
@@ -180,11 +186,11 @@ int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::
     return 0;
 }
 
-int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* p) {
+int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi64* p) {
     int64_t n = A->rows();
     assert(A->cols() == n);
     assert(p->size() == n);
-    VectorXi swap(p->size());
+    VectorXi64 swap(p->size());
     if(n == 0)
         return 0;
     int64_t info = lapack::getrf(n, n, A->data(), n, swap.data());
@@ -199,7 +205,8 @@ int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi* p) {
     }
 }
 
-void fpgetf(Eigen::MatrixXd* A, Eigen::VectorXi* p, Eigen::VectorXi* q) {
+template <typename VEC1, typename VEC2>
+void fpgetf(Eigen::MatrixXd* A, VEC1* p, VEC2* q) {
     assert(A->cols() == A->rows());
     assert(p->size() == A->cols());
     assert(q->size() == A->cols());
@@ -351,7 +358,7 @@ void ormqr_trans(MatrixXd* v, VectorXd* h, Segment* x) {
 }
 
 // A <- (Q^/T) * A * (Q^/T)
-void ormqr(MatrixXd* v, VectorXd* h, MatrixXd* A, Side side, Op trans) {
+void ormqr_spand(MatrixXd* v, VectorXd* h, MatrixXd* A, Side side, Op trans) {
     int64_t m = A->rows();
     int64_t n = A->cols();
     int64_t k = v->cols(); // number of reflectors
@@ -369,7 +376,7 @@ void ormqr(MatrixXd* v, VectorXd* h, MatrixXd* A, Side side, Op trans) {
 }
 
 // Create the thin Q in v
-void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
+void orgqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
     int64_t m = v->rows();
     int64_t k = v->cols();
     assert(h->size() == k);
@@ -380,13 +387,13 @@ void orgqr(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
 }
 
 // RRQR
-void geqp3(MatrixXd* A, VectorXi* jpvt, VectorXd* tau) {
+void geqp3_spand(MatrixXd* A, VectorXi64* jpvt, VectorXd* tau) {
     int64_t m = A->rows();
     int64_t n = A->cols();
     if (m == 0 || n == 0)
         return;
     assert(jpvt->size() == n);
-    assert(tau->size() == min(m,n));
+    assert(tau->size() == std::min(m,n));
     int64_t info = lapack::geqp3(m, n, A->data(), m, jpvt->data(), tau->data());
     assert(info == 0);
     for (int64_t i = 0; i < jpvt->size(); i++)
@@ -394,22 +401,21 @@ void geqp3(MatrixXd* A, VectorXi* jpvt, VectorXd* tau) {
 }
 
 // Full SVD
-void gesvd(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eigen::MatrixXd* VT) {
+void gesvd_spand(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eigen::MatrixXd* VT) {
     int64_t m = A->rows();
     int64_t n = A->cols();
-    int64_t k = min(m,n);
+    int64_t k = std::min(m,n);
     assert(U->rows() == m && U->cols() == m);
     assert(VT->rows() == n && VT->cols() == n);
     assert(S->size() == k);
     if(k == 0)
         return;
-    VectorXd superb(k-1);
-    int64_t info = lapack::gesvd(Job::AllVec, Job::AllVec, m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n, superb.data());
+    int64_t info = lapack::gesvd(Job::AllVec, Job::AllVec, m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n);
     assert(info == 0);
 }
 
 // Full Symmetric EVD
-void syev(Eigen::MatrixXd* A, Eigen::VectorXd* S) {
+void syev_spand(Eigen::MatrixXd* A, Eigen::VectorXd* S) {
     int64_t m = A->rows();
     int64_t n = A->cols();
     assert(m == n);
@@ -421,12 +427,12 @@ void syev(Eigen::MatrixXd* A, Eigen::VectorXd* S) {
 }
 
 // QR
-void geqrf(MatrixXd* A, VectorXd* tau) {
+void geqrf_spand(MatrixXd* A, VectorXd* tau) {
     int64_t m = A->rows();
     int64_t n = A->cols();
     if (m == 0 || n == 0)
         return;
-    assert(tau->size() == min(m,n));
+    assert(tau->size() == std::min(m,n));
     int64_t info = lapack::geqrf(m, n, A->data(), m, tau->data());
     assert(info == 0);
 }
@@ -451,7 +457,7 @@ int64_t choose_rank(VectorXd& s, double tol) {
     }
 }
 
-void block2dense(VectorXi &rowval, VectorXi &colptr, VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, MatrixXd *dst, bool transpose) {
+void block2dense(VectorXi64 &rowval, VectorXi64 &colptr, VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, MatrixXd *dst, bool transpose) {
     if(transpose) {
         assert(dst->rows() == lj && dst->cols() == li);
     } else {
@@ -517,9 +523,9 @@ MatrixXd linspace_nd(int64_t n, int64_t dim) {
 }
 
 // Compute A[p,p]
-SpMat symm_perm(SpMat &A, VectorXi &p) {
+SpMat symm_perm(SpMat &A, VectorXi64 &p) {
     // Create inverse permutation
-    VectorXi pinv(p.size());
+    VectorXi64 pinv(p.size());
     for(int64_t i = 0; i < p.size(); i++)
         pinv[p[i]] = i;
     // Initialize A[p,p]
@@ -529,7 +535,7 @@ SpMat symm_perm(SpMat &A, VectorXi &p) {
     SpMat App(n, n);
     App.reserve(nnz);
     // Create permuted (I, J, V) values
-    vector<Triplet<double>> vals(nnz);
+    std::vector<Triplet<double>> vals(nnz);
     int64_t l = 0;
     for (int64_t k = 0; k < A.outerSize(); k++){
         for (SpMat::InnerIterator it(A, k); it; ++it){

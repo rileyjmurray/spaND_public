@@ -12,7 +12,7 @@ INCLUDE = -I$(INCDIR) $(EXTRA_INCDIR)
 LINK = $(EXTRA_LINKDIR)
 
 ## Compiler flags
-CFLAGS = -std=c++20 -Wall -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACKE
+CFLAGS = -std=c++20 -Wall -v
 ifdef DEBUG
     CFLAGS += -g -O0 -D_GLIBCXX_DEBUG
 else
@@ -21,11 +21,11 @@ endif
 CFLAGS += $(EXTRA_CFLAGS)
 
 ## Linker flags
-LDFLAGS = -lmetis
+LDFLAGS = -lmetis -lblaspp -llapackpp
 # ifeq ($(USE_MKL),1)
 #     LDFLAGS += -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl 
 # else
-LDFLAGS += -lblas -llapack
+# LDFLAGS += -lblas -llapack
 # endif
 
 DEPS = $(INCDIR)/tree.h $(INCDIR)/util.h $(INCDIR)/is.h $(INCDIR)/partition.h $(INCDIR)/operations.h $(INCDIR)/cluster.h $(INCDIR)/edge.h $(INCDIR)/spaND.h
