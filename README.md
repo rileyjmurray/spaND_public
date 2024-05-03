@@ -67,6 +67,11 @@ If you have both Openblas and MKL, you can pass `USE_MKL=0` or `USE_MKL=1` to ma
     
 - You may have to change the Openblas link flag from `-lblas` to `-lopenblas`. Not clear why :-()
 
+- when running the code, you might need to set your DYLD_LIBRARY_PATH:
+    ```shell
+    export DYLD_LIBRARY_PATH=/Users/rjmurr/Documents/randnla/blaspp-install/lib:/Users/rjmurr/Documents/randnla/lapackpp-install/lib
+    ```
+
 ## Example
 
 Let's compile the general driver code and run it on a sample arbitrary matrix. Set-up all the above. We assume you have Openblas installed, with 'USE_MKL=0' set in your `Makefile.conf` file.
