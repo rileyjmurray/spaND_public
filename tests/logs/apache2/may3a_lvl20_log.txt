@@ -1,0 +1,184 @@
+<<<<cn=-1
+<<<<cd=-1
+<<<<matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/apache2/apache2.mtx
+Matrix 715176x715176 loaded from /Users/rjmurr/Documents/randnla/spand-repo/mats/apache2/apache2.mtx
+|A - AT|/|A| = 0.000000e+00
+<<<<N=715176
+<<<<nlevels=20
+<<<<tol=0.1
+<<<<skip=0
+<<<<preserve=0
+<<<<lorasp=0
+MND algebraic (with vertex sep ? 1) partitioning of matrix with 715176 dofs with 20 levels
+Algebraic MND partitioning & ordering
+  Depth  1: 3.67e-01 s. (    1 separators, [ 2377  2377], mean 2377.0)
+  Depth  2: 3.45e-01 s. (    2 separators, [ 1169  1201], mean 1185.0)
+  Depth  3: 3.63e-01 s. (    4 separators, [ 1025  1152], mean 1088.2)
+  Depth  4: 3.78e-01 s. (    8 separators, [  445   621], mean  553.4)
+  Depth  5: 4.33e-01 s. (   16 separators, [  373   602], mean  494.8)
+  Depth  6: 4.67e-01 s. (   32 separators, [  193   347], mean  260.4)
+  Depth  7: 4.90e-01 s. (   64 separators, [  119   288], mean  207.9)
+  Depth  8: 4.78e-01 s. (  128 separators, [   54   186], mean  125.2)
+  Depth  9: 3.87e-01 s. (  256 separators, [   33   146], mean   88.8)
+  Depth 10: 4.33e-01 s. (  512 separators, [    8   102], mean   61.3)
+  Depth 11: 4.84e-01 s. ( 1024 separators, [    7    69], mean   41.9)
+ [K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --help
+]633;C]633;E;./spaND --help;8bd863d6-994d-41b4-a270-8a8595568b0dGeneral driver for spaND. Load a matrix, an optional coordinate file. Then, assemble the matrix, partition it, factor it and solve Ax=b using GMRES.
+Usage:
+  spaND [OPTION...]
+
+      --help                    Print help
+      --verbose                 Verbose mode (default: true)
+  -m, --matrix arg              Matrix MM coordinate file (mandatory)
+  -l, --lvl arg                 # of levels (mandatory). If 0, uses
+                                lvl=ceil(log2(N/64))+1 instead
+      --symm_kind arg           Wether the matrix is SPD, symmetric SYM or
+                                general GEN (default: SPD)
+      --part_kind arg           Partition kind (modified ND - MND) or
+                                recursive bissection based (RB) (default: MND)
+      --lorasp                  Wether to use LoRaSp (true) or spaND (false)
+                                (default: false)
+      --coordinates arg         Coordinates MM array file. If provided, will
+                                do a geometric partitioning.
+  -n, --coordinates_n arg       If provided with -n, will use a tensor n^d &
+                                geometric partitioning. Overwrites
+                                --coordinates (default: -1)
+  -d, --coordinates_d arg       If provided with -d, will use a tensor n^d &
+                                geometric partitioning. Overwrites
+                                --coordinates (default: -1)
+  -t, --tol arg                 Tolerance (default: 1e-1)
+      --skip arg                Skip sparsification (default: 0)
+      --preserve                Wether to preserve the 1 vector or not
+                                (default: false)
+      --scaling_kind arg        The scaling kind, LLT, EVD, SVD, PLU or PLUQ
+                                (default: LLT)
+      --use_want_sparsify       Wether to use want_sparsify (true) or not
+                                (default: true) (default: true)
+      --solver arg              Wether to use CG, GMRES or IR (default: CG)
+  -i, --iterations arg          Iterative solver iterations (default: 100)
+      --solver_tol arg          Iterative solver tolerance (default: 1e-12)
+      --flip_sign               Wether to solve with -A (true) or not
+                                (default: false)
+      --rationale arg           Solve with a_0 I + a_1 A + a_2 A^2 ...
+                                instead of A
+      --clustering arg          Output clustering (before any merging) in
+                                text file
+      --clusters arg            Output clusters metadata in text file
+      --merging arg             Output merging process in text file
+      --stats arg               Output cluster data throughout elimination in
+                                text file
+      --monitor_cond            Monitor condition number of pivots
+      --monitor_unsym           Monitor |A-AT|/|A|
+      --monitor_Rdiag           Monitor the diagonal of R (~ svds) and save
+                                to --stats
+      --print_clusters_hierarchy
+                                Print the clusters hierarchy (lots of
+                                output!)
+      --write_log_flops arg     Print the flops log to file
+      --n_threads arg           Number of threads (default: 1)
+      --sp_mid arg              Saddle point middle point (default: -1)
+      --sp_eps arg              Saddle point epsilon point (default: 0.0)
+
+
+]633;D;0]633;P;Cwd=/Users/rjmurr/Documents/randnla/spand-repo/tests]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;Bclear[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;Bclear
+]633;C]633;E;clear;8bd863d6-994d-41b4-a270-8a8595568b0d[H[2J[3J]633;D;0]633;P;Cwd=/Users/rjmurr/Documents/randnla/spand-repo/tests]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;Bclear./spaND --helpecho "This is stdout"xec > >(tee ${LOG_FILE}) 2>&1[9Pcho "This is stdout"[7P./spaND --help[9Pclear[K./[K[Kmake spaND
+]633;C]633;E;make spaND;8bd863d6-994d-41b4-a270-8a8595568b0dclang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/tree.o ../src/tree.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/util.o ../src/util.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/is.o ../src/is.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/partition.o ../src/partition.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/operations.o ../src/operations.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/cluster.o ../src/cluster.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -c -o ../obj/edge.o ../src/edge.cpp -std=c++20 -O3 -DEIGEN_NO_DEBUG  -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen
+clang++  -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -o spaND spaND.cpp ../obj/tree.o ../obj/util.o ../obj/is.o ../obj/partition.o ../obj/operations.o ../obj/cluster.o ../obj/edge.o -std=c++20 -O3 -DEIGEN_NO_DEBUG  -lmetis -lblaspp -llapackpp -I../include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include -isystem/Users/rjmurr/Documents/randnla/lapackpp-install/include -isystem/Users/rjmurr/Documents/randnla/blaspp-install/include -I/Users/rjmurr/Documents/randnla/spand-deps/install/include/Eigen -L/Users/rjmurr/Documents/randnla/spand-deps/install/lib -L/Users/rjmurr/Documents/randnla/lapackpp-install/lib/ -L/Users/rjmurr/Documents/randnla/blaspp-install/lib/ 
+In file included from spaND.cpp:5:
+./cxxopts.hpp:488:36: warning: overflow in expression; result is -2147483648 with type 'type' (aka 'int') [-Winteger-overflow]
+  488 |             if (u > static_cast<U>(-(std::numeric_limits<T>::min)()))
+      |                                    ^
+./cxxopts.hpp:488:36: warning: overflow in expression; result is -9223372036854775808 with type 'type' (aka 'long long') [-Winteger-overflow]
+2 warnings generated.
+]633;D;0]633;P;Cwd=/Users/rjmurr/Documents/randnla/spand-repo/tests]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaNDmake spaND[5Pclear./spaND --helpecho "This is stdout"xec > >(tee ${LOG_FILE}) 2>&1[16Pcho $LOG_FILELOG_FILE=may3a_lvl20_log.txtclear[K./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10[K]633;A(rb311) (base) s1104997ca:tests rjmurr$ ]633;B./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10>&  14 |   9.8e-04   1.7e-03   8.2e-03   3.7e-04
+&>>&  15 |   4.8e-04   7.2e-04   3.1e-03   1.7e-04
+&>>&  16 |   1.7e-04   1.4e-04   8.4e-04   5.4e-05
+&>>&  17 |   5.6e-05   3.7e-05   1.5e-04   1.5e-05
+&>>&  18 |   1.3e-05   1.9e-06   6.0e-06   2.1e-06
+&>>&  19 |   4.1e-06   0.0e+00   0.0e+00   0.0e+00
+&<<& Lvl |     Pivot     Panel     Schur |     Pivot     Panel |     Assmb     Spars     Scatt |     Alloc      Copy
+&<<&   0 |   2.8e-03   1.7e-02   1.5e-01 |   8.4e-02   7.3e-01 |   2.7e-04   1.3e-03   8.0e-04 |   1.8e-01   2.9e-01
+&<<&   1 |   2.5e-03   1.2e-02   1.4e-01 |   9.5e-02   6.9e-01 |   1.4e-03   1.2e-02   6.8e-03 |   2.1e-01   3.2e-01
+&<<&   2 |   7.1e-03   3.7e-02   4.6e-01 |   1.0e-01   8.9e-01 |   4.8e-03   3.2e-02   1.4e-02 |   2.0e-01   4.0e-01
+&<<&   3 |   1.2e-02   7.1e-02   7.6e-01 |   6.3e-02   9.8e-01 |   8.5e-03   6.3e-02   2.6e-02 |   1.7e-01   3.5e-01
+&<<&   4 |   7.1e-03   5.1e-02   7.7e-01 |   4.2e-02   8.2e-01 |   1.7e-02   1.6e-01   4.4e-02 |   1.5e-01   2.8e-01
+&<<&   5 |   4.6e-03   3.2e-02   6.0e-01 |   3.2e-02   6.6e-01 |   4.3e-02   3.6e-01   8.0e-02 |   8.7e-02   2.1e-01
+&<<&   6 |   4.6e-03   2.7e-02   3.2e-01 |   1.5e-02   3.6e-01 |   5.8e-02   5.8e-01   1.2e-01 |   5.7e-02   1.2e-01
+&<<&   7 |   3.5e-03   2.1e-02   1.9e-01 |   1.2e-02   2.3e-01 |   5.2e-02   5.7e-01   7.3e-02 |   2.5e-02   7.0e-02
+&<<&   8 |   2.1e-03   1.1e-02   7.6e-02 |   5.8e-03   1.0e-01 |   2.6e-02   3.8e-01   4.0e-02 |   7.6e-03   2.6e-02
+&<<&   9 |   1.3e-03   5.8e-03   3.1e-02 |   3.5e-03   4.8e-02 |   1.3e-02   1.9e-01   1.8e-02 |   5.1e-03   1.0e-02
+&<<&  10 |   6.3e-04   2.5e-03   1.5e-02 |   1.5e-03   2.1e-02 |   4.6e-03   9.1e-02   6.0e-03 |   1.1e-03   3.6e-03
+&<<&  11 |   3.4e-04   1.4e-03   7.2e-03 |   7.5e-04   1.0e-02 |   1.8e-03   4.5e-02   2.9e-03 |   4.4e-04   1.2e-03
+&<<&  12 |   1.9e-04   6.4e-04   3.4e-03 |   3.8e-04   4.8e-03 |   6.4e-04   2.1e-02   1.4e-03 |   2.0e-04   4.9e-04
+&<<&  13 |   1.1e-04   3.4e-04   1.7e-03 |   1.9e-04   2.9e-03 |   3.5e-04   1.0e-02   7.9e-04 |   1.3e-04   2.1e-04
+&<<&  14 |   5.5e-05   1.5e-04   6.5e-04 |   8.7e-05   1.5e-03 |   1.4e-04   3.7e-03   3.0e-04 |   4.0e-05   7.1e-05
+&<<&  15 |   2.4e-05   7.7e-05   3.2e-04 |   4.2e-05   6.5e-04 |   5.6e-05   1.4e-03   1.1e-04 |   2.3e-05   2.8e-05
+&<<&  16 |   1.4e-05   2.8e-05   9.9e-05 |   1.7e-05   1.1e-04 |   1.4e-05   4.4e-04   5.1e-05 |   5.0e-06   3.8e-06
+&<<&  17 |   4.8e-06   9.1e-06   3.2e-05 |   1.1e-05   2.3e-05 |   3.3e-06   9.7e-05   2.1e-05 |   0.0e+00   2.1e-06
+&<<&  18 |   1.9e-06   1.9e-06   6.0e-06 |   9.5e-07   0.0e+00 |   0.0e+00   9.5e-07   4.1e-06 |   0.0e+00   1.2e-06
+&<<&  19 |   0.0e+00   0.0e+00   9.5e-07 |   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00
+&++& Lvl |      potf      ldlt      trsm      gemm     geqp3     geqrf      syev     gesvd      getf    buildq    scattq     perma    scatta     assmb       phi
+&++&   0 |   4.1e-02   0.0e+00   4.2e-01   4.1e-02   6.2e-01   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.1e-05   0.0e+00   5.4e-05   0.0e+00   1.2e-01   0.0e+00
+&++&   1 |   5.4e-02   0.0e+00   4.3e-01   4.1e-02   1.1e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.2e-04   0.0e+00   4.7e-04   0.0e+00   1.5e-01   0.0e+00
+&++&   2 |   6.2e-02   0.0e+00   5.8e-01   1.5e-01   1.7e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   7.1e-04   0.0e+00   1.2e-03   0.0e+00   2.6e-01   0.0e+00
+&++&   3 |   4.2e-02   0.0e+00   6.7e-01   2.5e-01   2.2e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.1e-03   0.0e+00   1.6e-03   0.0e+00   2.9e-01   0.0e+00
+&++&   4 |   3.0e-02   0.0e+00   5.9e-01   2.7e-01   2.4e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.7e-03   0.0e+00   3.1e-03   0.0e+00   2.6e-01   0.0e+00
+&++&   5 |   2.3e-02   0.0e+00   4.9e-01   2.5e-01   2.2e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   2.4e-03   0.0e+00   6.2e-03   0.0e+00   2.4e-01   0.0e+00
+&++&   6 |   1.4e-02   0.0e+00   2.8e-01   1.6e-01   1.7e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   4.4e-03   0.0e+00   9.3e-03   0.0e+00   1.5e-01   0.0e+00
+&++&   7 |   9.8e-03   0.0e+00   1.9e-01   1.1e-01   1.2e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.1e-03   0.0e+00   8.6e-03   0.0e+00   9.6e-02   0.0e+00
+&++&   8 |   6.1e-03   0.0e+00   9.3e-02   4.8e-02   6.1e-01   0.0e+00   0.0e+00   0.0e+00   0.0e+00   2.2e-03   0.0e+00   6.6e-03   0.0e+00   3.8e-02   0.0e+00
+&++&   9 |   4.0e-03   0.0e+00   4.7e-02   2.2e-02   2.9e-01   0.0e+00   0.0e+00   0.0e+00   0.0e+00   9.3e-04   0.0e+00   3.1e-03   0.0e+00   1.8e-02   0.0e+00
+&++&  10 |   1.8e-03   0.0e+00   2.2e-02   1.1e-02   1.5e-01   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.8e-04   0.0e+00   1.2e-03   0.0e+00   7.0e-03   0.0e+00
+&++&  11 |   9.7e-04   0.0e+00   1.1e-02   5.1e-03   7.4e-02   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.6e-04   0.0e+00   6.1e-04   0.0e+00   2.6e-03   0.0e+00
+&++&  12 |   5.3e-04   0.0e+00   5.2e-03   2.5e-03   3.6e-02   0.0e+00   0.0e+00   0.0e+00   0.0e+00   9.0e-05   0.0e+00   2.6e-04   0.0e+00   9.2e-04   0.0e+00
+&++&  13 |   2.7e-04   0.0e+00   3.1e-03   1.2e-03   1.7e-02   0.0e+00   0.0e+00   0.0e+00   0.0e+00   5.8e-05   0.0e+00   1.4e-04   0.0e+00   4.7e-04   0.0e+00
+&++&  14 |   1.4e-04   0.0e+00   1.6e-03   5.0e-04   7.2e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   2.1e-05   0.0e+00   6.1e-05   0.0e+00   1.9e-04   0.0e+00
+&++&  15 |   5.8e-05   0.0e+00   7.1e-04   2.6e-04   2.7e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.9e-06   0.0e+00   2.3e-05   0.0e+00   7.4e-05   0.0e+00
+&++&  16 |   3.1e-05   0.0e+00   1.4e-04   8.3e-05   7.5e-04   0.0e+00   0.0e+00   0.0e+00   0.0e+00   4.1e-06   0.0e+00   6.7e-06   0.0e+00   2.0e-05   0.0e+00
+&++&  17 |   1.6e-05   0.0e+00   2.8e-05   2.6e-05   1.2e-04   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.2e-06   0.0e+00   3.8e-06   0.0e+00   2.4e-06   0.0e+00
+&++&  18 |   2.9e-06   0.0e+00   1.9e-06   5.0e-06   9.5e-07   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+&++&  19 |   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++ Lvl |        ND    ND lft    El lft    Sp lft   Fct nnz    Rk Bfr    Rk Aft      Nbrs   Tot Bfr   Tot Aft   Cl Sped   Cl Ignd   ConEPiv     ConEL     ConEU  NorEDiag   ConSPiv     ConSL     ConSU  NorSDiag  AssymBfr  AssymAft   UppBefo   LowBefo   UppAfte   LowAfte
+++++   0 |     20408    694768    694768    694507   8.4e+05         1         1         6    199462    199201    197448    493605   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   1 |     19525    675243    675080    673138   1.7e+06         1         1         7    328593    326651    305327    341279   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   2 |     60554    614689    613647    609296   3.1e+06         1         1        12    408450    404099    315592    195743   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   3 |     91876    522813    520174    514842   5.6e+06         2         2        23    402006    396674    227176    106036   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   4 |     95388    427425    422999    413808   9.5e+06         3         3        43    355460    346269    136746     55459   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   5 |     86482    340943    333258    316014   1.5e+07         4         4        71    295380    278136     74821     27987   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   6 |     72565    268378    253969    225506   2.3e+07         6         5       105    233334    204871     38628     13617   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   7 |     59977    208401    181868    146968   3.1e+07         9         7       141    171930    137030     18445      5922   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   8 |     52249    156152    116250     81914   3.8e+07        15        10       163    112644     78308      7664      1930   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   9 |     42920    113232     64465     42179   4.3e+07        19        12       173     62922     40636      3327       751   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  10 |     31399     81833     33875     21930   4.6e+07        21        13       182     33094     21149      1572       364   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  11 |     22720     59113     17733     11069   4.7e+07        24        15       187     17388     10724       735       166   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  12 |     16028     43085      9005      5424   4.8e+07        25        15       185      8839      5258       350        76   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  13 |     13308     29777      4360      2521   4.9e+07        26        15       183      4286      2447       165        34   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  14 |      8334     21443      2018      1115   4.9e+07        26        14       162      1991      1088        76        13   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  15 |      7916     13527       882       470   4.9e+07        26        13       139       869       457        34         8   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  16 |      4427      9100       357       156   4.9e+07        25        11        86       352       151        14         4   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  17 |      4353      4747       116        46   4.9e+07        23         9        32       114        44         5         2   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  18 |      2370      2377        31         0   4.9e+07        31         0         0        31         0         1         0   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++  19 |      2377         0         0         0   4.9e+07       nan       nan       nan         0         0         0         0   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+Timings [s.]:
+<<<<tpart=15.3053
+<<<<tassm=1.05557
+<<<<tfact=48.1392
+<<<<stop=31
+<<<<nnzfact=48866864
+<<<<tsolv=7.20586
+One-time solve (Random b):
+<<<<|Ax-b|/|b| : 0.372106
+<<<<hash(b) : 1331952338426432521
+<<<<hash(x) : 6397578151933335659
+One-time solve (Random x):
+<<<<|Ax-b|/|b| : 0.0116721
+<<<<|x-xtrue|/|x| : 0.375279
+<<<<hash(xtrue) : 1331952338426432521
+<<<<hash(b) : 74888248908926221
+<<<<hash(x) : 9448242906021327500

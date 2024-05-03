@@ -1,0 +1,233 @@
+(rb311) (base) s1104997ca:tests rjmurr$ ./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=10
+<<<<cn=-1
+<<<<cd=-1
+<<<<matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx
+Matrix 146689x146689 loaded from /Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx
+|A - AT|/|A| = 0.000000e+00
+<<<<N=146689
+<<<<nlevels=10
+<<<<tol=0.1
+<<<<skip=0
+<<<<preserve=0
+<<<<lorasp=0
+MND algebraic (with vertex sep ? 1) partitioning of matrix with 146689 dofs with 10 levels
+Algebraic MND partitioning & ordering
+  Depth  1: 1.63e-01 s. (    1 separators, [  416   416], mean  416.0)
+  Depth  2: 1.60e-01 s. (    2 separators, [  188   245], mean  216.5)
+  Depth  3: 1.62e-01 s. (    4 separators, [  176   200], mean  184.2)
+  Depth  4: 1.54e-01 s. (    8 separators, [   83   110], mean   96.1)
+  Depth  5: 1.65e-01 s. (   16 separators, [   77   110], mean   91.2)
+  Depth  6: 1.43e-01 s. (   32 separators, [   35    68], mean   49.2)
+  Depth  7: 1.43e-01 s. (   64 separators, [   35    56], mean   45.0)
+  Depth  8: 1.39e-01 s. (  128 separators, [   17    35], mean   24.2)
+  Depth  9: 1.64e-01 s. (  256 separators, [   11    29], mean   21.4)
+Clustering size statistics (# of leaf-clusters at each level of the ND hierarchy)
+Lvl     Count       Min       Max      Mean
+  0       512       136       442       254
+  1       256        11        29        21
+  2       372         1        26         8
+  3       367         1        29         8
+  4       260         1        23         6
+  5       214         1        26         7
+  6       150         1        23         5
+  7       139         1        23         5
+  8        86         1        23         5
+  9        85         1        26         5
+Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)
+  0      2441
+  1      1180
+  2       609
+  3       287
+  4       141
+  5        67
+  6        27
+  7        11
+  8         3
+  9         1
+Partitioning time : 1.44e+00 s.
+Assembling (Size 146689 with 10 levels and symmetry 1)
+Edge size statistics (Leaf-cluster edge size at each level of the ND hierarchy)
+Lvl     Count       Min       Max      Mean
+  0      5300       136    195364      8154
+  1      1786        11       841       190
+  2      1427         1       676        86
+  3      1070         1       841        78
+  4       693         1       529        52
+  5       508         1       676        62
+  6       347         1       529        35
+  7       303         1       529        35
+  8       184         1       529        33
+  9       179         1       676        31
+Edge count statistics (Leaf-cluster edge count at each level of the ND hierarchy)
+Lvl     Count       Min       Max      Mean
+  0       512         4        17        10
+  1       256         4        10         7
+  2       372         1         9         4
+  3       367         1         6         3
+  4       260         1         6         3
+  5       214         1         6         2
+  6       150         1         6         2
+  7       139         1         6         2
+  8        86         1         5         2
+  9        85         1         3         2
+Assembly time : 8.37e-02 s. (3.60e-02 permuting A)
+spaND Factorization started
+  N:          146689
+  #levels:    10
+  verbose?:   1
+  tol?:       0.1
+  #skip:      0
+  symmetrykd? SPD
+  scalingkd?  LLT
+  want_spars? 1
+  mon cond?   0
+  preserving? 0
+Level 0, 146689 dofs left, 2441 clusters left
+  Elim: 1.58e-01 s., 16854 dofs left, 1929 clusters left
+  Scaling: 8.28e-03 s.
+  Sparsification: 5.85e-02 s., 7663 dofs left, geqp3 5.04e-02, geqrf 0.00e+00, assmb 2.23e-03, buildQ 4.34e-04, scatterQ 0.00e+00, permA 7.38e-04, scatterA 0.00e+00
+  Merge: 1.02e-02 s., 7663 dofs left, 1180 clusters left
+Level 1, 7663 dofs left, 1180 clusters left
+  Elim: 5.07e-03 s., 5953 dofs left, 924 clusters left
+  Scaling: 3.04e-03 s.
+  Sparsification: 2.33e-02 s., 3530 dofs left, geqp3 2.00e-02, geqrf 0.00e+00, assmb 6.56e-04, buildQ 9.97e-05, scatterQ 0.00e+00, permA 2.45e-04, scatterA 0.00e+00
+  Merge: 5.21e-03 s., 3530 dofs left, 609 clusters left
+Level 2, 3530 dofs left, 609 clusters left
+  Elim: 2.42e-03 s., 2743 dofs left, 481 clusters left
+  Scaling: 1.45e-03 s.
+  Sparsification: 1.01e-02 s., 1864 dofs left, geqp3 9.07e-03, geqrf 0.00e+00, assmb 2.59e-04, buildQ 3.86e-05, scatterQ 0.00e+00, permA 9.51e-05, scatterA 0.00e+00
+  Merge: 2.13e-03 s., 1864 dofs left, 287 clusters left
+Level 3, 1864 dofs left, 287 clusters left
+  Elim: 1.11e-03 s., 1465 dofs left, 223 clusters left
+  Scaling: 7.27e-04 s.
+  Sparsification: 5.39e-03 s., 854 dofs left, geqp3 4.82e-03, geqrf 0.00e+00, assmb 1.22e-04, buildQ 2.07e-05, scatterQ 0.00e+00, permA 6.53e-05, scatterA 0.00e+00
+  Merge: 9.76e-04 s., 854 dofs left, 141 clusters left
+Level 4, 854 dofs left, 141 clusters left
+  Elim: 4.86e-04 s., 662 dofs left, 109 clusters left
+  Scaling: 3.25e-04 s.
+  Sparsification: 2.26e-03 s., 417 dofs left, geqp3 2.06e-03, geqrf 0.00e+00, assmb 4.15e-05, buildQ 1.19e-05, scatterQ 0.00e+00, permA 2.15e-05, scatterA 0.00e+00
+  Merge: 4.02e-04 s., 417 dofs left, 67 clusters left
+Level 5, 417 dofs left, 67 clusters left
+  Elim: 2.32e-04 s., 331 dofs left, 51 clusters left
+  Scaling: 1.53e-04 s.
+  Sparsification: 1.13e-03 s., 186 dofs left, geqp3 1.02e-03, geqrf 0.00e+00, assmb 2.43e-05, buildQ 3.81e-06, scatterQ 0.00e+00, permA 1.62e-05, scatterA 0.00e+00
+  Merge: 1.92e-04 s., 186 dofs left, 27 clusters left
+Level 6, 186 dofs left, 27 clusters left
+  Elim: 7.08e-05 s., 144 dofs left, 19 clusters left
+  Scaling: 4.51e-05 s.
+  Sparsification: 3.32e-04 s., 68 dofs left, geqp3 2.96e-04, geqrf 0.00e+00, assmb 7.39e-06, buildQ 9.54e-07, scatterQ 0.00e+00, permA 3.10e-06, scatterA 0.00e+00
+  Merge: 5.22e-05 s., 68 dofs left, 11 clusters left
+Level 7, 68 dofs left, 11 clusters left
+  Elim: 1.91e-05 s., 51 dofs left, 7 clusters left
+  Scaling: 9.06e-06 s.
+  Sparsification: 7.61e-05 s., 23 dofs left, geqp3 6.41e-05, geqrf 0.00e+00, assmb 1.91e-06, buildQ 0.00e+00, scatterQ 0.00e+00, permA 9.54e-07, scatterA 0.00e+00
+  Merge: 1.10e-05 s., 23 dofs left, 3 clusters left
+Level 8, 23 dofs left, 3 clusters left
+  Elim: 3.10e-06 s., 15 dofs left, 1 clusters left
+  Scaling: 9.54e-07 s.
+  Sparsification: 2.15e-06 s., 0 dofs left, geqp3 0.00e+00, geqrf 0.00e+00, assmb 0.00e+00, buildQ 1.19e-06, scatterQ 0.00e+00, permA 0.00e+00, scatterA 0.00e+00
+  Merge: 9.54e-07 s., 0 dofs left, 1 clusters left
+Level 9, 0 dofs left, 1 clusters left
+  Elim: 0.00e+00 s., 0 dofs left, 0 clusters left
+  Scaling: 0.00e+00 s.
+  Sparsification: 0.00e+00 s., 0 dofs left, geqp3 0.00e+00, geqrf 0.00e+00, assmb 0.00e+00, buildQ 0.00e+00, scatterQ 0.00e+00, permA 0.00e+00, scatterA 0.00e+00
+Factorization: 3.05e-01 s.
+&>>& Lvl |      Elim     Scale  Sparsify     Merge
+&>>&   0 |   1.6e-01   8.3e-03   5.9e-02   1.0e-02
+&>>&   1 |   5.1e-03   3.0e-03   2.3e-02   5.2e-03
+&>>&   2 |   2.4e-03   1.5e-03   1.0e-02   2.1e-03
+&>>&   3 |   1.1e-03   7.3e-04   5.4e-03   9.8e-04
+&>>&   4 |   4.9e-04   3.2e-04   2.3e-03   4.0e-04
+&>>&   5 |   2.3e-04   1.5e-04   1.1e-03   1.9e-04
+&>>&   6 |   7.1e-05   4.5e-05   3.3e-04   5.2e-05
+&>>&   7 |   1.9e-05   9.1e-06   7.6e-05   1.1e-05
+&>>&   8 |   3.1e-06   9.5e-07   2.1e-06   9.5e-07
+&>>&   9 |   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+&<<& Lvl |     Pivot     Panel     Schur |     Pivot     Panel |     Assmb     Spars     Scatt |     Alloc      Copy
+&<<&   0 |   3.4e-02   9.5e-02   2.7e-02 |   4.7e-04   7.3e-03 |   2.2e-03   4.4e-02   5.0e-03 |   9.8e-04   1.5e-03
+&<<&   1 |   1.3e-04   3.8e-04   4.0e-03 |   1.8e-04   2.6e-03 |   6.0e-04   1.6e-02   2.2e-03 |   6.0e-04   6.9e-04
+&<<&   2 |   4.3e-05   2.1e-04   1.9e-03 |   8.5e-05   1.3e-03 |   1.6e-04   4.7e-03   5.8e-04 |   1.3e-04   3.3e-04
+&<<&   3 |   2.3e-05   9.8e-05   8.5e-04 |   4.0e-05   6.2e-04 |   1.0e-04   3.6e-03   3.7e-04 |   8.3e-05   1.3e-04
+&<<&   4 |   9.8e-06   3.6e-05   3.8e-04 |   1.4e-05   2.9e-04 |   2.5e-05   1.1e-03   1.3e-04 |   3.5e-05   6.3e-05
+&<<&   5 |   6.9e-06   2.2e-05   1.8e-04 |   8.8e-06   1.3e-04 |   1.9e-05   6.6e-04   7.0e-05 |   1.6e-05   2.7e-05
+&<<&   6 |   1.9e-06   8.6e-06   4.8e-05 |   5.0e-06   3.5e-05 |   5.2e-06   2.0e-04   2.3e-05 |   4.8e-06   8.8e-06
+&<<&   7 |   9.5e-07   4.1e-06   1.1e-05 |   0.0e+00   5.0e-06 |   9.5e-07   4.4e-05   8.1e-06 |   0.0e+00   1.9e-06
+&<<&   8 |   9.5e-07   9.5e-07   0.0e+00 |   9.5e-07   0.0e+00 |   0.0e+00   0.0e+00   2.1e-06 |   0.0e+00   0.0e+00
+&<<&   9 |   0.0e+00   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00
+&++& Lvl |      potf      ldlt      trsm      gemm     geqp3     geqrf      syev     gesvd      getf    buildq    scattq     perma    scatta     assmb       phi
+&++&   0 |   3.5e-02   0.0e+00   1.0e-01   2.1e-02   5.0e-02   0.0e+00   0.0e+00   0.0e+00   0.0e+00   4.3e-04   0.0e+00   7.4e-04   0.0e+00   2.2e-03   0.0e+00
+&++&   1 |   2.3e-04   0.0e+00   2.4e-03   2.1e-03   2.0e-02   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.0e-04   0.0e+00   2.5e-04   0.0e+00   6.6e-04   0.0e+00
+&++&   2 |   1.0e-04   0.0e+00   1.2e-03   9.7e-04   9.1e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.9e-05   0.0e+00   9.5e-05   0.0e+00   2.6e-04   0.0e+00
+&++&   3 |   5.2e-05   0.0e+00   6.1e-04   4.7e-04   4.8e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   2.1e-05   0.0e+00   6.5e-05   0.0e+00   1.2e-04   0.0e+00
+&++&   4 |   1.6e-05   0.0e+00   2.7e-04   2.1e-04   2.1e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.2e-05   0.0e+00   2.1e-05   0.0e+00   4.1e-05   0.0e+00
+&++&   5 |   1.4e-05   0.0e+00   1.2e-04   1.1e-04   1.0e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.8e-06   0.0e+00   1.6e-05   0.0e+00   2.4e-05   0.0e+00
+&++&   6 |   6.0e-06   0.0e+00   3.5e-05   3.5e-05   3.0e-04   0.0e+00   0.0e+00   0.0e+00   0.0e+00   9.5e-07   0.0e+00   3.1e-06   0.0e+00   7.4e-06   0.0e+00
+&++&   7 |   9.5e-07   0.0e+00   6.2e-06   8.8e-06   6.4e-05   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   9.5e-07   0.0e+00   1.9e-06   0.0e+00
+&++&   8 |   9.5e-07   0.0e+00   9.5e-07   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   1.2e-06   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+&++&   9 |   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++ Lvl |        ND    ND lft    El lft    Sp lft   Fct nnz    Rk Bfr    Rk Aft      Nbrs   Tot Bfr   Tot Aft   Cl Sped   Cl Ignd   ConEPiv     ConEL     ConEU  NorEDiag   ConSPiv     ConSL     ConSU  NorSDiag  AssymBfr  AssymAft   UppBefo   LowBefo   UppAfte   LowAfte
+++++   0 |    129835     16854     16854      7663   2.7e+07        13         6        73     16128      6937      1219       710   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   1 |      5483     11371      5953      3530   2.7e+07        10         5        63      5613      3190       589       335   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   2 |      3097      8274      2743      1864   2.7e+07         8         6        60      2563      1684       304       177   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   3 |      2883      5391      1465       854   2.7e+07        10         5        63      1382       771       143        80   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   4 |      1576      3815       662       417   2.7e+07         9         5        59       620       375        70        39   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   5 |      1460      2355       331       186   2.7e+07         9         5        58       310       165        33        18   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   6 |       769      1586       144        68   2.7e+07        11         5        40       138        62        13         6   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   7 |       737       849        51        23   2.7e+07        10         4        19        49        21         5         2   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   8 |       433       416        15         0   2.7e+07        15         0         0        15         0         1         0   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   9 |       416         0         0         0   2.7e+07       nan       nan       nan         0         0         0         0   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+Timings [s.]:
+<<<<tpart=1.50105
+<<<<tassm=0.0851538
+<<<<tfact=0.305024
+<<<<stop=15
+<<<<nnzfact=26961014
+<<<<tsolv=0.18361
+One-time solve (Random b):
+<<<<|Ax-b|/|b| : 0.0637156
+<<<<hash(b) : 15310035315964029026
+<<<<hash(x) : 8850150280638303817
+One-time solve (Random x):
+<<<<|Ax-b|/|b| : 0.00814702
+<<<<|x-xtrue|/|x| : 0.0820013
+<<<<hash(xtrue) : 15310035315964029026
+<<<<hash(b) : 17039724748810135935
+<<<<hash(x) : 1703048085511526530
+0: |Ax-b|/|b| = 6.52e-02 <? 1.00e-12
+1: |Ax-b|/|b| = 1.75e-02 <? 1.00e-12
+2: |Ax-b|/|b| = 1.76e-02 <? 1.00e-12
+3: |Ax-b|/|b| = 8.66e-03 <? 1.00e-12
+4: |Ax-b|/|b| = 4.57e-03 <? 1.00e-12
+5: |Ax-b|/|b| = 4.12e-03 <? 1.00e-12
+6: |Ax-b|/|b| = 1.89e-03 <? 1.00e-12
+7: |Ax-b|/|b| = 1.13e-03 <? 1.00e-12
+8: |Ax-b|/|b| = 3.70e-04 <? 1.00e-12
+9: |Ax-b|/|b| = 1.58e-04 <? 1.00e-12
+10: |Ax-b|/|b| = 5.40e-05 <? 1.00e-12
+11: |Ax-b|/|b| = 2.69e-05 <? 1.00e-12
+12: |Ax-b|/|b| = 1.05e-05 <? 1.00e-12
+13: |Ax-b|/|b| = 6.29e-06 <? 1.00e-12
+14: |Ax-b|/|b| = 2.23e-06 <? 1.00e-12
+15: |Ax-b|/|b| = 1.09e-06 <? 1.00e-12
+16: |Ax-b|/|b| = 3.93e-07 <? 1.00e-12
+17: |Ax-b|/|b| = 1.73e-07 <? 1.00e-12
+18: |Ax-b|/|b| = 3.83e-08 <? 1.00e-12
+19: |Ax-b|/|b| = 1.79e-08 <? 1.00e-12
+20: |Ax-b|/|b| = 4.98e-09 <? 1.00e-12
+21: |Ax-b|/|b| = 2.19e-09 <? 1.00e-12
+22: |Ax-b|/|b| = 5.28e-10 <? 1.00e-12
+23: |Ax-b|/|b| = 1.82e-10 <? 1.00e-12
+24: |Ax-b|/|b| = 6.41e-11 <? 1.00e-12
+25: |Ax-b|/|b| = 2.50e-11 <? 1.00e-12
+26: |Ax-b|/|b| = 7.00e-12 <? 1.00e-12
+27: |Ax-b|/|b| = 2.07e-12 <? 1.00e-12
+28: |Ax-b|/|b| = 6.41e-13 <? 1.00e-12
+Converged!
+# of iter:  29
+Total time: 5.37e+00 s.
+  Matvec:   5.27e-02 s.
+  Precond:  5.31e+00 s.
+CG: #iterations: 29, residual |Ax-b|/|b|: 6.40595e-13
+  CG: 5.37041 s.
+<<<<CG=29
+<<<<tCG=5.37041

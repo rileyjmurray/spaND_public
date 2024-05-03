@@ -1,0 +1,115 @@
+(rb311) (base) s1104997ca:tests rjmurr$ ./spaND --matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx --lvl=3
+<<<<cn=-1
+<<<<cd=-1
+<<<<matrix=/Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx
+Matrix 146689x146689 loaded from /Users/rjmurr/Documents/randnla/spand-repo/mats/Dubcova3/Dubcova3.mtx
+|A - AT|/|A| = 0.000000e+00
+<<<<N=146689
+<<<<nlevels=3
+<<<<tol=0.1
+<<<<skip=0
+<<<<preserve=0
+<<<<lorasp=0
+MND algebraic (with vertex sep ? 1) partitioning of matrix with 146689 dofs with 3 levels
+Algebraic MND partitioning & ordering
+  Depth  1: 1.83e-01 s. (    1 separators, [  416   416], mean  416.0)
+  Depth  2: 1.84e-01 s. (    2 separators, [  188   245], mean  216.5)
+Clustering size statistics (# of leaf-clusters at each level of the ND hierarchy)
+Lvl     Count       Min       Max      Mean
+  0         4     34522     39853     36460
+  1         2       188       245       216
+  2         5         1       200        83
+Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)
+  0        11
+  1         3
+  2         1
+Partitioning time : 4.03e-01 s.
+Assembling (Size 146689 with 3 levels and symmetry 1)
+Edge size statistics (Leaf-cluster edge size at each level of the ND hierarchy)
+Lvl     Count       Min       Max      Mean
+  0        20     34522 1588261609 269784804
+  1         8       188     60025     24334
+  2         9         1     40000      7840
+Edge count statistics (Leaf-cluster edge count at each level of the ND hierarchy)
+Lvl     Count       Min       Max      Mean
+  0         4         4         6         5
+  1         2         4         4         4
+  2         5         1         3         2
+Assembly time : 2.94e+00 s. (4.03e-02 permuting A)
+spaND Factorization started
+  N:          146689
+  #levels:    3
+  verbose?:   1
+  tol?:       0.1
+  #skip:      0
+  symmetrykd? SPD
+  scalingkd?  LLT
+  want_spars? 1
+  mon cond?   0
+  preserving? 0
+Level 0, 146689 dofs left, 11 clusters left
+  Elim: 5.85e+02 s., 849 dofs left, 7 clusters left
+  Scaling: 1.68e-03 s.
+  Sparsification: 1.36e-02 s., 31 dofs left, geqp3 9.17e-03, geqrf 0.00e+00, assmb 2.28e-04, buildQ 3.81e-06, scatterQ 0.00e+00, permA 1.72e-05, scatterA 0.00e+00
+  Merge: 1.91e-05 s., 31 dofs left, 3 clusters left
+Level 1, 31 dofs left, 3 clusters left
+  Elim: 7.87e-06 s., 19 dofs left, 1 clusters left
+  Scaling: 9.54e-07 s.
+  Sparsification: 3.10e-06 s., 0 dofs left, geqp3 0.00e+00, geqrf 0.00e+00, assmb 9.54e-07, buildQ 0.00e+00, scatterQ 0.00e+00, permA 0.00e+00, scatterA 0.00e+00
+  Merge: 9.54e-07 s., 0 dofs left, 1 clusters left
+Level 2, 0 dofs left, 1 clusters left
+  Elim: 0.00e+00 s., 0 dofs left, 0 clusters left
+  Scaling: 0.00e+00 s.
+  Sparsification: 0.00e+00 s., 0 dofs left, geqp3 0.00e+00, geqrf 0.00e+00, assmb 0.00e+00, buildQ 0.00e+00, scatterQ 0.00e+00, permA 0.00e+00, scatterA 0.00e+00
+Factorization: 5.85e+02 s.
+&>>& Lvl |      Elim     Scale  Sparsify     Merge
+&>>&   0 |   5.8e+02   1.7e-03   1.4e-02   1.9e-05
+&>>&   1 |   7.9e-06   9.5e-07   3.1e-06   9.5e-07
+&>>&   2 |   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+&<<& Lvl |     Pivot     Panel     Schur |     Pivot     Panel |     Assmb     Spars     Scatt |     Alloc      Copy
+&<<&   0 |   5.5e+02   3.3e+01   1.5e-01 |   2.1e-04   1.4e-03 |   2.3e-04   9.2e-03   3.8e-03 |   0.0e+00   9.5e-07
+&<<&   1 |   9.5e-07   4.1e-06   3.1e-06 |   9.5e-07   0.0e+00 |   9.5e-07   0.0e+00   2.1e-06 |   0.0e+00   0.0e+00
+&<<&   2 |   0.0e+00   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00   0.0e+00 |   0.0e+00   0.0e+00
+&++& Lvl |      potf      ldlt      trsm      gemm     geqp3     geqrf      syev     gesvd      getf    buildq    scattq     perma    scatta     assmb       phi
+&++&   0 |   5.5e+02   0.0e+00   3.3e+01   1.5e-01   9.2e-03   0.0e+00   0.0e+00   0.0e+00   0.0e+00   3.8e-06   0.0e+00   1.7e-05   0.0e+00   2.3e-04   0.0e+00
+&++&   1 |   1.9e-06   0.0e+00   2.9e-06   3.1e-06   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   9.5e-07   0.0e+00
+&++&   2 |   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++ Lvl |        ND    ND lft    El lft    Sp lft   Fct nnz    Rk Bfr    Rk Aft      Nbrs   Tot Bfr   Tot Aft   Cl Sped   Cl Ignd   ConEPiv     ConEL     ConEU  NorEDiag   ConSPiv     ConSL     ConSU  NorSDiag  AssymBfr  AssymAft   UppBefo   LowBefo   UppAfte   LowAfte
+++++   0 |    145840       849       849        31   2.7e+09       169         6       195       847        29         5         2   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   1 |       433       416        19         0   2.7e+09        19         0         0        19         0         1         0   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+++++   2 |       416         0         0         0   2.7e+09       nan       nan       nan         0         0         0         0   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00       nan   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00   0.0e+00
+Timings [s.]:
+<<<<tpart=0.470207
+<<<<tassm=2.94367
+<<<<tfact=584.618
+<<<<stop=19
+<<<<nnzfact=2729227084
+<<<<tsolv=1.02417
+One-time solve (Random b):
+<<<<|Ax-b|/|b| : 0.00429776
+<<<<hash(b) : 15310035315964029026
+<<<<hash(x) : 13132042712034323808
+One-time solve (Random x):
+<<<<|Ax-b|/|b| : 0.000247275
+<<<<|x-xtrue|/|x| : 0.00701839
+<<<<hash(xtrue) : 15310035315964029026
+<<<<hash(b) : 17039724748810135935
+<<<<hash(x) : 11744856082336018027
+0: |Ax-b|/|b| = 7.89e-03 <? 1.00e-12
+1: |Ax-b|/|b| = 7.82e-04 <? 1.00e-12
+2: |Ax-b|/|b| = 8.47e-05 <? 1.00e-12
+3: |Ax-b|/|b| = 3.23e-06 <? 1.00e-12
+4: |Ax-b|/|b| = 2.04e-07 <? 1.00e-12
+5: |Ax-b|/|b| = 9.41e-09 <? 1.00e-12
+6: |Ax-b|/|b| = 2.45e-10 <? 1.00e-12
+7: |Ax-b|/|b| = 9.19e-12 <? 1.00e-12
+8: |Ax-b|/|b| = 2.36e-13 <? 1.00e-12
+Converged!
+# of iter:  9
+Total time: 8.80e+00 s.
+  Matvec:   1.83e-02 s.
+  Precond:  8.78e+00 s.
+CG: #iterations: 9, residual |Ax-b|/|b|: 2.3607e-13
+  CG: 8.80421 s.
+<<<<CG=9
+<<<<tCG=8.8042
