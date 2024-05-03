@@ -343,6 +343,13 @@ int main(int argc, char* argv[]) {
         VectorXd b = VectorXd::Random(N);
         if (useCG) {            
             timer cg0 = wctime();
+            // SparseMatrix<typename SpMat::Scalar, Eigen::RowMajor> A_rm(A);
+            // int iter = cg(A_rm, b, x, t, iterations, solver_tol, verb);
+            //
+            // ^ Riley note: I added the lines above since my understanding is
+            // that CSR typically has faster matrix-vector products than CSC.
+            // But I shouldn't make that change without justifying the decision
+            // properly. Checking in now.
             int iter = cg(A, b, x, t, iterations, solver_tol, verb);
             timer cg1 = wctime();
             std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
