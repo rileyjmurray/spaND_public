@@ -5935,3 +5935,7 @@ CG: #iterations: 16, residual |Ax-b|/|b|: 6.05429e-13
   CG: 108.056 s.
 <<<<CG=16
 <<<<tCG=108.056
+
+<<<<tpart=145.114
+<<<<tassm=6.36921
+<<<<tfact=813.622
