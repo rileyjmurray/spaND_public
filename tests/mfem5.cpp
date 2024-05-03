@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 
    // Add negative bottom right diagonal for Aprec
    // double Anorm = A.norm();
-   for(int64_t i = 0; i < Wsize; i++) {
+   for (int64_t i = 0; i < Wsize; i++) {
       triplets.push_back({Rsize + i, Rsize + i, -sp_eps});
    }
    SpMat Aprec(Nout, Nout);
@@ -275,13 +275,13 @@ int main(int argc, char *argv[])
    Eigen::MatrixXd Xcoo = Eigen::MatrixXd::Zero(dim, Nout);
    assert(Rsize == R_coords.Size() / dim);
    assert(Wsize == W_coords.Size() / dim);   
-   for(int64_t i = 0; i < Rsize; i++) {
-      for(int64_t d = 0; d < dim; d++) {
+   for (int64_t i = 0; i < Rsize; i++) {
+      for (int64_t d = 0; d < dim; d++) {
          Xcoo(d, i) = R_coords.GetData()[i + d * Rsize];
       }
    }
-   for(int64_t i = 0; i < Wsize; i++) {
-      for(int64_t d = 0; d < dim; d++) {
+   for (int64_t i = 0; i < Wsize; i++) {
+      for (int64_t d = 0; d < dim; d++) {
          Xcoo(d, Rsize + i) = W_coords.GetData()[i + d * Wsize];
       }
    }
@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
    cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sole-rhse).norm() / rhse.norm() << endl;
 
    {
-      for(int64_t i = 0; i < Nout; i++) {
+      for (int64_t i = 0; i < Nout; i++) {
          x.Elem(i) = sole[i];
       }
    }

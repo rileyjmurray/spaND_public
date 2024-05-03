@@ -29,8 +29,8 @@ std::string Gemm::name() {
 }
 
 void GemmOut::fwd() {    
-    if(nbr.size() > 0 && self.size() > 0) {
-        if(Adiag != nullptr) {
+    if (nbr.size() > 0 && self.size() > 0) {
+        if (Adiag != nullptr) {
             nbr -= ((*A) * Adiag->asDiagonal() * self);
         } else {
             gemv_notrans(A.get(), &self, &nbr);
@@ -43,8 +43,8 @@ void GemmOut::bwd() {};
 void GemmIn::fwd() {};
 
 void GemmIn::bwd() {
-    if(nbr.size() > 0 && self.size() > 0) {
-        if(Adiag != nullptr) {
+    if (nbr.size() > 0 && self.size() > 0) {
+        if (Adiag != nullptr) {
             self -= (Adiag->asDiagonal() * (*A) * nbr);
         } else {
             gemv_notrans(A.get(), &nbr, &self);
@@ -53,8 +53,8 @@ void GemmIn::bwd() {
 }
 
 void GemmSymmOut::fwd() {
-    if(nbr.size() > 0 && self.size() > 0) {
-        if(Adiag != nullptr) {
+    if (nbr.size() > 0 && self.size() > 0) {
+        if (Adiag != nullptr) {
             nbr -= ((*A) * Adiag->asDiagonal() * self);
         } else {            
             gemv_notrans(A.get(), &self, &nbr);
@@ -63,8 +63,8 @@ void GemmSymmOut::fwd() {
 }
 
 void GemmSymmOut::bwd() {
-    if(nbr.size() > 0 && self.size() > 0) {
-        if(Adiag != nullptr) {
+    if (nbr.size() > 0 && self.size() > 0) {
+        if (Adiag != nullptr) {
             self -= Adiag->asDiagonal() * ((*A).transpose() * nbr);
         } else {            
             gemv_trans(A.get(), &nbr, &self);
@@ -73,8 +73,8 @@ void GemmSymmOut::bwd() {
 }
 
 void GemmSymmIn::fwd() {
-    if(nbr.size() > 0 && self.size() > 0) {
-        if(Adiag != nullptr) {
+    if (nbr.size() > 0 && self.size() > 0) {
+        if (Adiag != nullptr) {
             nbr -= ((*A).transpose() * Adiag->asDiagonal() * self);
         } else {
             gemv_trans(A.get(), &self, &nbr);
@@ -83,8 +83,8 @@ void GemmSymmIn::fwd() {
 }
 
 void GemmSymmIn::bwd() {
-    if(nbr.size() > 0 && self.size() > 0) {
-        if(Adiag != nullptr) {
+    if (nbr.size() > 0 && self.size() > 0) {
+        if (Adiag != nullptr) {
             self -= Adiag->asDiagonal() * ((*A) * nbr);
         } else {            
             gemv_notrans(A.get(), &nbr, &self);
@@ -166,8 +166,8 @@ std::string Orthogonal::name() {
 Merge::Merge(Cluster* parent) : parent(parent) {}
 void Merge::fwd() {
     int64_t k = 0;
-    for(auto c: parent->children()) {
-        for(int64_t i = 0; i < c->size(); i++) {
+    for (auto c: parent->children()) {
+        for (int64_t i = 0; i < c->size(); i++) {
             (*parent->get_x())[k] = (*c->get_x())[i];
             k++;
         }
@@ -176,8 +176,8 @@ void Merge::fwd() {
 }
 void Merge::bwd() {
     int64_t k = 0;
-    for(auto c: parent->children()) {
-        for(int64_t i = 0; i < c->size(); i++) {
+    for (auto c: parent->children()) {
+        for (int64_t i = 0; i < c->size(); i++) {
             (*c->get_x())[i] = (*parent->get_x())[k];
             k++;
         }

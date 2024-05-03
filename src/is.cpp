@@ -14,21 +14,21 @@ int64_t ir(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& preco
     typedef Eigen::Matrix<double,Eigen::Dynamic,1> VectorType;
     VectorType residual = rhs - mat * x;
     double rhsNorm2 = rhs.squaredNorm();
-    if(rhsNorm2 == 0){
+    if (rhsNorm2 == 0){
         x.setZero();
         return 0;
     }
     double threshold = tol*tol*rhsNorm2;
     double residualNorm2 = residual.squaredNorm();
     int64_t i = 1;
-    while(residualNorm2 >= threshold && i < iters) {
+    while (residualNorm2 >= threshold && i < iters) {
         precond.solve(residual);
         x += residual;
         residual = rhs - mat * x;
         residualNorm2 = residual.squaredNorm();
-        if(verb) printf("%d: |Ax-b|/|b| = %3.2e <? %3.2e\n", i, sqrt(residualNorm2 / rhsNorm2), tol);
-        if(residualNorm2 < threshold) {
-            if(verb) printf("Converged!\n");
+        if (verb) printf("%d: |Ax-b|/|b| = %3.2e <? %3.2e\n", i, sqrt(residualNorm2 / rhsNorm2), tol);
+        if (residualNorm2 < threshold) {
+            if (verb) printf("Converged!\n");
             break;
         }
         i++;
@@ -56,7 +56,7 @@ int64_t cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& preco
     t_matvec += elapsed(t00, t01);
 
     double rhsNorm2 = rhs.squaredNorm();
-    if(rhsNorm2 == 0) 
+    if (rhsNorm2 == 0) 
     {
         x.setZero();
         iters = 0;
@@ -80,7 +80,7 @@ int64_t cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& preco
     VectorType z(n), tmp(n);
     double absNew = residual.dot(p);  // the square of the absolute value of r scaled by invM
     int64_t i = 0;
-    while(i < maxIters)
+    while (i < maxIters)
     {
         timer t0 = wctime();
         tmp.noalias() = mat * p;                    // the bottleneck of the algorithm
@@ -92,9 +92,9 @@ int64_t cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& preco
         residual -= alpha * tmp;                    // update residual
         
         residualNorm2 = residual.squaredNorm();
-        if(verb) printf("%d: |Ax-b|/|b| = %3.2e <? %3.2e\n", i, sqrt(residualNorm2 / rhsNorm2), tol);
-        if(residualNorm2 < threshold) {
-            if(verb) printf("Converged!\n");
+        if (verb) printf("%d: |Ax-b|/|b| = %3.2e <? %3.2e\n", i, sqrt(residualNorm2 / rhsNorm2), tol);
+        if (residualNorm2 < threshold) {
+            if (verb) printf("Converged!\n");
             break;
         }
      
@@ -110,7 +110,7 @@ int64_t cg(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& preco
         i++;
     }
     iters = i+1;
-    if(verb) {
+    if (verb) {
         timer stop = wctime();
         printf("# of iter:  %d\n", iters);
         printf("Total time: %3.2e s.\n", elapsed(start, stop));
@@ -136,7 +136,7 @@ int64_t gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& pr
 
     const RealScalar considerAsZero = (std::numeric_limits<RealScalar>::min)();
 
-    if(rhs.norm() <= considerAsZero) {
+    if (rhs.norm() <= considerAsZero) {
         x.setZero();
         tol_error = 0;
         return true;
@@ -161,7 +161,7 @@ int64_t gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& pr
     const RealScalar r0Norm = r0.norm();
 
     // is initial guess already good enough?
-    if(r0Norm == 0) {
+    if (r0Norm == 0) {
         printf("Converged!");
         return true;
     }
@@ -244,7 +244,7 @@ int64_t gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& pr
 
         tol_error = abs(w(k)) / r0Norm;
         bool stop = (k==m || tol_error < tol || iters == maxIters);
-        if(verb) printf("%d: |Ax-b|/|b| = %3.2e <? %3.2e\n", iters, tol_error, tol);
+        if (verb) printf("%d: |Ax-b|/|b| = %3.2e <? %3.2e\n", iters, tol_error, tol);
 
         if (stop || k == restart) {
             // solve upper triangular system
@@ -261,9 +261,9 @@ int64_t gmres(const SpMat& mat, const VectorXd& rhs, VectorXd& x, const Tree& pr
 
             x += x_new;
 
-            if(stop) {
+            if (stop) {
                 printf("GMRES converged!\n");
-                if(verb) {
+                if (verb) {
                     timer stop = wctime();
                     printf("# of iter:  %d\n", iters);
                     printf("Total time: %3.2e s.\n", elapsed(start, stop));

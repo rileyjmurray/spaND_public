@@ -9,14 +9,14 @@ bool are_connected(VectorXi64 &a, VectorXi64 &b, SpMat &A) {
     int64_t  bsize = b.size();
     auto b_begin = b.data();
     auto b_end   = b.data() + b.size();
-    for(int64_t ia = 0; ia < a.size(); ia++) {
+    for (int64_t ia = 0; ia < a.size(); ia++) {
         // Look at all the neighbors of ia
         int64_t node = a[ia];
-        for(SpMat::InnerIterator it(A,node); it; ++it) {
+        for (SpMat::InnerIterator it(A,node); it; ++it) {
             auto neigh = it.row();
             auto id = lower_bound(b_begin, b_end, neigh);
             int64_t pos = id - b_begin;
-            if(pos < bsize && b[pos] == neigh) // Found one in b! They are connected.
+            if (pos < bsize && b[pos] == neigh) // Found one in b! They are connected.
                 return true;
         }
     }
@@ -72,48 +72,6 @@ timer wctime() {
     return time;
 }
 
-// template <typename VEC1, typename VEC2>
-// void swap2perm(VEC1* swap, VEC2* perm) {
-//     using VEC1_int = typename VEC1::Scalar;
-//     using VEC2_int = typename VEC2::Scalar;
-//     VEC2_int n = perm->size();
-//     assert(swap->size() == (VEC1_int) n);
-//     for(VEC2_int i = 0; i < n; i++) {
-//         (*perm)[i] = i;
-//     }
-//     for(int i = 0; i < n; i++) {
-//         VEC1_int ipiv = (*swap)[i];
-//         VEC2_int tmp  = (*perm)[ipiv];
-//         (*perm)[ipiv] = (*perm)[i];
-//         (*perm)[i] = tmp;
-//     }
-// }
-
-// template <typename iVEC>
-// bool isperm(const iVEC* perm) {
-//     using iVEC_scalar_t = typename iVEC::Scalar;
-//     auto n = perm->size();
-//     iVEC count = iVEC::Zero(n);
-//     for(int64_t i = 0;i < n; i++) {
-//         iVEC_scalar_t pi = (*perm)[i];
-//         if(pi < 0 || pi >= n) { return false; }
-//         count[pi] += 1;
-//     }
-//     return (count.cwiseEqual(1)).all();
-// }
-
-// template <typename iVEC>
-// iVEC invperm(const iVEC& perm) {
-//     using iVEC_scalar_t = typename iVEC::Scalar;
-//     assert(isperm(&perm));
-//     iVEC invperm(perm.size());
-//     for(iVEC_scalar_t i = 0; i < perm.size(); i++) {
-//         invperm[perm[i]] = i;
-//     }
-//     assert(isperm(&invperm));
-//     return invperm;    
-// }
-
 size_t hashv(std::vector<size_t> vals) {
     size_t seed = 0;
     for (size_t i = 0; i < vals.size(); ++i) {
@@ -138,7 +96,7 @@ void gemm_spand(MatrixXd* A, MatrixXd* B, MatrixXd* C, Op tA, Op tB, double alph
     assert(k == k2);
     assert(m == m2); 
     assert(n == n2);
-    if(m == 0 || n == 0 || k == 0)
+    if (m == 0 || n == 0 || k == 0)
         return;
     blas::gemm(Layout::ColMajor, tA, tB, m, n, k, alpha, A->data(), lda, B->data(), ldb, beta, C->data(), ldc);
 }
@@ -171,9 +129,9 @@ int64_t potf(MatrixXd* A) {
 }
 
 int64_t ldlt(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::VectorXd* d, Eigen::VectorXi64* p, double* rcond) {
-    if(A->rows() == 0) return 0;
+    if (A->rows() == 0) return 0;
     Eigen::LDLT<Ref<MatrixXd>, Lower> ldlt(*A);
-    if(ldlt.info() != ComputationInfo::Success) {
+    if (ldlt.info() != ComputationInfo::Success) {
         return 1;
     }
     (*rcond) = ldlt.rcond();
@@ -191,30 +149,19 @@ int64_t getf(Eigen::MatrixXd* A, Eigen::VectorXi64* p) {
     assert(A->cols() == n);
     assert(p->size() == n);
     VectorXi64 swap(p->size());
-    if(n == 0)
+    if (n == 0)
         return 0;
     int64_t info = lapack::getrf(n, n, A->data(), n, swap.data());
-    if(info != 0) {
+    if (info != 0) {
         return info;
     } else {
-        for(int64_t i = 0; i < n; i++) {
+        for (int64_t i = 0; i < n; i++) {
             (swap)[i] -= 1;
         }
         swap2perm(&swap, p);
         return info;
     }
 }
-
-// template <typename VEC1, typename VEC2>
-// void fpgetf(Eigen::MatrixXd* A, VEC1* p, VEC2* q) {
-//     assert(A->cols() == A->rows());
-//     assert(p->size() == A->cols());
-//     assert(q->size() == A->cols());
-//     if(A->rows() == 0) return;
-//     Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd>> pluq(*A);
-//     *p = invperm(pluq.permutationP().indices());
-//     *q = invperm(pluq.permutationQ().indices());
-// }
 
 // A = L * (D + U') = L * D (I + D^-1 U') = { L * |D|^1/2 } { |D|^1/2 sign(D) (I + D^-1 U') }
 void split_LU(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::MatrixXd* U) {
@@ -253,7 +200,7 @@ double rcond_1_potf(Eigen::MatrixXd* A_LLT, double A_1_norm) {
 
 double rcond_1_trcon(Eigen::MatrixXd* LU, Uplo uplo, Diag diag) {
     assert(LU->rows() == LU->cols());
-    if(LU->rows() == 0) return 1.0;
+    if (LU->rows() == 0) return 1.0;
     double rcond;
     int64_t info = lapack::trcon(Norm::One, uplo, diag, LU->rows(), LU->data(), LU->rows(), &rcond);
     assert(info == 0);
@@ -365,9 +312,9 @@ void ormqr_spand(MatrixXd* v, VectorXd* h, MatrixXd* A, Side side, Op trans) {
     assert(h->size() == k);
     if (m == 0 || n == 0)
         return;
-    if(side == Side::Left) // Q * A or Q^T * A
+    if (side == Side::Left) // Q * A or Q^T * A
         assert(k <= m);
-    if(side == Side::Right) // A * Q or A * Q^T
+    if (side == Side::Right) // A * Q or A * Q^T
         assert(k <= n);
     if (k == 0)
         return; // No reflectors, so nothing to do
@@ -380,7 +327,7 @@ void orgqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
     int64_t m = v->rows();
     int64_t k = v->cols();
     assert(h->size() == k);
-    if(m == 0 || k == 0)
+    if (m == 0 || k == 0)
         return;
     int64_t info = lapack::orgqr(m, k, k, v->data(), m, h->data());
     assert(info == 0);
@@ -408,7 +355,7 @@ void gesvd_spand(Eigen::MatrixXd* A, Eigen::MatrixXd* U, Eigen::VectorXd* S, Eig
     assert(U->rows() == m && U->cols() == m);
     assert(VT->rows() == n && VT->cols() == n);
     assert(S->size() == k);
-    if(k == 0)
+    if (k == 0)
         return;
     int64_t info = lapack::gesvd(Job::AllVec, Job::AllVec, m, n, A->data(), m, S->data(), U->data(), m, VT->data(), n);
     assert(info == 0);
@@ -420,7 +367,7 @@ void syev_spand(Eigen::MatrixXd* A, Eigen::VectorXd* S) {
     int64_t n = A->cols();
     assert(m == n);
     assert(S->size() == m);
-    if(m == 0)
+    if (m == 0)
         return;
     int64_t info = lapack::syev(Job::Vec, Uplo::Lower, m, A->data(), m, S->data());
     assert(info == 0);
@@ -448,7 +395,7 @@ int64_t choose_rank(VectorXd& s, double tol) {
         } else {
             double sref = abs(s[0]);
             int64_t rank = 1;
-            while(rank < s.size() && abs(s[rank]) / sref >= tol) {
+            while (rank < s.size() && abs(s[rank]) / sref >= tol) {
                 rank++;
             }
             assert(rank <= s.size());
@@ -458,12 +405,12 @@ int64_t choose_rank(VectorXd& s, double tol) {
 }
 
 void block2dense(VectorXi64 &rowval, VectorXi64 &colptr, VectorXd &nnzval, int64_t i, int64_t j, int64_t li, int64_t lj, MatrixXd *dst, bool transpose) {
-    if(transpose) {
+    if (transpose) {
         assert(dst->rows() == lj && dst->cols() == li);
     } else {
         assert(dst->rows() == li && dst->cols() == lj);
     }
-    for(int64_t col = 0; col < lj; col++) {
+    for (int64_t col = 0; col < lj; col++) {
         // All elements in column c
         int64_t start_c = colptr[j + col];
         int64_t end_c = colptr[j + col + 1];
@@ -474,14 +421,14 @@ void block2dense(VectorXi64 &rowval, VectorXi64 &colptr, VectorXd &nnzval, int64
         auto found = lower_bound(start, end, i);
         int64_t id = distance(start, found);
         // While we are between i and i+i...
-        while(id < size) {
+        while (id < size) {
             int64_t row = rowval[start_c + id];
-            if(row >= i + li) {
+            if (row >= i + li) {
                 break;
             }
             row = row - i;
             double val = nnzval[start_c + id];
-            if(transpose) {
+            if (transpose) {
                 (*dst)(col,row) = val;
             } else {
                 (*dst)(row,col) = val;
@@ -494,13 +441,13 @@ void block2dense(VectorXi64 &rowval, VectorXi64 &colptr, VectorXd &nnzval, int64
 MatrixXd linspace_nd(int64_t n, int64_t dim) {
     MatrixXd X = MatrixXd::Zero(dim, pow(n, dim));
     if (dim == 1) {
-        for(int64_t i = 0; i < n; i++) {
+        for (int64_t i = 0; i < n; i++) {
             X(0,i) = double(i);
         }
     } else if (dim == 2) {
         int64_t id = 0;
-        for(int64_t i = 0; i < n; i++) {
-            for(int64_t j = 0; j < n; j++) {
+        for (int64_t i = 0; i < n; i++) {
+            for (int64_t j = 0; j < n; j++) {
                 X(0,id) = i;
                 X(1,id) = j;
                 id ++;
@@ -508,9 +455,9 @@ MatrixXd linspace_nd(int64_t n, int64_t dim) {
         }
     } else if (dim == 3) {
         int64_t id = 0;
-        for(int64_t i = 0; i < n; i++) {
-            for(int64_t j = 0; j < n; j++) {
-                for(int64_t k = 0; k < n; k++) {
+        for (int64_t i = 0; i < n; i++) {
+            for (int64_t j = 0; j < n; j++) {
+                for (int64_t k = 0; k < n; k++) {
                     X(0,id) = i;
                     X(1,id) = j;
                     X(2,id) = k;
@@ -526,7 +473,7 @@ MatrixXd linspace_nd(int64_t n, int64_t dim) {
 SpMat symm_perm(SpMat &A, VectorXi64 &p) {
     // Create inverse permutation
     VectorXi64 pinv(p.size());
-    for(int64_t i = 0; i < p.size(); i++)
+    for (int64_t i = 0; i < p.size(); i++)
         pinv[p[i]] = i;
     // Initialize A[p,p]
     int64_t n = A.rows();
@@ -557,7 +504,7 @@ VectorXd random(int64_t size, int64_t seed) {
     rng.seed(seed);
     uniform_real_distribution<double> dist(-1.0,1.0);
     VectorXd x(size);
-    for(int64_t i = 0;i < size; i++) {
+    for (int64_t i = 0;i < size; i++) {
         x[i] = dist(rng);
     }
     return x;
@@ -568,8 +515,8 @@ MatrixXd random(int64_t rows, int64_t cols, int64_t seed) {
     rng.seed(seed);
     uniform_real_distribution<double> dist(-1.0,1.0);
     MatrixXd A(rows, cols);
-    for(int64_t i = 0; i < rows; i++) {
-        for(int64_t j = 0; j < cols; j++) {
+    for (int64_t i = 0; i < rows; i++) {
+        for (int64_t j = 0; j < cols; j++) {
             A(i,j) = dist(rng);
         }
     }
@@ -583,7 +530,7 @@ void setZero(Eigen::MatrixXd* A) {
 #else
     // Probably not super portable. Should be on all systems implementing IEC 60559 (or IEEE 754-1985)
     memset(A->data(), 0, A->size() * sizeof(double));   // Is ~2x faster than Eigen's setZero()
-    if(A->size() > 0) assert((*A)(A->size()-1) == 0.0); // Fails if double 0 are not sizeof(double) '0' bytes
+    if (A->size() > 0) assert((*A)(A->size()-1) == 0.0); // Fails if double 0 are not sizeof(double) '0' bytes
 #endif
 }
 

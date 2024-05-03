@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     }
     bool geo_tensor = (cn >= 0 && cd >= 0);
     bool geo = geo_file || geo_tensor;
-    if(geo_file) {
+    if (geo_file) {
         coordinates = result["coordinates"].as<string>();
     }
     double tol = result["tol"].as<double>();
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     bool useIR = (result["solver"].as<string>() == "IR");
     int iterations = result["iterations"].as<int>();
     double solver_tol = result["solver_tol"].as<double>();
-    if(!useCG && !useGMRES && !useIR) {
+    if (!useCG && !useGMRES && !useIR) {
         std::cout << "Wrong solver picked. Should be CG, IR or GMRES" << endl;
         return 1;
     }
@@ -115,11 +115,11 @@ int main(int argc, char* argv[]) {
     bool flip_sign = result["flip_sign"].as<bool>();
     vector<double> rational_coeffs;
     if (result.count("rationale")) {
-        for(auto v: result["rationale"].as<vector<double>>()) {
+        for (auto v: result["rationale"].as<vector<double>>()) {
             rational_coeffs.push_back(v);
         }
         std::cout << "Using rational coeffs: ";
-        for(int i = 0; i < rational_coeffs.size(); i++) {
+        for (int i = 0; i < rational_coeffs.size(); i++) {
             std::cout << rational_coeffs[i] << " A^" << i << " + ";
         }
         std::cout << endl;
@@ -135,26 +135,26 @@ int main(int argc, char* argv[]) {
     std::cout << "<<<<matrix=" << matrix << std::endl;
     std::cout << "Matrix " << N << "x" << N << " loaded from " << matrix << endl;
     
-    if(nlevels <= 0) {
+    if (nlevels <= 0) {
         std::cout << "nlevels = " << nlevels << " -> using log(N/64)/log(2) - |nlevels| instead" << std::endl;
         nlevels = round(log((double)N/64.0)/log(2.0)) + nlevels;
     }
 
     // Modifiy A for some cases/experiments
-    if(flip_sign) {
+    if (flip_sign) {
         A = -A;
         std::cout << "Solving with -A instead" << endl;
-    } else if(rational_coeffs.size() > 0) {
+    } else if (rational_coeffs.size() > 0) {
         std::cout << "Solving with rational coefficients instead" << endl;
         // Create identity
         vector<Triplet<double>> tripletList;
-        for(int i = 0; i < N; i++) { tripletList.push_back({i,i,1.0}); }
+        for (int i = 0; i < N; i++) { tripletList.push_back({i,i,1.0}); }
         SpMat I(N,N);
         I.setFromTriplets(tripletList.begin(), tripletList.end());
         // Creating a_0 I + a_1 A + a_2 A^2 ...
         SpMat An = I;
         SpMat RatA = SpMat(N,N);
-        for(int i = 0; i < rational_coeffs.size(); i++) {
+        for (int i = 0; i < rational_coeffs.size(); i++) {
             RatA = RatA + rational_coeffs[i] * An;
             An = An * A;
         }
@@ -168,15 +168,15 @@ int main(int argc, char* argv[]) {
     // Saddle point modifications
     SpMat Aprec = A;
     bool is_saddlepoint = result.count("sp_mid") && result.count("sp_eps");
-    if(is_saddlepoint) {
+    if (is_saddlepoint) {
         int sp_mid = result["sp_mid"].as<int>();
         double sp_eps = result["sp_eps"].as<double>();
         std::cout << "A[~sp_mid,~sp_mid]:\n" << A.block(sp_mid-2, sp_mid-2, 5, 5) << endl;
         std::cout << "System is saddle point" << endl;
         std::cout << "Rebuilding matrix by adding " << sp_eps << " on diagonal at entries [" << sp_mid << ";" << N << "[" << endl;
         vector<Triplet<double>> tripletList;
-        for(int i = sp_mid; i < N; i++) { tripletList.push_back({i,i,sp_eps}); }
-        for(int k = 0; k < A.outerSize(); ++k) {
+        for (int i = sp_mid; i < N; i++) { tripletList.push_back({i,i,sp_eps}); }
+        for (int k = 0; k < A.outerSize(); ++k) {
             for (SpMat::InnerIterator it(A,k); it; ++it) { tripletList.push_back({int(it.row()),int(it.col()),it.value()}); }
         }
         Aprec = SpMat(N,N);
@@ -187,17 +187,17 @@ int main(int argc, char* argv[]) {
 
     // Load coordinates ?
     MatrixXd X;
-    if(geo_tensor) {
-        if(pow(cn, cd) != N) {
+    if (geo_tensor) {
+        if (pow(cn, cd) != N) {
             std::cout << "Error: cn and cd where both provided, but cn^cd != N where A is NxN" << endl;
             return 1;
         }
         X = linspace_nd(cn, cd);
         std::cout << "Tensor coordinate matrix of size " << cn << "^" << cd << " built" << endl;
-    } else if(geo_file) {
+    } else if (geo_file) {
         X = mmio::dense_mmread<double>(coordinates);
         std::cout << "Coordinate file " << X.rows() << "x" << X.cols() << " loaded from " << coordinates << endl;
-        if(X.cols() != N) {
+        if (X.cols() != N) {
             std::cout << "Error: coordinate file should hold a matrix of size d x N" << endl;
         }
     }
@@ -213,7 +213,7 @@ int main(int argc, char* argv[]) {
     t.set_skip(skip);
     t.set_preserve(preserve);
     t.set_use_geo(geo);
-    if(geo) {
+    if (geo) {
         t.set_Xcoo(&X);
     }
     t.set_scaling_kind(sk);
@@ -223,7 +223,7 @@ int main(int argc, char* argv[]) {
     t.set_monitor_condition_pivots(monitor_cond);
     t.set_monitor_unsymmetry(monitor_unsymmetry);
     t.set_monitor_Rdiag(monitor_Rdiag);
-    if(result.count("write_log_flops")) t.set_monitor_flops(true);
+    if (result.count("write_log_flops")) t.set_monitor_flops(true);
 
     // Print basic parameters
     std::cout << "<<<<N=" << N << endl;
@@ -236,7 +236,7 @@ int main(int argc, char* argv[]) {
     // Partition
     timer tpart_0 = wctime();
     SpMat AAT = symmetric_graph(Aprec);
-    if(use_lorasp) {
+    if (use_lorasp) {
         t.partition_lorasp(AAT);
     } else {
         t.partition(AAT);
@@ -244,19 +244,19 @@ int main(int argc, char* argv[]) {
     timer tpart = wctime();
 
     // Clustering
-    if(result.count("clustering")) {
+    if (result.count("clustering")) {
         string clustering_fn = result["clustering"].as<string>();        
         std::cout << "Writing clustering to " << clustering_fn << endl;
         write_clustering(t, X, clustering_fn);
     }
     // Hierarchy
-    if(result.count("merging")) {
+    if (result.count("merging")) {
         string merging_fn = result["merging"].as<string>();
         std::cout << "Writing merging to " << merging_fn << endl;
         write_merging(t, merging_fn);
     }
     // Cluster metadata
-    if(result.count("clusters")) {
+    if (result.count("clusters")) {
         string clusters_fn = result["clusters"].as<string>();
         std::cout << "Writing clusters to " << clusters_fn << endl;
         write_clusters(t, clusters_fn);
@@ -267,14 +267,14 @@ int main(int argc, char* argv[]) {
     t.assemble(Aprec);
     timer tass = wctime();
 
-    if(result.count("print_clusters_hierarchy") && result["print_clusters_hierarchy"].as<bool>()) {
+    if (result.count("print_clusters_hierarchy") && result["print_clusters_hierarchy"].as<bool>()) {
         t.print_clusters_hierarchy();
     }
 
     // Factorize    
     timer tfact_0 = wctime();
     try {
-        if(use_lorasp) {
+        if (use_lorasp) {
             t.factorize_lorasp();
         } else {
             t.factorize();
@@ -294,14 +294,14 @@ int main(int argc, char* argv[]) {
     std::cout << "<<<<stop="  << t.get_stop() << endl;
     std::cout << "<<<<nnzfact=" << t.nnz() << endl;
 
-    if(result.count("write_log_flops")) {
+    if (result.count("write_log_flops")) {
         string log_flops_fn = result["write_log_flops"].as<string>();
         std::cout << "Writing flops log to " << log_flops_fn << endl;
         write_log_flops(t, log_flops_fn);
     }
 
     // Sizes & ranks
-    if(result.count("stats")) {
+    if (result.count("stats")) {
         string stats_fn = result["stats"].as<string>();
         std::cout << "Writing cluster stats to " << stats_fn << endl;        
         write_stats(t, stats_fn);
@@ -341,7 +341,7 @@ int main(int argc, char* argv[]) {
     {
         VectorXd x = VectorXd::Zero(N);
         VectorXd b = VectorXd::Random(N);
-        if(useCG) {            
+        if (useCG) {            
             timer cg0 = wctime();
             int iter = cg(A, b, x, t, iterations, solver_tol, verb);
             timer cg1 = wctime();
@@ -349,7 +349,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  CG: " << elapsed(cg0, cg1) << " s." << endl;
             std::cout << "<<<<CG=" << iter << endl;
             std::cout << "<<<<tCG=" << elapsed(cg0, cg1) << endl;
-        } else if(useGMRES) {
+        } else if (useGMRES) {
             timer gmres0 = wctime();
             int iter = gmres(A, b, x, t, iterations, iterations, solver_tol, verb);
             timer gmres1 = wctime();
@@ -357,7 +357,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  GMRES: " << elapsed(gmres0, gmres1) << " s." << endl;
             std::cout << "<<<<GMRES=" << iter << endl;
             std::cout << "<<<<tGMRES=" << elapsed(gmres0, gmres1) << endl;
-        } else if(useIR) {
+        } else if (useIR) {
             timer ir0 = wctime();
             int iter = ir(A, b, x, t, iterations, solver_tol, verb);
             timer ir1 = wctime();
@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
             std::cout << "<<<<tIR=" << elapsed(ir0, ir1) << endl;
         }
     }
-    if(preserve)  {
+    if (preserve)  {
         std::cout << "Checking preservation" << endl;
         VectorXd b = A*phi.col(0);
         VectorXd x = b;

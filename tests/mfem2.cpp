@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     cout << "Vertices? " << N << endl;
 
     Eigen::MatrixXd Xcoo(dim, N * dim);
-    for(int64_t i = 0; i < N; i++) {
-        for(int64_t j = 0; j < dim; j++) { // The three spatial dimensions
+    for (int64_t i = 0; i < N; i++) {
+        for (int64_t j = 0; j < dim; j++) { // The three spatial dimensions
             for (int64_t k = 0; k < dim; k++) { // The three PDEs components
                 Xcoo(j, i + k * N) = mesh->GetVertex(i)[j];
             }
@@ -206,36 +206,36 @@ int main(int argc, char *argv[])
     MatrixXd phi;
     assert(dim == 3);
     assert(N % 3 == 0);
-    if(preserve) {
+    if (preserve) {
         int64_t N = A2.rows();
         int64_t N3 = N/3;
         phi = MatrixXd::Zero(N, 12);
         // piecewise 1
-        for(int64_t i = 0; i < N/3; i++) {
+        for (int64_t i = 0; i < N/3; i++) {
             phi(     i,0) = 1;
             phi(  N3+i,1) = 1;
             phi(2*N3+i,2) = 1;
         }
         // piecewise x
-        for(int64_t i = 0; i < N/3; i++) {
+        for (int64_t i = 0; i < N/3; i++) {
             phi(     i,3) = Xcoo(0,i);
             phi(  N3+i,4) = Xcoo(0,i);
             phi(2*N3+i,5) = Xcoo(0,i);
         }
         // piecewise y
-        for(int64_t i = 0; i < N/3; i++) {
+        for (int64_t i = 0; i < N/3; i++) {
             phi(     i,6) = Xcoo(1,i);
             phi(  N3+i,7) = Xcoo(1,i);
             phi(2*N3+i,8) = Xcoo(1,i);
         }
         // piecewise z
-        for(int64_t i = 0; i < N/3; i++) {
+        for (int64_t i = 0; i < N/3; i++) {
             phi(     i,9)  = Xcoo(2,i);
             phi(  N3+i,10) = Xcoo(2,i);
             phi(2*N3+i,11) = Xcoo(2,i);
         }
     }
-    if(preserve) {
+    if (preserve) {
         tol = 10.0; // Adaptive = false -> only preservation
     }
     Tree t = Tree(lvl);
@@ -259,8 +259,8 @@ int main(int argc, char *argv[])
         cout << ">>>>t_S=" << elapsed(t3, t4) << endl;
         cout << ">>>>CG=" << iter << endl;
         eigen2mfem(x2, X);
-        if(preserve) {
-            for(int64_t i = 0; i < phi.cols(); i++) {
+        if (preserve) {
+            for (int64_t i = 0; i < phi.cols(); i++) {
                 VectorXd b3 = A2 * phi.col(i);
                 VectorXd x3 = b3;
                 t.solve(x3);

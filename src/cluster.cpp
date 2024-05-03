@@ -32,10 +32,10 @@ bool Cluster::is_eliminated() const {
 void Cluster::set_eliminated() {
     assert(! this->eliminated_);
     // Remove self from neighbors's edges
-    for(const auto& e : this->edgesOut){        
+    for (const auto& e : this->edgesOut){        
         e->n2->edgesIn.remove_if([this](Edge* e2){return e2->n1 == this;});
     }
-    for(const auto& e : this->edgesIn){
+    for (const auto& e : this->edgesIn){
         e->n1->edgesOut.remove_if([this](const pEdge& e2){ return e2->n2 == this; });
     }
     // Delete self's edges
@@ -81,7 +81,7 @@ int64_t Cluster::nnbr_self_out() const {
 
 void Cluster::set_vector(const VectorXd& b) {
     assert(x_ != nullptr);
-    if(children_.size() == 0) { // No children -> leaf        
+    if (children_.size() == 0) { // No children -> leaf        
         (*x_) = b.segment(start_, x_->size());
     } else {
         x_->setZero();        
@@ -90,7 +90,7 @@ void Cluster::set_vector(const VectorXd& b) {
 
 void Cluster::extract_vector(VectorXd& b) const {
     assert(x_ != nullptr);
-    if(children_.size() == 0) { // No children -> leaf
+    if (children_.size() == 0) { // No children -> leaf
         b.segment(start_, x_->size()) = (*x_);
     }
 }
@@ -113,7 +113,7 @@ void Cluster::set_parent(Cluster* p) { parent_ = p; }
 void Cluster::add_edge(pEdge e) {
     assert(this == e->n1);
     // Pivot goes in front
-    if(e->n1 == e->n2) {
+    if (e->n1 == e->n2) {
         this->edgesOut.insert(this->edgesOut.begin(), move(e));
     // Rest doesn't matter
     } else {
@@ -132,24 +132,24 @@ const pVectorXd& Cluster::get_x() const {
 
 void Cluster::assertDuplicates() {
     // Check for duplicates
-    if(this->edgesIn.size() > 1) {
+    if (this->edgesIn.size() > 1) {
         auto first   = this->edgesIn.begin();
         auto second  = this->edgesIn.begin();
         second++;
         auto end     = this->edgesIn.end();
-        while(second != end) {
+        while (second != end) {
             assert( (*first)->n1 != (*second)->n1 );
             assert( (*first)->n1->order() != (*second)->n1->order() );
             first++;
             second++;
         }
     }
-    if(this->edgesOut.size() > 1) {
+    if (this->edgesOut.size() > 1) {
         auto first   = this->edgesOut.begin();
         auto second  = this->edgesOut.begin();
         second++;
         auto end     = this->edgesOut.end();
-        while(second != end) {
+        while (second != end) {
             assert( (*first)->n2 != (*second)->n2 );
             assert( (*first)->n2->order() != (*second)->n2->order() );
             first++;
@@ -161,9 +161,9 @@ void Cluster::assertDuplicates() {
 // Put the out edge in some stable order, with the pivot in front
 void Cluster::sort_edges() {
     this->edgesOut.sort([](const pEdge& lhs, const pEdge& rhs){
-        if(lhs->n1 == lhs->n2) { // lhs is a pivot
+        if (lhs->n1 == lhs->n2) { // lhs is a pivot
             return true;
-        } else if(rhs->n1 == rhs->n2) { // rhs is a pivot
+        } else if (rhs->n1 == rhs->n2) { // rhs is a pivot
             return false;
         } else {
             return lhs->n2->order() < rhs->n2->order(); 
@@ -176,7 +176,7 @@ void Cluster::sort_edges() {
 }
 
 void compute_depth(const Cluster* n, int64_t& depth) {
-    if(n->parent() != nullptr) {
+    if (n->parent() != nullptr) {
         depth += 1;
         compute_depth(n->parent(), depth);
     }

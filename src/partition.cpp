@@ -31,12 +31,12 @@ std::tuple<std::vector<int64_t>, std::vector<int64_t>> SpMat2CSC(SpMat& A) {
     std::vector<int64_t> colptr(size+1);
     std::vector<int64_t> rowval;
     colptr[0] = 0;
-    for(int64_t i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         colptr[i+1] = colptr[i];
         for (SpMat::InnerIterator it(A,i); it; ++it) {
             assert(i == it.col());
             int64_t j = it.row();
-            if(i != j) {
+            if (i != j) {
                 rowval.push_back(j);
                 colptr[i + 1] += 1;
             }
@@ -64,23 +64,23 @@ void partition_metis(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval,
     int64_t sepsize = 0;
     // 1) Build smaller matrix
     colptrtmp[0] = 0;
-    for(int64_t i = 0; i < size; i++) { // New dof
+    for (int64_t i = 0; i < size; i++) { // New dof
         colptrtmp[i+1] = colptrtmp[i];
         int64_t i_ = dofs[i];
-        for(int64_t k = colptr[i_]; k < colptr[i_+1]; k++) { // Go through its edges in A
+        for (int64_t k = colptr[i_]; k < colptr[i_+1]; k++) { // Go through its edges in A
             int64_t k_ = rowval[k];
-            if(k_ == i_) // Skip diagonal
+            if (k_ == i_) // Skip diagonal
                 continue;
             auto found = lower_bound(dofs.begin(), dofs.end(), k_); // Is k a neighbor of i ?
             int64_t pos = distance(dofs.begin(), found);
-            if(pos < size && dofs[pos] == k_) {
+            if (pos < size && dofs[pos] == k_) {
                 rowvaltmp[colptrtmp[i+1]] = pos;                
                 colptrtmp[i+1] += 1;
             }
         }
     }
     // 2) Call metis
-    if(size > 0 && useVertexSep) {
+    if (size > 0 && useVertexSep) {
         assert(METIS_OK == METIS_ComputeVertexSeparator(&size, colptrtmp.data(), rowvaltmp.data(), nullptr, options, &sepsize, parts.data()));
     } else if (size > 0 && (! useVertexSep)) {
         int64_t one = 1;
@@ -88,11 +88,11 @@ void partition_metis(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval,
         int64_t objval = 0;
         assert(METIS_OK == METIS_PartGraphRecursive(&size, &one, colptrtmp.data(), rowvaltmp.data(), nullptr, nullptr, nullptr, &two, nullptr, nullptr, options, &objval, parts.data()));
         // Update part with vertex sep
-        for(int64_t i = 0; i < size; i++) { // Those with 0, connected to > 1, get a 2
+        for (int64_t i = 0; i < size; i++) { // Those with 0, connected to > 1, get a 2
             if (parts[i] != 0) {
                 continue;
             }
-            for(int64_t k = colptrtmp[i]; k < colptrtmp[i+1]; k++) { 
+            for (int64_t k = colptrtmp[i]; k < colptrtmp[i+1]; k++) { 
                 int64_t j = rowvaltmp[k];
                 if (parts[j] == 1) {
                     parts[i] = 2;
@@ -107,21 +107,21 @@ void bissect_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval, std
     assert(X->cols() == colptr.size()-1);
     assert(X->cols() == parts.size());
     int64_t N = dofs.size();
-    if(N == 0)
+    if (N == 0)
         return;
     // Get dimension over which to cut
     int64_t bestdim = -1;
     double maxrange = -1.0;
-    for(int64_t d = 0; d < X->rows(); d++) {
+    for (int64_t d = 0; d < X->rows(); d++) {
         double maxi = std::numeric_limits<double>::lowest();
         double mini = std::numeric_limits<double>::max();
-        for(int64_t i = 0; i < dofs.size(); i++) {
+        for (int64_t i = 0; i < dofs.size(); i++) {
             int64_t idof = dofs[i];
             maxi = std::max(maxi, (*X)(d,idof));
             mini = std::min(mini, (*X)(d,idof));
         }
         double range = maxi - mini;
-        if(range > maxrange) {
+        if (range > maxrange) {
             bestdim = d;
             maxrange = range;
         }
@@ -133,9 +133,9 @@ void bissect_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval, std
     int64_t imid = dofstmp[N/2];
     double midv = (*X)(bestdim,imid);
     // X <= midv -> 0, X > midv -> 1
-    for(int64_t i = 0; i < N; i++) {
+    for (int64_t i = 0; i < N; i++) {
         int64_t j = dofs[i];
-        if( (*X)(bestdim,j) <= midv ) {
+        if ( (*X)(bestdim,j) <= midv ) {
             parts[j] = start;
         } else {
             parts[j] = start+1;
@@ -148,28 +148,28 @@ void partition_nd_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval
     assert(invp.size() >= X->cols());
     assert(X->cols() == parts.size());
     int64_t N = dofs.size();
-    if(N == 0)
+    if (N == 0)
         return;
     std::vector<int64_t> dofs_tmp = dofs;
     // Get dimension over which to cut
     int64_t bestdim = -1;
     double maxrange = -1.0;
-    for(int64_t d = 0; d < X->rows(); d++) {
+    for (int64_t d = 0; d < X->rows(); d++) {
         double maxi = std::numeric_limits<double>::lowest();
         double mini = std::numeric_limits<double>::max();
-        for(int64_t i = 0; i < dofs.size(); i++) {
+        for (int64_t i = 0; i < dofs.size(); i++) {
             int64_t idof = dofs[i];
             maxi = std::max(maxi, (*X)(d,idof));
             mini = std::min(mini, (*X)(d,idof));
         }
         double range = maxi - mini;
-        if(range > maxrange) {
+        if (range > maxrange) {
             bestdim = d;
             maxrange = range;
         }
     }
     assert(bestdim >= 0);
-    for(int64_t i = 0; i < N; i++) {
+    for (int64_t i = 0; i < N; i++) {
         parts[i] = dofs[i];
     }
     // Sort dofs based on X[dim,:]
@@ -178,16 +178,16 @@ void partition_nd_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval
     int64_t mid = parts[N/2];
     double midv = (*X)(bestdim,mid);
     // First, zero (-1) out all the neighbors of dofs
-    for(int64_t i = 0; i < N; i++) {
+    for (int64_t i = 0; i < N; i++) {
         int64_t dof = dofs[i];
         invp[dof] = -1;
-        for(int64_t k = colptr[dof]; k < colptr[dof+1]; k++) {
+        for (int64_t k = colptr[dof]; k < colptr[dof+1]; k++) {
             int64_t dofn = rowval[k];
             invp[dofn] = -1;
         }
     }
     // Put in part & get inverse perm
-    for(int64_t i = 0; i < N; i++) {
+    for (int64_t i = 0; i < N; i++) {
         int64_t dof = dofs[i];
         invp[dof] = i;
         if ( (*X)(bestdim,dof) < midv ) {
@@ -197,18 +197,18 @@ void partition_nd_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval
         }
     }
     // Compute separator
-    for(int64_t i = 0; i < N; i++) {
+    for (int64_t i = 0; i < N; i++) {
         int64_t dof = dofs[i];
         // If in RIGHT
-        if(parts[i] == 0)
+        if (parts[i] == 0)
             continue;
         // If neighbor in LEFT (parts[i] = 1 here)
-        for(int64_t k = colptr[dof]; k < colptr[dof+1]; k++) {
+        for (int64_t k = colptr[dof]; k < colptr[dof+1]; k++) {
             int64_t dofn = rowval[k];
             int64_t in = invp[dofn];
-            if(in == -1) // Skip: no in dofs
+            if (in == -1) // Skip: no in dofs
                 continue;
-            if(parts[in] == 0) {
+            if (parts[in] == 0) {
                 parts[i] = 2;
                 break;
             }
@@ -218,7 +218,7 @@ void partition_nd_geo(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval
 
 int64_t part_at_lvl(int64_t part_leaf, int64_t lvl, int64_t nlevels) {
     assert(lvl > 0);
-    for(int64_t l = 0; l < lvl-1; l++) {
+    for (int64_t l = 0; l < lvl-1; l++) {
         part_leaf /= 2;
     }
     assert(part_leaf >= 0 && part_leaf < pow(2, nlevels-lvl));
@@ -251,24 +251,24 @@ SepID find_highest_common(SepID n1, SepID n2) {
 
 std::vector<int64_t> partition_RB(SpMat &A, int64_t nlevels, bool verb, MatrixXd* Xcoo) {
     bool geo = (Xcoo != nullptr);
-    if(verb && geo) printf("Geometric RB partitioning & ordering\n");
-    if(verb && !geo) printf("Algebraic RB partitioning & ordering\n");
+    if (verb && geo) printf("Geometric RB partitioning & ordering\n");
+    if (verb && !geo) printf("Algebraic RB partitioning & ordering\n");
     int64_t size = A.rows();
     auto csc = SpMat2CSC(A);
     std::vector<int64_t> colptr = get<0>(csc);
     std::vector<int64_t> rowval = get<1>(csc);
     std::vector<int64_t> parts(size);
-    if(geo) {
+    if (geo) {
         fill(parts.begin(), parts.end(), 0);
-        for(int64_t depth = 0; depth < nlevels-1; depth++) {
+        for (int64_t depth = 0; depth < nlevels-1; depth++) {
             // Create dofs lists
             std::vector<std::vector<int64_t>> dofs(pow(2, depth));
-            for(int64_t i = 0; i < parts.size(); i++) {
+            for (int64_t i = 0; i < parts.size(); i++) {
                 assert(0 <= parts[i] && parts[i] < pow(2, depth));
                 dofs[parts[i]].push_back(i);
             }
             // Do a ND partition
-            for(int64_t k = 0; k < pow(2, depth); k++) {
+            for (int64_t k = 0; k < pow(2, depth); k++) {
                 bissect_geo(colptr, rowval, dofs[k], parts, Xcoo, 2*k);
             }
         }
@@ -277,7 +277,7 @@ std::vector<int64_t> partition_RB(SpMat &A, int64_t nlevels, bool verb, MatrixXd
         int64_t one = 1;
         int64_t objval;
         int64_t nparts = pow(2, nlevels-1);
-        if(nparts == 1) {
+        if (nparts == 1) {
             // Meties doesn't like nparts == 1 and memcheck finds some errors
             parts = std::vector<int64_t>(size, 0);
         } else {
@@ -297,7 +297,7 @@ std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, boo
     int64_t size = A.rows();
     std::vector<int64_t> parts = partition_RB(A, nlevels, verb, Xcoo);
     timer t1 = wctime();
-    if(verb) printf("Recursive bisection time: %3.2e s.\n", elapsed(t0, t1));
+    if (verb) printf("Recursive bisection time: %3.2e s.\n", elapsed(t0, t1));
     /**
      * ND root         20
      *             10      11
@@ -306,26 +306,26 @@ std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, boo
      */
     std::vector<ClusterID> clusters(size, ClusterID(SepID(-1,0),SepID(-1,0),SepID(-1,0)));
     // Find separators
-    for(int64_t depth = 0; depth < nlevels-1; depth++) {
+    for (int64_t depth = 0; depth < nlevels-1; depth++) {
         int64_t l = nlevels - depth - 1;
         std::vector<int64_t> sepsizes(pow(2, depth), 0);
-        for(int64_t i = 0; i < size; i++) {
-            if(clusters[i].self.lvl == -1) { // Not yet a separator
+        for (int64_t i = 0; i < size; i++) {
+            if (clusters[i].self.lvl == -1) { // Not yet a separator
                 bool sep = false;
                 int64_t pi = part_at_lvl(parts[i], l, nlevels);
-                if(pi % 2 == 0) { // Separators are always on the left partition
+                if (pi % 2 == 0) { // Separators are always on the left partition
                     for (SpMat::InnerIterator it(A,i); it; ++it) {
                         assert(i == it.col());
                         int64_t j = it.row();
-                        if(clusters[j].self.lvl == -1) { // Neighbor should also not be a separator
+                        if (clusters[j].self.lvl == -1) { // Neighbor should also not be a separator
                             int64_t pj = part_at_lvl(parts[j], l, nlevels);
-                            if(pj == pi+1) {
+                            if (pj == pi+1) {
                                 sep = true;
                                 break;
                             }
                         }
                     }
-                    if(sep) { // Ok, it has a non-sep neighbor with lvl-partition pi+1 -> separator
+                    if (sep) { // Ok, it has a non-sep neighbor with lvl-partition pi+1 -> separator
                         clusters[i].self = SepID(l, pi/2);
                         assert(pi/2 >= 0 && pi/2 < sepsizes.size());
                         sepsizes[pi/2]++;
@@ -335,21 +335,21 @@ std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, boo
         }
         { // Stats
             Stats<int64_t> sepsstats = Stats<int64_t>();
-            for(auto v: sepsizes) sepsstats.addData(v);
-            if(verb) printf("  Depth %2d: %5d separators, [%5d %5d], mean %6.1f\n", 
+            for (auto v: sepsizes) sepsstats.addData(v);
+            if (verb) printf("  Depth %2d: %5d separators, [%5d %5d], mean %6.1f\n", 
                  depth+1, sepsstats.getCount(), sepsstats.getMin(), sepsstats.getMax(), sepsstats.getMean());
         }
     }
-    for(int64_t i = 0; i < size; i++) {
-        if(clusters[i].self.lvl == -1) { 
+    for (int64_t i = 0; i < size; i++) {
+        if (clusters[i].self.lvl == -1) { 
             clusters[i].self = SepID(0, parts[i]); // Leaves
         }
     }
     // Leaf-clusters
-    for(int64_t i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         SepID self = clusters[i].self;
         // If it's a separator
-        if(self.lvl > 0) {
+        if (self.lvl > 0) {
             // Define left/right part
             // Find left & right SepID
             SepID left  = SepID(0, parts[i]);
@@ -359,13 +359,13 @@ std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, boo
             for (SpMat::InnerIterator it(A,i); it; ++it) {
                 int64_t j = it.row();
                 SepID nbr = clusters[j].self;
-                if(nbr.lvl < self.lvl) {
+                if (nbr.lvl < self.lvl) {
                     int64_t pj = part_at_lvl(parts[j], self.lvl, nlevels);
                     assert(pi == pj || pi+1 == pj);
-                    if(pj <= pi) { // Update left. It could be empty.
+                    if (pj <= pi) { // Update left. It could be empty.
                         left  = find_highest_common(nbr, left);
                     } else { // Update right. It cannot be empty.
-                        if(right.lvl == -1) {
+                        if (right.lvl == -1) {
                             right = clusters[j].self;
                         } else {
                             right = find_highest_common(nbr, right);
@@ -378,9 +378,9 @@ std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, boo
             clusters[i].r = right;
         }
     }
-    for(int64_t i = 0; i < size; i++) {
+    for (int64_t i = 0; i < size; i++) {
         SepID self = clusters[i].self;
-        if(self.lvl == 0) {
+        if (self.lvl == 0) {
             clusters[i].l = self;
             clusters[i].r = self;
         }
@@ -391,8 +391,8 @@ std::vector<ClusterID> partition_recursivebissect(SpMat &A, int64_t nlevels, boo
 std::vector<ClusterID> partition_modifiedND(SpMat &A, int64_t nlevels, bool verb, bool useVertexSep, MatrixXd* Xcoo) {
     int64_t N = A.rows();
     bool geo = (Xcoo != nullptr);
-    if(verb && geo) printf("Geometric MND partitioning & ordering\n");
-    if(verb && !geo) printf("Algebraic MND partitioning & ordering\n");
+    if (verb && geo) printf("Geometric MND partitioning & ordering\n");
+    if (verb && !geo) printf("Algebraic MND partitioning & ordering\n");
     // CSC format
     int64_t nnz = A.nonZeros();
     auto csc = SpMat2CSC(A);
@@ -408,19 +408,19 @@ std::vector<ClusterID> partition_modifiedND(SpMat &A, int64_t nlevels, bool verb
     // Partitioning results
     std::vector<ClusterID> part = std::vector<ClusterID>(N, ClusterID(SepID(nlevels-1,0),SepID(nlevels-1,0),SepID(nlevels-1,0)));
     // Where we store results
-    for(int64_t depth = 0; depth < nlevels - 1; depth++) {
+    for (int64_t depth = 0; depth < nlevels - 1; depth++) {
         Stats<int64_t> sepsstats = Stats<int64_t>();
         int64_t level = nlevels - depth - 1;
         timer t0000 = wctime();
         // Get all separators
         std::vector<std::vector<int64_t>> newdoms(pow(2, depth+1));
-        for(int64_t sep = 0; sep < pow(2, depth); sep++) {
+        for (int64_t sep = 0; sep < pow(2, depth); sep++) {
             SepID idself = SepID(level, sep);
             // Prepare sorted dofs vector            
             std::vector<int64_t> dofssep = doms[sep];
             std::sort(dofssep.begin(), dofssep.end());
             // Generate matrix & perform ND
-            if(geo) {
+            if (geo) {
                 partition_nd_geo(colptr, rowval, dofssep, parttmp, Xcoo, colptrtmp); // colptrtmp can be any array with >= N elements
             } else {
                 partition_metis(colptr, rowval, colptrtmp, rowvaltmp, dofssep, parttmp, useVertexSep); // result in parttmp[0...size-1]
@@ -435,7 +435,7 @@ std::vector<ClusterID> partition_modifiedND(SpMat &A, int64_t nlevels, bool verb
                 if (part[j].self == idself) {
                     if (parttmp[i] == 0) {
                         part[j].self = idleft;    
-                    } else if(parttmp[i] == 1) {
+                    } else if (parttmp[i] == 1) {
                         part[j].self = idright;
                     }
                 }
@@ -478,7 +478,7 @@ std::vector<ClusterID> partition_modifiedND(SpMat &A, int64_t nlevels, bool verb
         }
         doms = newdoms;
         timer t0001 = wctime();
-        if(verb) printf("  Depth %2d: %3.2e s. (%5d separators, [%5d %5d], mean %6.1f)\n", 
+        if (verb) printf("  Depth %2d: %3.2e s. (%5d separators, [%5d %5d], mean %6.1f)\n", 
                  depth+1, elapsed(t0000, t0001), sepsstats.getCount(), sepsstats.getMin(), sepsstats.getMax(), sepsstats.getMean());
     }
     return part;   

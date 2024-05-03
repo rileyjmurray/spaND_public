@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
     // 9b. Use spaND
     // Run Algo
     MatrixXd Xcoo(3, mesh->GetNV());
-    for(int64_t i = 0; i < mesh->GetNV(); i++) {
+    for (int64_t i = 0; i < mesh->GetNV(); i++) {
         Xcoo(0, i) = mesh->GetVertex(i)[0];
         Xcoo(1, i) = mesh->GetVertex(i)[1];
         Xcoo(2, i) = mesh->GetVertex(i)[2];

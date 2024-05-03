@@ -22,9 +22,9 @@ void write_clustering(const Tree& t, const MatrixXd& X, std::string fn) {
     std::ofstream clustering_s{fn};
     clustering_s << t.get_N() << ";" << X.rows() << ";" << t.get_nlevels() << "\n";
     clustering_s << "X;id" << "\n";
-    for(int64_t i = 0; i < t.get_N(); i++) {
+    for (int64_t i = 0; i < t.get_N(); i++) {
         // Coordinates
-        for(int64_t d = 0; d < X.rows(); d++) {
+        for (int64_t d = 0; d < X.rows(); d++) {
             clustering_s << " " << X(d,i);
         }
         // ID & lvl
@@ -36,8 +36,8 @@ void write_clustering(const Tree& t, const MatrixXd& X, std::string fn) {
 void write_merging(const Tree& t, std::string fn) {
     std::ofstream merging_s(fn);
     merging_s << "child;parent" << "\n";
-    for(auto n: t.get_clusters()) {
-        if(n->parent() != nullptr) {
+    for (auto n: t.get_clusters()) {
+        if (n->parent() != nullptr) {
             merging_s << n->order() << ";" << n->parent()->order() << "\n";
         }
     }
@@ -47,7 +47,7 @@ void write_merging(const Tree& t, std::string fn) {
 void write_clusters(const Tree& t, std::string fn) {
     std::ofstream clusters_s(fn);
     clusters_s << "id;lvl;mergeLvl;name" << "\n";
-    for(auto n: t.get_clusters()) {
+    for (auto n: t.get_clusters()) {
         clusters_s << n->order() << ";" << n->level() << ";" << n->merge_level() << ";" << n->get_name() << "\n";
     }
     clusters_s.close();
@@ -56,9 +56,9 @@ void write_clusters(const Tree& t, std::string fn) {
 void write_stats(const Tree& t, std::string fn) {
     std::ofstream stats_s(fn);
     stats_s << "id;size;rank;Rdiag" << "\n";
-    for(auto n: t.get_clusters()) {
+    for (auto n: t.get_clusters()) {
         stats_s << n->order() << ";" << n->original_size() << ";" << n->size() << ";";
-        for(auto v: n->Rdiag) { stats_s << v << " "; }
+        for (auto v: n->Rdiag) { stats_s << v << " "; }
         stats_s << "\n";
     }
     stats_s.close();
@@ -67,17 +67,17 @@ void write_stats(const Tree& t, std::string fn) {
 
 void write_log_flops(const Tree& t, std::string fn) {         
     std::ofstream flops(fn);
-    for(int64_t l = 0; l < t.tprof_flops.size(); l++) {
-        for(const auto& f: t.tprof_flops[l].pivot) {
+    for (int64_t l = 0; l < t.tprof_flops.size(); l++) {
+        for (const auto& f: t.tprof_flops[l].pivot) {
             flops << l << ";pivot;" << f.rows << ";0;0;" << f.time << "\n";
         }
-        for(const auto& f: t.tprof_flops[l].panel) {
+        for (const auto& f: t.tprof_flops[l].panel) {
             flops << l << ";panel;" << f.rows << ";" << f.cols << ";0;" << f.time << "\n";
         }
-        for(const auto& f: t.tprof_flops[l].gemm) {
+        for (const auto& f: t.tprof_flops[l].gemm) {
             flops << l << ";gemm;" << f.rows << ";" << f.cols << ";" << f.inner << ";" << f.time << "\n";
         }
-        for(const auto& f: t.tprof_flops[l].rrqr) {
+        for (const auto& f: t.tprof_flops[l].rrqr) {
             flops << l << ";rrqr;" << f.rows << ";" << f.cols << ";0;" << f.time << "\n";
         }
     }    
@@ -145,16 +145,16 @@ int64_t Tree::get_new_order() {
 
 int64_t Tree::nclusters_left() const {
     int64_t n = 0;
-    for(auto& self : bottom_current()){
-        if(! self->is_eliminated()) n++;
+    for (auto& self : bottom_current()){
+        if (! self->is_eliminated()) n++;
     }
     return n;
 }
 
 int64_t Tree::ndofs_left() const {
     int64_t n = 0;
-    for(auto& self : bottom_current()){
-        if(! self->is_eliminated()) n += self->size();
+    for (auto& self : bottom_current()){
+        if (! self->is_eliminated()) n += self->size();
     }
     return n;
 }
@@ -165,11 +165,11 @@ int64_t Tree::get_N() const {
 
 int64_t Tree::get_stop() const {
     int64_t stop = get_N();
-    for(int64_t lvl = 0; lvl < this->log.size(); lvl++) {
-        if(this->log[lvl].dofs_left_elim > 0) {
+    for (int64_t lvl = 0; lvl < this->log.size(); lvl++) {
+        if (this->log[lvl].dofs_left_elim > 0) {
             stop = std::min(stop, this->log[lvl].dofs_left_elim);
         }
-        if(this->log[lvl].dofs_left_spars > 0) {
+        if (this->log[lvl].dofs_left_spars > 0) {
             stop = std::min(stop, this->log[lvl].dofs_left_spars);
         }
     }
@@ -199,8 +199,8 @@ bool Tree::symmetry() const {
 }
 
 void Tree::assert_symmetry() {
-    for(const auto& self : this->bottom_current()) {
-        for(auto e: self->edgesOutNbr()) {
+    for (const auto& self : this->bottom_current()) {
+        for (auto e: self->edgesOutNbr()) {
             assert(e->n1 == self.get());
             assert(e->n2->order() > e->n1->order());
         }
@@ -214,14 +214,14 @@ void Tree::stats() const {
     Stats<int64_t> cluster_size = Stats<int64_t>();
     Stats<int64_t> edge_size = Stats<int64_t>();
     Stats<int64_t> edge_count = Stats<int64_t>();
-    for(const auto& self : bottom_original()) {
+    for (const auto& self : bottom_original()) {
         cluster_size.addData(self->size());
         edge_count.addData(self->nnbr_in_self_out());
-        for(const auto edge : self->edgesOutAll()) {
+        for (const auto edge : self->edgesOutAll()) {
             assert(edge->n1 == self.get());
             edge_size.addData(edge->n1->size() * edge->n2->size());
         }
-        for(const auto edge : self->edgesInNbr()) {
+        for (const auto edge : self->edgesInNbr()) {
             assert(edge->n2 == self.get());
             edge_size.addData(edge->n1->size() * edge->n2->size());
         }
@@ -232,11 +232,11 @@ void Tree::stats() const {
 }
 
 void print_nodes_hierarchy(Cluster* n, int64_t indent) {        
-    for(int64_t i = 0; i < indent; i++) std::cout << "  ";
-    if(indent == 0) std::cout << "* ";
-    if(indent >  0) std::cout << "|_";
+    for (int64_t i = 0; i < indent; i++) std::cout << "  ";
+    if (indent == 0) std::cout << "* ";
+    if (indent >  0) std::cout << "|_";
     std::cout << n->order() << ": " << n->start() << ", " << n->size() << ", " << n->level() << ", " << n->get_name() << "\n";
-    for(auto c: n->children()) {
+    for (auto c: n->children()) {
         print_nodes_hierarchy(c, indent + 1);
     }
 }
@@ -244,26 +244,26 @@ void print_nodes_hierarchy(Cluster* n, int64_t indent) {
 void Tree::print_clusters_hierarchy() const {
     // (1) Find all cluster hierarchy roots
     std::set<Cluster*> roots;
-    for(int64_t l = 0; l < bottoms.size(); l++) {
-        for(const auto& n: bottoms[l]) {
-            if(n->parent() == nullptr) roots.insert(n.get());
+    for (int64_t l = 0; l < bottoms.size(); l++) {
+        for (const auto& n: bottoms[l]) {
+            if (n->parent() == nullptr) roots.insert(n.get());
         }
     }
     std::vector<Cluster*> roots_sorted(roots.begin(), roots.end());
     // (2) Print hierarchy
-    for(auto r: roots_sorted) {
+    for (auto r: roots_sorted) {
         print_nodes_hierarchy(r, 0);
     }
 }
 
 void Tree::print_connectivity() const {
-    for(int64_t l = 0; l < bottoms.size(); l++) {
-        for(const auto& n: bottoms[l]) {
+    for (int64_t l = 0; l < bottoms.size(); l++) {
+        for (const auto& n: bottoms[l]) {
             printf("Node %d (%p) size %d:\n", n->order(), n.get(), n->size());
-            for(auto e: n->edgesOutAll()) {
+            for (auto e: n->edgesOutAll()) {
                 printf(" -> %d (%p) orig ? %d\n", e->n2->order(), e->n2, e->is_original());
             }
-            for(auto e: n->edgesInNbr()) {
+            for (auto e: n->edgesInNbr()) {
                 printf(" <- %d (%p) orig ? %d\n", e->n1->order(), e->n1, e->is_original());
             }
         }
@@ -272,8 +272,8 @@ void Tree::print_connectivity() const {
 
 std::list<const Cluster*> Tree::get_clusters() const {
     std::list<const Cluster*> all;
-    for(int64_t l = 0; l < bottoms.size(); l++) {
-        for(const auto& n: bottoms[l]) {
+    for (int64_t l = 0; l < bottoms.size(); l++) {
+        for (const auto& n: bottoms[l]) {
             all.push_back(n.get());
         }
     }
@@ -283,8 +283,8 @@ std::list<const Cluster*> Tree::get_clusters() const {
 std::vector<int64_t> Tree::get_dof2ID() const {
     std::vector<int64_t> ids(this->get_N());
     assert(bottoms.size() > 0);
-    for(const auto& n: bottoms[0]) {
-        for(int64_t i = 0; i < n->original_size(); i++) {
+    for (const auto& n: bottoms[0]) {
+        for (int64_t i = 0; i < n->original_size(); i++) {
             ids[perm[n->start() + i]] = n->order();
         }
     }
@@ -294,7 +294,7 @@ std::vector<int64_t> Tree::get_dof2ID() const {
 // We sparsify a cluster when both his left and right have been eliminated
 bool Tree::want_sparsify(Cluster* self) {
     assert(self->level() >= this->ilvl); // If we sparsify a node, it means it cannot be eliminated
-    if(this->use_want_sparsify) {
+    if (this->use_want_sparsify) {
         return self->should_sparsify();
     } else {
         return true;
@@ -318,34 +318,34 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
     int64_t N = A.rows();
     assert(A.rows() == A.cols());
     assert(nlevels > 0);
-    if(this->geo) {
+    if (this->geo) {
         assert(this->Xcoo != nullptr);
         assert(this->Xcoo->cols() == N);
     }
     std::vector<ClusterID> part;
     bool use_vertex_sep = true;
     // Print
-    if(this->verb) {
-        if(this->part_kind == PartKind::MND) {
+    if (this->verb) {
+        if (this->part_kind == PartKind::MND) {
             if (this->geo) std::cout << "MND geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << std::endl;
             else           std::cout << "MND algebraic (with vertex sep ? " << use_vertex_sep << ") partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << std::endl;
-        } else if(this->part_kind == PartKind::RB) {
+        } else if (this->part_kind == PartKind::RB) {
             if (this->geo) std::cout << "RB geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << std::endl;
             else           std::cout << "RB algebraic partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << std::endl;
         }
     }
     // Compute the self/left/right partitioning
-    if(this->part_kind == PartKind::MND) {
+    if (this->part_kind == PartKind::MND) {
         part = partition_modifiedND(A, this->nlevels, this->verb, use_vertex_sep, this->geo ? this->Xcoo : nullptr);
     } else if (this->part_kind == PartKind::RB) {
         part = partition_recursivebissect(A, this->nlevels, this->verb, this->geo ? this->Xcoo : nullptr);
     }
     // Logging
-    for(int64_t i = 0; i < part.size(); i++) {
+    for (int64_t i = 0; i < part.size(); i++) {
         this->log[part[i].self.lvl].dofs_nd += 1;
     }
     this->log[nlevels-1].dofs_left_nd = 0;
-    for(int64_t l = nlevels-2; l >= 0; l--) {
+    for (int64_t l = nlevels-2; l >= 0; l--) {
         this->log[l].dofs_left_nd = this->log[l+1].dofs_nd + this->log[l+1].dofs_left_nd;
     }
     // Compute the ordering & associated permutation
@@ -354,7 +354,7 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
     std::vector<ClusterID> partmerged = part;
     auto compIJ = [&partmerged](int64_t i, int64_t j){return (partmerged[i] < partmerged[j]);};
     std::stable_sort(perm.data(), perm.data() + perm.size(), compIJ); // !!! STABLE SORT MATTERS !!!
-    for(int64_t lvl = 1; lvl < nlevels; lvl++) {
+    for (int64_t lvl = 1; lvl < nlevels; lvl++) {
         std::transform(partmerged.begin(), partmerged.end(), partmerged.begin(), [&lvl](ClusterID s){return merge_if(s, lvl);}); // lvl matters    
         std::stable_sort(perm.data(), perm.data() + perm.size(), compIJ); // !!! STABLE SORT MATTERS !!!
     }
@@ -365,10 +365,10 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
     std::map<Cluster*, ClusterID> clusters_ids;
     std::map<Cluster*, ClusterID> parents_ids;
     std::vector<Stats<int64_t>> clustersstats(nlevels, Stats<int64_t>());
-    for(int64_t k = 0; k < N; ) {
+    for (int64_t k = 0; k < N; ) {
         int64_t knext = k+1;
         ClusterID id = partpermed[k];
-        while(knext < N && partpermed[knext] == id) { knext += 1; }
+        while (knext < N && partpermed[knext] == id) { knext += 1; }
         int64_t size = knext - k;
         auto self = std::make_unique<Cluster>(k, size, id.self.lvl, get_new_order(), id.l.lvl == 0 && id.r.lvl == 0);
         clusters_ids[self.get()] = id;
@@ -376,28 +376,28 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
         bottoms[0].push_back(move(self));
         k = knext;
     }
-    if(this->verb) {
+    if (this->verb) {
         printf("Clustering size statistics (# of leaf-clusters at each level of the ND hierarchy)\n");
         printf("Lvl     Count       Min       Max      Mean\n");
-        for(int64_t lvl = 0; lvl < nlevels; lvl++) {
+        for (int64_t lvl = 0; lvl < nlevels; lvl++) {
             printf("%3d %9d %9d %9d %9.0f\n", lvl, clustersstats[lvl].getCount(), clustersstats[lvl].getMin(), clustersstats[lvl].getMax(), clustersstats[lvl].getMean());
         }
     }
     // Create the cluster hierarchy
-    if(this->verb) printf("Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)\n");
-    if(this->verb) printf("%3d %9lu\n", 0, bottoms[0].size());
-    for(int64_t lvl = 1; lvl < nlevels; lvl++) {
+    if (this->verb) printf("Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)\n");
+    if (this->verb) printf("%3d %9lu\n", 0, bottoms[0].size());
+    for (int64_t lvl = 1; lvl < nlevels; lvl++) {
         auto begin = find_if(bottoms[lvl-1].begin(), bottoms[lvl-1].end(), [lvl](const pCluster& s){
                         return s->level() >= lvl; // All others should have been eliminated by now
                      });
         auto end   = bottoms[lvl-1].end();        
         // Merge clusters        
-        for(auto self = begin; self != end; self++) {
+        for (auto self = begin; self != end; self++) {
             assert((*self)->level() >= lvl);
             parents_ids[self->get()] = merge_if(clusters_ids.at(self->get()), lvl);            
         }
         // Figure out who gets merged together, setup children/parent, parentID
-        for(auto k = begin; k != end;) {
+        for (auto k = begin; k != end;) {
             // Figures out who gets merged together
             auto idparent = parents_ids.at(k->get());
             std::vector<Cluster*> children;
@@ -406,23 +406,23 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
             int64_t children_start = (*k)->start();
             int64_t children_size  = (*k)->size();
             k++;
-            while(k != end && idparent == parents_ids.at(k->get())) {
+            while (k != end && idparent == parents_ids.at(k->get())) {
                 children.push_back(k->get());
                 children_size += (*k)->size();
                 k++;                
             }
             auto parent = std::make_unique<Cluster>(children_start, children_size, idparent.self.lvl, get_new_order(), idparent.l.lvl == lvl && idparent.r.lvl == lvl);
-            for(auto c: children) {
+            for (auto c: children) {
                 c->set_parent(parent.get());
                 parent->add_children(c);                
             }
             clusters_ids[parent.get()] = idparent;
             bottoms[lvl].push_back(move(parent));            
         }
-        if(this->verb) printf("%3d %9lu\n", lvl, bottoms[lvl].size());
+        if (this->verb) printf("%3d %9lu\n", lvl, bottoms[lvl].size());
     }
     timer tend = wctime();
-    if(this->verb) printf("Partitioning time : %3.2e s.\n", elapsed(tstart, tend));
+    if (this->verb) printf("Partitioning time : %3.2e s.\n", elapsed(tstart, tend));
     return part;
 }
 
@@ -433,12 +433,12 @@ void Tree::partition_lorasp(SpMat& A) {
     int64_t N = A.rows();
     assert(A.rows() == A.cols());
     assert(nlevels > 0);
-    if(this->geo) {
+    if (this->geo) {
         assert(this->Xcoo != nullptr);
         assert(this->Xcoo->cols() == N);
     }
     // Print
-    if(this->verb) {        
+    if (this->verb) {        
         if (this->geo) std::cout << "RB geometric partitioning of matrix with " << N << " dofs with " << nlevels << " levels in " << this->Xcoo->rows() << "D" << std::endl;
         else           std::cout << "RB algebraic partitioning of matrix with " << N << " dofs with " << nlevels << " levels" << std::endl;
     }    
@@ -455,10 +455,10 @@ void Tree::partition_lorasp(SpMat& A) {
     std::map<Cluster*, int64_t> clusters_ids; // Basically the partition ID
     std::map<Cluster*, int64_t> parents_ids;
     int64_t lvltop = nlevels-1;
-    for(int64_t k = 0; k < N; ) {
+    for (int64_t k = 0; k < N; ) {
         int64_t knext = k+1;
         int64_t id = partpermed[k];
-        while(knext < N && partpermed[knext] == id) { knext += 1; }
+        while (knext < N && partpermed[knext] == id) { knext += 1; }
         int64_t size = knext - k;
         auto self = std::make_unique<Cluster>(k, size, lvltop, get_new_order(), true);
         clusters_ids[self.get()] = self->order();
@@ -466,20 +466,20 @@ void Tree::partition_lorasp(SpMat& A) {
         k = knext;
     }    
     // Create the cluster hierarchy
-    if(this->verb) printf("Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)\n");
-    if(this->verb) printf("%3d %9lu\n", 0, bottoms[0].size());
-    for(int64_t lvl = 1; lvl < nlevels; lvl++) {
+    if (this->verb) printf("Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)\n");
+    if (this->verb) printf("%3d %9lu\n", 0, bottoms[0].size());
+    for (int64_t lvl = 1; lvl < nlevels; lvl++) {
         auto begin = find_if(bottoms[lvl-1].begin(), bottoms[lvl-1].end(), [lvl](const pCluster& s){
                         return s->level() >= lvl; // All others should have been eliminated by now
                      });
         auto end = bottoms[lvl-1].end();
         // Merge clusters
-        for(auto self = begin; self != end; self++) {
+        for (auto self = begin; self != end; self++) {
             assert((*self)->level() >= lvl);
             parents_ids[self->get()] = clusters_ids[self->get()] / 2;
         }
         // Figure out who gets merged together, setup children/parent, parentID
-        for(auto k = begin; k != end;) {
+        for (auto k = begin; k != end;) {
             // Figures out who gets merged together
             auto idparent = parents_ids.at(k->get());
             std::vector<Cluster*> children;
@@ -488,23 +488,23 @@ void Tree::partition_lorasp(SpMat& A) {
             int64_t children_start = (*k)->start();
             int64_t children_size  = (*k)->size();
             k++;
-            while(k != end && idparent == parents_ids.at(k->get())) {
+            while (k != end && idparent == parents_ids.at(k->get())) {
                 children.push_back(k->get());
                 children_size += (*k)->size();
                 k++;                
             }
             auto parent = std::make_unique<Cluster>(children_start, children_size, lvltop, get_new_order(), true);
-            for(auto c: children) {
+            for (auto c: children) {
                 c->set_parent(parent.get());
                 parent->add_children(c);                
             }
             clusters_ids[parent.get()] = idparent;
             bottoms[lvl].push_back(move(parent));            
         }
-        if(this->verb) printf("%3d %9lu\n", lvl, bottoms[lvl].size());
+        if (this->verb) printf("%3d %9lu\n", lvl, bottoms[lvl].size());
     }
     timer tend = wctime();
-    if(this->verb) printf("Partitioning time : %3.2e s.\n", elapsed(tstart, tend));
+    if (this->verb) printf("Partitioning time : %3.2e s.\n", elapsed(tstart, tend));
 }
 
 /** 
@@ -516,9 +516,9 @@ void Tree::assemble(SpMat& A) {
     assert(N >= 0);
     timer tstart = wctime();        
     int64_t nlevels = this->nlevels;
-    if(this->verb) std::cout << "Assembling (Size " << N << " with " << nlevels << " levels and symmetry " << this->symmetry() << ")" << std::endl;    
+    if (this->verb) std::cout << "Assembling (Size " << N << " with " << nlevels << " levels and symmetry " << this->symmetry() << ")" << std::endl;    
     // Verify the clusters hierarchy
-    for(const auto& n: this->bottom_current()) {
+    for (const auto& n: this->bottom_current()) {
         assert(n->depth() == n->level());
     }
     // Permute & compress the matrix for assembly
@@ -536,11 +536,11 @@ void Tree::assemble(SpMat& A) {
     std::vector<Stats<int64_t>> nedgestats(nlevels, Stats<int64_t>());
     // Create all edges
     std::vector<Cluster*> cmap(N);
-    for(auto& self : bottom_original()) {
+    for (auto& self : bottom_original()) {
         assert(self->start() >= 0);
-        for(int64_t k = self->start(); k < self->start() + self->size(); k++) { cmap[k] = self.get(); }
+        for (int64_t k = self->start(); k < self->start() + self->size(); k++) { cmap[k] = self.get(); }
     }
-    for(auto& self : bottom_original()) {
+    for (auto& self : bottom_original()) {
         // Get all neighbors in column
         int64_t col  = self->start();
         int64_t size = self->size();
@@ -548,7 +548,7 @@ void Tree::assemble(SpMat& A) {
         for (int64_t j = col; j < col + size; ++j) {
             // Get the column
             for (SpMat::InnerIterator it(App,j); it; ++it) {
-                if(this->symmetry() && (it.row() < j)) continue; // Symmetric: skip stuff above the diagonal
+                if (this->symmetry() && (it.row() < j)) continue; // Symmetric: skip stuff above the diagonal
                 Cluster* n = cmap[it.row()];
                 nbrs.insert(n);
             }
@@ -566,20 +566,20 @@ void Tree::assemble(SpMat& A) {
         nedgestats[self->level()].addData(nbrs.size());
         self->sort_edges();
     }
-    if(this->verb) {
+    if (this->verb) {
         printf("Edge size statistics (Leaf-cluster edge size at each level of the ND hierarchy)\n");
         printf("Lvl     Count       Min       Max      Mean\n");
-        for(int64_t lvl = 0; lvl < nlevels; lvl++) {
+        for (int64_t lvl = 0; lvl < nlevels; lvl++) {
             printf("%3d %9d %9d %9d %9.0f\n", lvl, edgesizestats[lvl].getCount(), edgesizestats[lvl].getMin(), edgesizestats[lvl].getMax(), edgesizestats[lvl].getMean());
         }
         printf("Edge count statistics (Leaf-cluster edge count at each level of the ND hierarchy)\n");
         printf("Lvl     Count       Min       Max      Mean\n");
-        for(int64_t lvl = 0; lvl < nlevels; lvl++) {
+        for (int64_t lvl = 0; lvl < nlevels; lvl++) {
             printf("%3d %9d %9d %9d %9.0f\n", lvl, nedgestats[lvl].getCount(), nedgestats[lvl].getMin(), nedgestats[lvl].getMax(), nedgestats[lvl].getMean());
         }
     }
     timer tend = wctime();
-    if(this->verb) printf("Assembly time : %3.2e s. (%3.2e permuting A)\n", elapsed(tstart, tend), elapsed(t0, t1));
+    if (this->verb) printf("Assembly time : %3.2e s. (%3.2e permuting A)\n", elapsed(tstart, tend), elapsed(t0, t1));
 }
 
 /**
@@ -592,12 +592,12 @@ void Tree::potf_cluster(Cluster* self) {
     timer t_ = wctime();
     int64_t info = potf(Ass); // Ass = L L^T
     timer t__ = wctime();    
-    if(info != 0) {
+    if (info != 0) {
         std::cout << "Not SPD!" << std::endl;
         throw std::runtime_error("Error: Non-SPD Pivot\n");
     }
     this->tprof[this->ilvl].potf += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
 }
 
 // Scale pivot Ass = P L D LT PT, returns P, L, D
@@ -610,12 +610,12 @@ void Tree::ldlt_cluster(Cluster* self, pMatrixXd* L, pVectorXd* d, pVectorXi64* 
     timer t_ = wctime();
     int64_t info = ldlt(Ass, L->get(), d->get(), p->get(), &rcond);
     timer t__ = wctime();
-    if(info != 0) {
+    if (info != 0) {
         std::cout << "Singular Pivot in LDLT!" << std::endl;
         throw std::runtime_error("Error: Singular Pivot\n");
     }
     this->tprof[this->ilvl].ldlt += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
 }
 
 // Scale pivot Ass = P L U Q, returns L, U, P, Q
@@ -626,11 +626,11 @@ void Tree::getf_cluster(Cluster* self, pMatrixXd* L, pMatrixXd* U, pVectorXi64* 
     *U = std::make_unique<MatrixXd>(self->size(), self->size());
     MatrixXd* Ass  = self->pivot()->A();
     timer t_ = wctime();
-    if(this->scale_kind == ScalingKind::PLUQ) {
+    if (this->scale_kind == ScalingKind::PLUQ) {
         fpgetf(Ass, p->get(), q->get()); // Ass = P L U Q
     } else {
         int64_t info = getf(Ass, p->get()); // Ass = P L U
-        if(info != 0) {
+        if (info != 0) {
             std::cout << "Singular Pivot!" << std::endl;
             throw std::runtime_error("Error: Singular Pivot\n");
         }
@@ -639,7 +639,7 @@ void Tree::getf_cluster(Cluster* self, pMatrixXd* L, pMatrixXd* U, pVectorXi64* 
     timer t__ = wctime();    
     split_LU(Ass, L->get(), U->get());
     this->tprof[this->ilvl].getf += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].pivot.push_back({Ass->rows(), elapsed(t_, t__)});
 }
 
 // Assume A = L L^T is the pivot
@@ -653,7 +653,7 @@ void Tree::trsm_potf_edgeIn(Edge* edge){
     trsm_left(L, Asn, Uplo::Lower, Op::NoTrans, Diag::NonUnit); // Lss^(-1) Asn
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
 }
 
 // Assumes A = L L^T is the pivot
@@ -667,7 +667,7 @@ void Tree::trsm_potf_edgeOut(Edge* edge){
     trsm_right(L, Ans, Uplo::Lower, Op::Trans, Diag::NonUnit); // Ans Lss^-T
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
 }
 
 // Assume A = P L U Q
@@ -680,7 +680,7 @@ void Tree::trsm_getf_edgeIn(Edge* edge, MatrixXd* L, VectorXi64* p){
     trsm_left(L, Asn, Uplo::Lower, Op::NoTrans, Diag::NonUnit); // Lss^-1 Pss^T Asn
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
 }
 
 // Assumes A = P U L Q
@@ -693,7 +693,7 @@ void Tree::trsm_getf_edgeOut(Edge* edge, MatrixXd* U, VectorXi64* q){
     trsm_right(U, Ans, Uplo::Upper, Op::NoTrans, Diag::NonUnit); // Ans Qss^T Uss^-1
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
 }
 
 // A = P L S LT PT with S a sign
@@ -706,7 +706,7 @@ void Tree::trsm_ldlt_edgeIn(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi64* p
     trsm_left( L, Asn, Uplo::Lower, Op::NoTrans, Diag::NonUnit); // Lss^-1 Pss^T Asn
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Asn->cols(), Asn->rows(), elapsed(t_, t__)});
 }
 
 // A = P L S LT PT with S a sign
@@ -719,32 +719,32 @@ void Tree::trsm_ldlt_edgeOut(Edge* edge, Eigen::MatrixXd* L, Eigen::VectorXi64* 
     trsm_right(L, Ans, Uplo::Lower, Op::Trans, Diag::NonUnit); // Ans Pss Lss^-T
     timer t__ = wctime();
     this->tprof[this->ilvl].trsm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].panel.push_back({Ans->rows(), Ans->cols(), elapsed(t_, t__)});
 }
 
 void Tree::panel_potf(Cluster* self) {
-    for(auto edge : self->edgesInNbr()){
+    for (auto edge : self->edgesInNbr()){
         trsm_potf_edgeIn(edge);
     }
-    for(auto edge : self->edgesOutNbr()){
+    for (auto edge : self->edgesOutNbr()){
         trsm_potf_edgeOut(edge);
     }
 }
 
 void Tree::panel_ldlt(Cluster* self, MatrixXd* L, VectorXi64* p) {
-    for(auto edge : self->edgesInNbr()) {
+    for (auto edge : self->edgesInNbr()) {
         trsm_ldlt_edgeIn(edge, L, p);
     }
-    for(auto edge : self->edgesOutNbr()) {
+    for (auto edge : self->edgesOutNbr()) {
         trsm_ldlt_edgeOut(edge, L, p);
     }
 }
 
 void Tree::panel_getf(Cluster* self, MatrixXd* L, MatrixXd* U, VectorXi64* p, VectorXi64* q) {
-    for(auto edge : self->edgesInNbr()) {
+    for (auto edge : self->edgesInNbr()) {
         trsm_getf_edgeIn(edge, L, p);
     }
-    for(auto edge : self->edgesOutNbr()) {
+    for (auto edge : self->edgesOutNbr()) {
         trsm_getf_edgeOut(edge, U, q);
     }
 }
@@ -782,22 +782,22 @@ void Tree::gemm_edges(Edge* edge1, Edge* edge2, VectorXd* diag, bool transpose_e
     assert(found != n2->edgesOutAll().end());
     MatrixXd* An1n2 = (*found)->A();
     timer t_ = wctime();
-    if(diag == nullptr) {
-        if(n1 == n2 && this->symmetry()) {
+    if (diag == nullptr) {
+        if (n1 == n2 && this->symmetry()) {
             syrk(An1s, An1n2, transpose_edge_1 ? Op::Trans : Op::NoTrans, -1.0, 1.0);
         } else {
             gemm_spand(An1s, Asn2, An1n2, transpose_edge_1 ? Op::Trans : Op::NoTrans, transpose_edge_2 ? Op::Trans : Op::NoTrans, -1.0, 1.0);
         }
     } else {
         if     ( (! transpose_edge_1) && (! transpose_edge_2)) (*An1n2).noalias() -= (*An1s)             * (diag->cwiseInverse().asDiagonal()) * (*Asn2);
-        else if( (! transpose_edge_1) && (  transpose_edge_2)) (*An1n2).noalias() -= (*An1s)             * (diag->cwiseInverse().asDiagonal()) * (*Asn2).transpose();
-        else if( (  transpose_edge_1) && (! transpose_edge_2)) (*An1n2).noalias() -= (*An1s).transpose() * (diag->cwiseInverse().asDiagonal()) * (*Asn2);
-        else if( (  transpose_edge_1) && (  transpose_edge_2)) (*An1n2).noalias() -= (*An1s).transpose() * (diag->cwiseInverse().asDiagonal()) * (*Asn2).transpose();
+        else if ( (! transpose_edge_1) && (  transpose_edge_2)) (*An1n2).noalias() -= (*An1s)             * (diag->cwiseInverse().asDiagonal()) * (*Asn2).transpose();
+        else if ( (  transpose_edge_1) && (! transpose_edge_2)) (*An1n2).noalias() -= (*An1s).transpose() * (diag->cwiseInverse().asDiagonal()) * (*Asn2);
+        else if ( (  transpose_edge_1) && (  transpose_edge_2)) (*An1n2).noalias() -= (*An1s).transpose() * (diag->cwiseInverse().asDiagonal()) * (*Asn2).transpose();
         else assert(false);
     }
     timer t__ = wctime();
     this->tprof[this->ilvl].gemm += elapsed(t_, t__);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].gemm.push_back({An1n2->rows(), An1n2->cols(), s->size(), elapsed(t_, t__)});
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].gemm.push_back({An1n2->rows(), An1n2->cols(), s->size(), elapsed(t_, t__)});
 }
 
 // Scale a cluster to make it identity
@@ -812,7 +812,7 @@ void Tree::scale_cluster(Cluster* self) {
         panel_potf(self);
         t2 = wctime();
         // Record & make diagonal identity
-        if(preserve) {
+        if (preserve) {
             trmm_trans(self->pivot()->A(), self->phi());
         }
         this->ops.push_back(std::make_unique<ScalingLLT>(self, self->pivot()->get_A()));
@@ -829,7 +829,7 @@ void Tree::scale_cluster(Cluster* self) {
         panel_ldlt(self, L.get(), p.get());
         t2 = wctime();
         // Record
-        if(preserve) {
+        if (preserve) {
             *self->phi() = p->asPermutation().transpose() * (*self->phi());
             trmm_trans(L.get(), self->phi());
         }
@@ -868,22 +868,22 @@ void Tree::schur_symmetric(Cluster* self) {
 }
 
 void Tree::schur_symmetric(Cluster* self, VectorXd* Adiag) {
-    for(auto edge1 : self->edgesOutNbr()){ // s -> n1, row
-        for(auto edge2 : self->edgesOutNbr()){ // s -> n2, col
-            if(edge1->n2->order() >= edge2->n2->order()) {
+    for (auto edge1 : self->edgesOutNbr()){ // s -> n1, row
+        for (auto edge2 : self->edgesOutNbr()){ // s -> n2, col
+            if (edge1->n2->order() >= edge2->n2->order()) {
                 gemm_edges(edge1, edge2, Adiag, false, true);
             }
         }
     }
-    for(auto edge1 : self->edgesInNbr()){ // n1 -> s, row
-        for(auto edge2 : self->edgesInNbr()){ // n2 -> s, col
-            if(edge1->n1->order() >= edge2->n1->order()) {
+    for (auto edge1 : self->edgesInNbr()){ // n1 -> s, row
+        for (auto edge2 : self->edgesInNbr()){ // n2 -> s, col
+            if (edge1->n1->order() >= edge2->n1->order()) {
                 gemm_edges(edge1, edge2, Adiag, true, false);
             }
         }
     }
-    for(auto edge1 : self->edgesOutNbr()){ // s -> n1, row
-        for(auto edge2 : self->edgesInNbr()){ // n2 -> s, col
+    for (auto edge1 : self->edgesOutNbr()){ // s -> n1, row
+        for (auto edge2 : self->edgesInNbr()){ // n2 -> s, col
             assert(edge1->n2->order() > edge2->n1->order());
             gemm_edges(edge1, edge2, Adiag, false, false);
         }
@@ -891,10 +891,10 @@ void Tree::schur_symmetric(Cluster* self, VectorXd* Adiag) {
 }
 
 void Tree::record_schur_symmetric(Cluster* self, VectorXd* Adiag) {
-    for(auto edge : self->edgesOutNbr()) {
+    for (auto edge : self->edgesOutNbr()) {
         this->ops.push_back(std::make_unique<GemmSymmOut>(self, edge->n2, edge->get_A(), Adiag));
     }
-    for(auto edge : self->edgesInNbr()) {
+    for (auto edge : self->edgesInNbr()) {
         this->ops.push_back(std::make_unique<GemmSymmIn>(self, edge->n1, edge->get_A(), Adiag));
     }
 }
@@ -948,18 +948,18 @@ void Tree::eliminate_cluster(Cluster* self){
         panel_getf(self, L.get(), U.get(), p.get(), q.get());
         // Schur complement
         t2 = wctime();
-        for(auto edge1 : self->edgesOutNbr()){ // s -> n1
-            for(auto edge2 : self->edgesInNbr()){ // n2 -> s    
+        for (auto edge1 : self->edgesOutNbr()){ // s -> n1
+            for (auto edge2 : self->edgesInNbr()){ // n2 -> s    
                 gemm_edges(edge1, edge2, nullptr, false, false);
             }
         }
         t3 = wctime(); 
         // Record
         this->ops.push_back(std::make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q))); // Fwd and Bwd
-        for(auto edge : self->edgesOutNbr()) {
+        for (auto edge : self->edgesOutNbr()) {
             this->ops.push_back(std::make_unique<GemmOut>(self, edge->n2, edge->get_A())); // Fwd only
         }
-        for(auto edge : self->edgesInNbr()) {
+        for (auto edge : self->edgesInNbr()) {
             this->ops.push_back(std::make_unique<GemmIn>(self, edge->n1, edge->get_A())); // Bwd only
         }
     } else {
@@ -998,7 +998,7 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     Cluster* sibling = psibling.get();
     // Shrink original
     original->set_size(original_size);    
-    if(preserve) {
+    if (preserve) {
         MatrixXd* phi_original = original->phi();
         // Apply Q on phi
         ormqr_spand(v, h, phi_original, Side::Left, Op::Trans); // Ass <- Q^T Ass
@@ -1011,14 +1011,14 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     // Scatter
     int64_t Asn_col = 0;
     // Edge before   
-    for(auto edge : original->edgesInNbr()) {
+    for (auto edge : original->edgesInNbr()) {
         assert(edge->n2 == original);
         Cluster* n = edge->n1;  
-        if(this->symmetry()) {
+        if (this->symmetry()) {
             assert(n->order() < original->order());
         }
         // From Asn for original, none for sibling
-        if(pred(edge)) {
+        if (pred(edge)) {
             assert(Asn != nullptr);
             int64_t cols = n->size();
             (*edge->A()) = Asn->middleCols(Asn_col, cols);
@@ -1028,7 +1028,7 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
             MatrixXd* Apn = edge->A();
             ormqr_spand(v, h, Apn, Side::Left, Op::Trans); // Q^T Apn
             // Allocate sibling
-            if(keep_sibling_if_pred_false) {
+            if (keep_sibling_if_pred_false) {
                 pMatrixXd Asn = std::make_unique<MatrixXd>(sibling_size,  n->size());
                 (*Asn) = Apn->middleRows(original_size, sibling_size);
                 pEdge Ens = std::make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
@@ -1039,14 +1039,14 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
         }
     }
     // Edge after
-    for(auto edge : original->edgesOutNbr()) {
+    for (auto edge : original->edgesOutNbr()) {
         assert(edge->n1 == original);
         Cluster* n = edge->n2;
-        if(this->symmetry()) {
+        if (this->symmetry()) {
             assert(n->order() > original->order());
         }
         // From Asn for original, none for sibling
-        if(pred(edge)) {
+        if (pred(edge)) {
             assert(Asn != nullptr);            
             int64_t cols = n->size();
             (*edge->A()) = Asn->middleCols(Asn_col, cols).transpose();
@@ -1056,8 +1056,8 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
             MatrixXd* Anp = edge->A();
             ormqr_spand(v, h, Anp, Side::Right, Op::NoTrans); // Anp Q
             // Allocate sibling
-            if(keep_sibling_if_pred_false) {
-                if(! this->symmetry()) {
+            if (keep_sibling_if_pred_false) {
+                if (! this->symmetry()) {
                     pMatrixXd Ans = std::make_unique<MatrixXd>(n->size(), sibling_size);
                     (*Ans) = Anp->middleCols(original_size, sibling_size);
                     pEdge Esn = std::make_unique<Edge>(sibling, n, move(Ans), edge->is_original());
@@ -1073,10 +1073,10 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
             Anp->conservativeResize(NoChange_t::NoChange, original_size);
         }
     }
-    if(Asn != nullptr) assert(Asn_col == Asn->cols());
+    if (Asn != nullptr) assert(Asn_col == Asn->cols());
     // Self edges
     MatrixXd* piv = original->pivot()->A();
-    if(! is_pivot_I) {
+    if (! is_pivot_I) {
         ormqr_spand(v, h, piv, Side::Right, Op::NoTrans); // Ass <- Ass Q 
         ormqr_spand(v, h, piv, Side::Left, Op::Trans); // Ass <- Q^T Ass
     }
@@ -1089,14 +1089,14 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     pEdge Ess = std::make_unique<Edge>(sibling,   sibling,  move(Ass), true);
     sibling->add_edge(move(Ess));
     // Create s-o and o-s edges, if needed
-    if(! is_pivot_I) {
+    if (! is_pivot_I) {
         // Create s-o edge
         pMatrixXd Aso = std::make_unique<MatrixXd>(sibling_size,  original_size);
         (*Aso) = piv->block(original_size, 0,             sibling_size,  original_size); // Aso : o -> s                
         pEdge Eso = std::make_unique<Edge>(original,  sibling,  move(Aso), true);
         original->add_edge(move(Eso));
         // Create o-s edge
-        if(! this->symmetry()) {
+        if (! this->symmetry()) {
             pMatrixXd Aos = std::make_unique<MatrixXd>(original_size, sibling_size);
             (*Aos) = piv->block(0,             original_size, original_size, sibling_size);  // Aos : s -> o
             pEdge Eos = std::make_unique<Edge>(sibling,   original, move(Aos), true);
@@ -1116,18 +1116,18 @@ pOperation Tree::reset_size(Cluster* snew, std::map<Cluster*, int64_t>* posparen
     assert(this->ilvl == current_bottom-1);
     // Update sizes & posparent
     int64_t size = 0;
-    for(auto sold : snew->children()){
+    for (auto sold : snew->children()){
         (*posparent)[sold] = size;
         size += sold->size();
     }
     snew->reset_size(size);
     // Merge phis
-    if(preserve) {
+    if (preserve) {
         assert(snew->children().size() > 0);
         auto kid = snew->children()[0];
         snew->set_phi(std::make_unique<MatrixXd>(snew->size(), kid->phi()->cols()));
         int64_t row = 0;
-        for(auto sold : snew->children()) {
+        for (auto sold : snew->children()) {
             assert(sold->phi()->rows() == sold->size());
             assert(sold->phi()->cols() == snew->phi()->cols());
             snew->phi()->middleRows(row, sold->size()) = *(sold->phi());
@@ -1143,22 +1143,22 @@ void Tree::update_edges(Cluster* snew, std::map<Cluster*,int64_t>* posparent) {
     assert(this->ilvl == current_bottom-1);
     // Figure out edges that gets together
     std::map<Cluster*,bool> edges_merged; // old neighbor => original?
-    for(auto sold : snew->children()){
-        for(auto eold : sold->edgesOutAll()){
+    for (auto sold : snew->children()){
+        for (auto eold : sold->edgesOutAll()){
             auto nold = eold->n2;
             auto nnew = nold->parent();
             // Default original is false
-            if(edges_merged.count(nnew) == 0) {
+            if (edges_merged.count(nnew) == 0) {
                 edges_merged[nnew] = false;
             }
             // This makes sure that if any edge is original, the new merged edge is original
-            if(! edges_merged[nnew]) {
+            if (! edges_merged[nnew]) {
                 edges_merged[nnew] = eold->is_original();
             }            
         }
     }
     // Allocate memory, create new edges 
-    for(auto nnew_orig : edges_merged) {
+    for (auto nnew_orig : edges_merged) {
         auto nnew = nnew_orig.first;
         auto original = nnew_orig.second;
         timer t0 = wctime();
@@ -1171,8 +1171,8 @@ void Tree::update_edges(Cluster* snew, std::map<Cluster*,int64_t>* posparent) {
     }
     snew->sort_edges(); // Make the edge ordering reproducible (set above can make it ~random)
     // Fill edges, delete previous edges
-    for(auto sold : snew->children()){
-        for(auto eold : sold->edgesOutAll()){
+    for (auto sold : snew->children()){
+        for (auto eold : sold->edgesOutAll()){
             auto nold = eold->n2;
             auto nnew = nold->parent();
             auto found = find_if(snew->edgesOutAll().begin(), snew->edgesOutAll().end(), [&nnew](Edge* e){return e->n2 == nnew;});
@@ -1199,26 +1199,26 @@ pMatrixXd Tree::assemble_Asn(Cluster* self, std::function<bool(Edge*)> pred) {
     int64_t rows = self->size();
     // How many columns & prealloc
     int64_t cols = 0;
-    for(auto edge : self->edgesInNbr()) { // n -> s, Asn
-        if(pred(edge))
+    for (auto edge : self->edgesInNbr()) { // n -> s, Asn
+        if (pred(edge))
             cols += edge->n1->size();
     }    
-    for(auto edge : self->edgesOutNbr()) { // s -> n, Ans
-        if(pred(edge))
+    for (auto edge : self->edgesOutNbr()) { // s -> n, Ans
+        if (pred(edge))
             cols += edge->n2->size();
     }
     auto Asn = std::make_unique<MatrixXd>(rows, cols);
     // Fill
     int64_t c = 0;
-    for(auto edge : self->edgesInNbr()) {
-        if(pred(edge)) {
+    for (auto edge : self->edgesInNbr()) {
+        if (pred(edge)) {
             int64_t cols = edge->n1->size();
             Asn->middleCols(c, cols) = *edge->A(); // Asn
             c += cols;  
         }      
     }
-    for(auto edge : self->edgesOutNbr()) {
-        if(pred(edge)) {
+    for (auto edge : self->edgesOutNbr()) {
+        if (pred(edge)) {
             int64_t cols = edge->n2->size();
             Asn->middleCols(c, cols) = edge->A()->transpose(); // Ans^T
             c += cols;
@@ -1238,22 +1238,22 @@ pMatrixXd Tree::assemble_Asphi(Cluster* self) {
     // How many neighbors ?
     int64_t cols = 0;
     int64_t nphis = this->nphis();
-    for(auto edge : self->edgesInNbr()) { // n -> s, Asn
+    for (auto edge : self->edgesInNbr()) { // n -> s, Asn
         (void)edge;
         cols += nphis;
     }    
-    for(auto edge : self->edgesOutAll()) { // s -> n, Ans
+    for (auto edge : self->edgesOutAll()) { // s -> n, Ans
         (void)edge;
         cols += nphis;
     }    
     // Build matrix [phis, Asn*phin] into Q1
     auto Asnp = std::make_unique<MatrixXd>(rows, cols);
     int64_t c = 0;
-    for(auto edge : self->edgesInNbr()) {
+    for (auto edge : self->edgesInNbr()) {
         Asnp->middleCols(c, nphis) = (*edge->A()) * (*(edge->n1->phi()));
         c += nphis;
     }
-    for(auto edge : self->edgesOutAll()) { // This includes the pivot
+    for (auto edge : self->edgesOutAll()) { // This includes the pivot
         Asnp->middleCols(c, nphis) = edge->A()->transpose() * (*(edge->n2->phi()));
         c += nphis;
     }    
@@ -1270,7 +1270,7 @@ void Tree::sparsify_preserve_only(Cluster* self) {
     auto Asnp = this->assemble_Asphi(self); // new
     int64_t rows = Asnp->rows();
     int64_t cols = Asnp->cols();
-    if(cols >= rows) return;
+    if (cols >= rows) return;
     // Orthogonalize
     timer t1 = wctime();
     int64_t rank = std::min(rows, cols);
@@ -1300,7 +1300,7 @@ void Tree::sparsify_preserve_only(Cluster* self) {
 void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred) {
     bool is_pivot_I = (this->symm_kind != SymmKind::SYM);
     MatrixXd* Ass = self->pivot()->A();
-    if(is_pivot_I) {
+    if (is_pivot_I) {
         assert((*Ass - MatrixXd::Identity(self->size(), self->size())).norm() == 0.0);
     } else { // Then it's +- I
         assert((Ass->cwiseAbs() - MatrixXd::Identity(self->size(), self->size())).norm() == 0.0);
@@ -1317,10 +1317,10 @@ void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred
     geqp3_spand(Asn.get(), &jpvt, &ht);
     timer t2 = wctime();
     this->tprof[this->ilvl].geqp3 += elapsed(t1, t2);
-    if(this->monitor_flops) this->tprof_flops[this->ilvl].rrqr.push_back({Asn->rows(), Asn->cols(), elapsed(t1, t2)});    
+    if (this->monitor_flops) this->tprof_flops[this->ilvl].rrqr.push_back({Asn->rows(), Asn->cols(), elapsed(t1, t2)});    
     // Truncate ?
     VectorXd diag = Asn->diagonal();
-    if(this->monitor_Rdiag) { self->Rdiag = std::vector<double>(diag.data(), diag.data() + diag.size()); }
+    if (this->monitor_Rdiag) { self->Rdiag = std::vector<double>(diag.data(), diag.data() + diag.size()); }
     int64_t rank = choose_rank(diag, tol);
     if (rank >= rows) { // No point, nothing to do
         return;
@@ -1391,7 +1391,7 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
     VectorXd diag = Asn->diagonal();
     int64_t rank2 = choose_rank(diag, tol);
     int64_t rank = rank1 + rank2;
-    if(rank >= rows) {
+    if (rank >= rows) {
         return;
     }
     // Build Q2
@@ -1423,10 +1423,10 @@ void Tree::sparsify_cluster_farfield(Cluster* self) {
 }
 
 void Tree::sparsify_cluster(Cluster* self) {
-    if(want_sparsify(self)) {
+    if (want_sparsify(self)) {
         this->log[this->ilvl].rank_before.addData(self->size());
-        if(this->preserve) {
-            if(this->tol <= 1.0) {
+        if (this->preserve) {
+            if (this->tol <= 1.0) {
                 this->sparsify_preserve_adaptive(self);                
             } else {
                 this->sparsify_preserve_only(self);
@@ -1443,11 +1443,11 @@ void Tree::sparsify_cluster(Cluster* self) {
 void Tree::merge_all() {
     current_bottom++;
     std::map<Cluster*,int64_t> posparent;
-    for(auto& self : this->bottom_current()) {
+    for (auto& self : this->bottom_current()) {
         pOperation op = this->reset_size(self.get(), &posparent);
         this->ops.push_back(move(op));
     }
-    for(auto& self : this->bottom_current()) {
+    for (auto& self : this->bottom_current()) {
         this->update_edges(self.get(), &posparent);
     }
 }
@@ -1455,18 +1455,18 @@ void Tree::merge_all() {
 void Tree::factorize() {
 
     timer tstart = wctime();
-    if(symm_kind == SymmKind::SPD) {
+    if (symm_kind == SymmKind::SPD) {
         assert(scale_kind == ScalingKind::LLT);
-    } else if(symm_kind == SymmKind::SYM) {
+    } else if (symm_kind == SymmKind::SYM) {
         assert(scale_kind == ScalingKind::LDLT);
-    } else if(symm_kind == SymmKind::GEN) {
+    } else if (symm_kind == SymmKind::GEN) {
         assert(scale_kind == ScalingKind::PLU || scale_kind == ScalingKind::PLUQ);
     }
-    if(preserve) {
+    if (preserve) {
         assert(this->symmetry());
     }
  
-    if(this->verb) {
+    if (this->verb) {
         std::cout << "spaND Factorization started" << std::endl;
         std::cout << "  N:          " << get_N()  << std::endl;
         std::cout << "  #levels:    " << nlevels  << std::endl;
@@ -1478,99 +1478,99 @@ void Tree::factorize() {
         std::cout << "  want_spars? " << use_want_sparsify << std::endl;
         std::cout << "  mon cond?   " << monitor_condition_pivots << std::endl;
         std::cout << "  preserving? " << preserve << std::endl;
-        if(preserve)
+        if (preserve)
             std::cout << "  preserving " << this->nphis() << " vectors" << std::endl;
     }
     
     // Create the phi
-    if(preserve) {
+    if (preserve) {
         MatrixXd phi_ = this->perm.asPermutation().transpose() * (*phi);        
         // Store phi
-        for(auto& self : bottom_original()) {
+        for (auto& self : bottom_original()) {
             self->set_phi(std::make_unique<MatrixXd>(self->size(), phi_.cols()));
             (*self->phi()) = phi_.middleRows(self->start(), self->size());
         }
     }
 
     // Factorization
-    for(this->ilvl = 0; this->ilvl < nlevels; this->ilvl++) {
+    for (this->ilvl = 0; this->ilvl < nlevels; this->ilvl++) {
         
-        if(this->verb) printf("Level %d, %d dofs left, %d clusters left\n", this->ilvl, this->ndofs_left(), this->nclusters_left());
+        if (this->verb) printf("Level %d, %d dofs left, %d clusters left\n", this->ilvl, this->ndofs_left(), this->nclusters_left());
 
-        if(this->symmetry()) this->assert_symmetry();
+        if (this->symmetry()) this->assert_symmetry();
 
         {
             // Eliminate interiors
             timer telim_0 = wctime();        
-            for(auto& self : this->bottom_current()) {
-                if(self->level() == this->ilvl) {
+            for (auto& self : this->bottom_current()) {
+                if (self->level() == this->ilvl) {
                     this->eliminate_cluster(self.get());                                        
                 }
             }
             timer telim_1 = wctime();
             this->tprof[this->ilvl].elim += elapsed(telim_0, telim_1);
             this->log[this->ilvl].dofs_left_elim = this->ndofs_left();
-            if(this->verb) printf("  Elim: %3.2e s., %d dofs left, %d clusters left\n", elapsed(telim_0, telim_1), this->log[this->ilvl].dofs_left_elim, this->nclusters_left());
+            if (this->verb) printf("  Elim: %3.2e s., %d dofs left, %d clusters left\n", elapsed(telim_0, telim_1), this->log[this->ilvl].dofs_left_elim, this->nclusters_left());
         }
 
         if (this->ilvl >= skip) {
 
             // Scale
             timer tscale_0 = wctime();
-            for(auto& self : this->bottom_current()) {
-                if(self->level() > this->ilvl) {
+            for (auto& self : this->bottom_current()) {
+                if (self->level() > this->ilvl) {
                     this->scale_cluster(self.get());
                 }
             }
             timer tscale_1 = wctime();
             this->tprof[this->ilvl].scale += elapsed(tscale_0, tscale_1);
-            if(this->verb) printf("  Scaling: %3.2e s.\n", elapsed(tscale_0, tscale_1));
+            if (this->verb) printf("  Scaling: %3.2e s.\n", elapsed(tscale_0, tscale_1));
 
             // Sparsify        
             timer tspars_0 = wctime();
-            for(auto& self : this->bottom_current()) {
-                if(self->level() > this->ilvl) {
+            for (auto& self : this->bottom_current()) {
+                if (self->level() > this->ilvl) {
                     this->sparsify_cluster(self.get());
                 }
             }
             timer tsparse_1 = wctime();
             this->tprof[this->ilvl].spars += elapsed(tspars_0, tsparse_1);
-            if(this->verb) printf("  Sparsification: %3.2e s., %d dofs left, geqp3 %3.2e, geqrf %3.2e, assmb %3.2e, buildQ %3.2e, scatterQ %3.2e, permA %3.2e, scatterA %3.2e\n", 
+            if (this->verb) printf("  Sparsification: %3.2e s., %d dofs left, geqp3 %3.2e, geqrf %3.2e, assmb %3.2e, buildQ %3.2e, scatterQ %3.2e, permA %3.2e, scatterA %3.2e\n", 
                     elapsed(tspars_0, tsparse_1), this->ndofs_left(), this->tprof[this->ilvl].geqp3, this->tprof[this->ilvl].geqrf, 
                     this->tprof[this->ilvl].assmb, this->tprof[this->ilvl].buildq, this->tprof[this->ilvl].scattq, this->tprof[this->ilvl].perma, this->tprof[this->ilvl].scatta);
 
         } // ... if skip
 
         // Merge
-        if(this->ilvl < nlevels-1) {
+        if (this->ilvl < nlevels-1) {
             timer tmerge_0 = wctime();        
             merge_all();
             timer tmerge_1 = wctime();
             this->tprof[this->ilvl].merge += elapsed(tmerge_0, tmerge_1);
-            if(this->verb) printf("  Merge: %3.2e s., %d dofs left, %d clusters left\n", elapsed(tmerge_0, tmerge_1), this->ndofs_left(), this->nclusters_left());
+            if (this->verb) printf("  Merge: %3.2e s., %d dofs left, %d clusters left\n", elapsed(tmerge_0, tmerge_1), this->ndofs_left(), this->nclusters_left());
         }        
 
         this->log[this->ilvl].dofs_left_spars = this->ndofs_left();
         this->log[this->ilvl].fact_nnz = this->nnz();
 
-    } // TOP LEVEL for(int64_t this->ilvl = 0 ...)
+    } // TOP LEVEL for (int64_t this->ilvl = 0 ...)
     timer tend = wctime();
-    if(this->verb) printf("Factorization: %3.2e s.\n", elapsed(tstart, tend));
+    if (this->verb) printf("Factorization: %3.2e s.\n", elapsed(tstart, tend));
 }
 
 void Tree::factorize_lorasp() {
 
-    if(symm_kind == SymmKind::SPD) {
+    if (symm_kind == SymmKind::SPD) {
         assert(scale_kind == ScalingKind::LLT);
-    } else if(symm_kind == SymmKind::SYM) {
+    } else if (symm_kind == SymmKind::SYM) {
         assert(scale_kind == ScalingKind::LDLT);
-    } else if(symm_kind == SymmKind::GEN) {
+    } else if (symm_kind == SymmKind::GEN) {
         assert(scale_kind == ScalingKind::PLU || scale_kind == ScalingKind::PLUQ);
     }    
     assert(! preserve);
 
     timer tstart = wctime();    
-    if(this->verb) {
+    if (this->verb) {
         std::cout << "LoRaSp Factorization started" << std::endl;
         std::cout << "  N:          " << get_N()  << std::endl;
         std::cout << "  #levels:    " << nlevels  << std::endl;
@@ -1582,60 +1582,60 @@ void Tree::factorize_lorasp() {
     }
 
     // Factorization
-    for(this->ilvl = 0; this->ilvl < nlevels; this->ilvl++) {
+    for (this->ilvl = 0; this->ilvl < nlevels; this->ilvl++) {
         
-        if(this->verb) printf("Level %d, %d dofs left, %d clusters left\n", this->ilvl, this->ndofs_left(), this->nclusters_left());        
+        if (this->verb) printf("Level %d, %d dofs left, %d clusters left\n", this->ilvl, this->ndofs_left(), this->nclusters_left());        
 
         // Scale & Sparsify
         timer tspars_0 = wctime();
-        for(auto& self : this->bottom_current()) {
+        for (auto& self : this->bottom_current()) {
             this->scale_cluster(self.get());
             this->sparsify_cluster_farfield(self.get());
         }
         timer tsparse_1 = wctime();
         this->tprof[this->ilvl].spars += elapsed(tspars_0, tsparse_1);
-        if(this->verb) printf("  Sparsification: %3.2e s., %d dofs left, geqp3 %3.2e, geqrf %3.2e, assmb %3.2e, buildQ %3.2e, scatterQ %3.2e, permA %3.2e, scatterA %3.2e\n", 
+        if (this->verb) printf("  Sparsification: %3.2e s., %d dofs left, geqp3 %3.2e, geqrf %3.2e, assmb %3.2e, buildQ %3.2e, scatterQ %3.2e, permA %3.2e, scatterA %3.2e\n", 
                 elapsed(tspars_0, tsparse_1), this->ndofs_left(), this->tprof[this->ilvl].geqp3, this->tprof[this->ilvl].geqrf, 
                 this->tprof[this->ilvl].assmb, this->tprof[this->ilvl].buildq, this->tprof[this->ilvl].scattq, this->tprof[this->ilvl].perma, this->tprof[this->ilvl].scatta);
 
         // Merge
-        if(this->ilvl < nlevels-1) {
+        if (this->ilvl < nlevels-1) {
             timer tmerge_0 = wctime();        
             merge_all();
             timer tmerge_1 = wctime();
             this->tprof[this->ilvl].merge += elapsed(tmerge_0, tmerge_1);
-            if(this->verb) printf("  Merge: %3.2e s., %d dofs left, %d clusters left\n", elapsed(tmerge_0, tmerge_1), this->ndofs_left(), this->nclusters_left());
+            if (this->verb) printf("  Merge: %3.2e s., %d dofs left, %d clusters left\n", elapsed(tmerge_0, tmerge_1), this->ndofs_left(), this->nclusters_left());
         }
 
         this->log[this->ilvl].dofs_left_spars = this->ndofs_left();
         this->log[this->ilvl].fact_nnz = this->nnz();
 
-    } // TOP LEVEL for(int64_t this->ilvl = 0 ...)
+    } // TOP LEVEL for (int64_t this->ilvl = 0 ...)
     timer tend = wctime();
-    if(this->verb) printf("Factorization: %3.2e s.\n", elapsed(tstart, tend));
+    if (this->verb) printf("Factorization: %3.2e s.\n", elapsed(tstart, tend));
 }
 
 void Tree::solve(VectorXd& x) const {
     // Permute
     VectorXd b = perm.asPermutation().transpose() * x;
     // Set solution
-    for(auto& cluster : bottom_original()) {
+    for (auto& cluster : bottom_original()) {
         cluster->set_vector(b);
     }
     // Fwd
-    for(auto io = ops.begin(); io != ops.end(); io++) {
+    for (auto io = ops.begin(); io != ops.end(); io++) {
         (*io)->fwd();
     }
     // Diagonal
-    for(auto io = ops.begin(); io != ops.end(); io++) {
+    for (auto io = ops.begin(); io != ops.end(); io++) {
         (*io)->diag();
     }
     // Bwd
-    for(auto io = ops.rbegin(); io != ops.rend(); io++) {
+    for (auto io = ops.rbegin(); io != ops.rend(); io++) {
         (*io)->bwd();
     }
     // Extract solution
-    for(auto& cluster : bottom_original()) {
+    for (auto& cluster : bottom_original()) {
         cluster->extract_vector(b);
     }
     // Permute back
@@ -1644,7 +1644,7 @@ void Tree::solve(VectorXd& x) const {
 
 long long Tree::nnz() const {
     long long nnz = 0;
-    for(auto& op: ops) {
+    for (auto& op: ops) {
         nnz += op->nnz();
     }
     return nnz;
@@ -1653,7 +1653,7 @@ long long Tree::nnz() const {
 void Tree::print_log() const {
     // All sorts of timings
     printf("&>>& Lvl |      Elim     Scale  Sparsify     Merge\n");
-    for(int64_t lvl = 0; lvl < this->nlevels; lvl++) {
+    for (int64_t lvl = 0; lvl < this->nlevels; lvl++) {
         printf("&>>& %3d |   %7.1e   %7.1e   %7.1e   %7.1e\n", 
             lvl,
             this->tprof[lvl].elim,
@@ -1663,7 +1663,7 @@ void Tree::print_log() const {
             );
     }
     printf("&<<& Lvl |     Pivot     Panel     Schur |     Pivot     Panel |     Assmb     Spars     Scatt |     Alloc      Copy\n");
-    for(int64_t lvl = 0; lvl < this->nlevels; lvl++) {
+    for (int64_t lvl = 0; lvl < this->nlevels; lvl++) {
         printf("&<<& %3d |   %7.1e   %7.1e   %7.1e |   %7.1e   %7.1e |   %7.1e   %7.1e   %7.1e |   %7.1e   %7.1e\n", 
             lvl,
             this->tprof[lvl].elim_pivot,
@@ -1679,7 +1679,7 @@ void Tree::print_log() const {
             );
     }
     printf("&++& Lvl |      potf      ldlt      trsm      gemm     geqp3     geqrf      syev     gesvd      getf    buildq    scattq     perma    scatta     assmb       phi\n");
-    for(int64_t lvl = 0; lvl < this->nlevels; lvl++) {
+    for (int64_t lvl = 0; lvl < this->nlevels; lvl++) {
         printf("&++& %3d |   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e\n", 
             lvl,            
             this->tprof[lvl].potf,
@@ -1701,7 +1701,7 @@ void Tree::print_log() const {
     }
     // Sizes and ranks
     printf("++++ Lvl |        ND    ND lft    El lft    Sp lft   Fct nnz    Rk Bfr    Rk Aft      Nbrs   Tot Bfr   Tot Aft   Cl Sped   Cl Ignd   ConEPiv     ConEL     ConEU  NorEDiag   ConSPiv     ConSL     ConSU  NorSDiag  AssymBfr  AssymAft   UppBefo   LowBefo   UppAfte   LowAfte\n");
-    for(int64_t lvl = 0; lvl < this->nlevels; lvl++) {
+    for (int64_t lvl = 0; lvl < this->nlevels; lvl++) {
         printf("++++ %3d | %9d %9d %9d %9d   %7.1e %9.0f %9.0f %9.0f %9d %9d %9d %9d   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e   %7.1e\n", 
             lvl,
             this->log[lvl].dofs_nd, 
@@ -1738,26 +1738,26 @@ void Tree::print_log() const {
 SpMat Tree::get_trailing_mat() const {
     // Build matrix at current stage
     std::vector<Triplet<double>> values(0);
-    for(auto& s : bottom_current()) {
+    for (auto& s : bottom_current()) {
         int64_t s1 = s->start();
         assert(s1 >= 0);
         int64_t s2 = s->size();
-        for(auto e : s->edgesOutAll()) {
+        for (auto e : s->edgesOutAll()) {
             assert(e->n1 == s.get());
             int64_t n1 = e->n2->start();
             assert(n1 >= 0);
             int64_t n2 = e->n2->size();
-            for(int64_t i_ = 0; i_ < n2; i_++) {
-                for(int64_t j_ = 0; j_ < s2; j_++) {
+            for (int64_t i_ = 0; i_ < n2; i_++) {
+                for (int64_t j_ = 0; j_ < s2; j_++) {
                     int64_t i = n1 + i_;
                     int64_t j = s1 + j_;
                     double v = (*e->A())(i_,j_);
-                    if(this->symmetry() && i > j) {
+                    if (this->symmetry() && i > j) {
                         values.push_back(Triplet<double>(j,i,v));
                         values.push_back(Triplet<double>(i,j,v));
-                    } else if(this->symmetry() && i == j) {
+                    } else if (this->symmetry() && i == j) {
                         values.push_back(Triplet<double>(i,i,v));
-                    } else if(! this->symmetry()) {
+                    } else if (! this->symmetry()) {
                         values.push_back(Triplet<double>(i,j,v));
                     }
                 }
@@ -1772,8 +1772,8 @@ SpMat Tree::get_trailing_mat() const {
 
 MatrixXd Tree::get_current_x() const {
     MatrixXd X = MatrixXd::Zero(this->get_N(), this->nlevels);
-    for(int64_t lvl = 0; lvl < this->nlevels; lvl++) {
-        for(const auto& s : bottoms[lvl]){
+    for (int64_t lvl = 0; lvl < this->nlevels; lvl++) {
+        for (const auto& s : bottoms[lvl]){
             X.block(s->start(), lvl, s->get_x()->size(), 1) = *(s->get_x());
         }
     }

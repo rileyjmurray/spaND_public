@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     MatrixXd X(2, N);
     assert(xcoords.size() == N/2);
     assert(ycoords.size() == N/2);
-    for(int64_t i = 0; i < N; i++) {
+    for (int64_t i = 0; i < N; i++) {
         X(0,i) = xcoords(i/2);
         X(1,i) = ycoords(i/2);
     }

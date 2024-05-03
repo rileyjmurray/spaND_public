@@ -27,10 +27,10 @@ void swap2perm(VEC1* swap, VEC2* perm) {
     using VEC2_int = typename VEC2::Scalar;
     VEC2_int n = perm->size();
     assert(swap->size() == (VEC1_int) n);
-    for(VEC2_int i = 0; i < n; i++) {
+    for (VEC2_int i = 0; i < n; i++) {
         (*perm)[i] = i;
     }
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         VEC1_int ipiv = (*swap)[i];
         VEC2_int tmp  = (*perm)[ipiv];
         (*perm)[ipiv] = (*perm)[i];
@@ -44,9 +44,9 @@ bool isperm(const iVEC* perm) {
     using iVEC_scalar_t = typename iVEC::Scalar;
     auto n = perm->size();
     iVEC count = iVEC::Zero(n);
-    for(int64_t i = 0;i < n; i++) {
+    for (int64_t i = 0;i < n; i++) {
         iVEC_scalar_t pi = (*perm)[i];
-        if(pi < 0 || pi >= n) { return false; }
+        if (pi < 0 || pi >= n) { return false; }
         count[pi] += 1;
     }
     return (count.cwiseEqual(1)).all();
@@ -59,7 +59,7 @@ VEC2 invperm(const VEC1& perm) {
     assert(isperm(&perm));
     VEC2 invperm(perm.size());
     VEC2_scalar_t perm_size = perm.size();
-    for(VEC2_scalar_t i = 0; i < perm_size; i++) {
+    for (VEC2_scalar_t i = 0; i < perm_size; i++) {
         invperm[perm[i]] = i;
     }
     assert(isperm(&invperm));
@@ -119,7 +119,7 @@ void fpgetf(Eigen::MatrixXd* A, VEC1* p, VEC2* q) {
     assert(A->cols() == A->rows());
     assert(p->size() == A->cols());
     assert(q->size() == A->cols());
-    if(A->rows() == 0) return;
+    if (A->rows() == 0) return;
     Eigen::FullPivLU<Eigen::Ref<Eigen::MatrixXd>> pluq(*A);
     auto invp = pluq.permutationP().indices();
     auto invq = pluq.permutationQ().indices();
@@ -278,7 +278,7 @@ void setZero(Eigen::MatrixXd* A);
 // Print vector
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
-    for(auto v_ : v) {
+    for (auto v_ : v) {
         os << v_ << " " ;
     }
     os << std::endl;

@@ -86,16 +86,16 @@ namespace mmio {
     enum class property {general, symmetric, hermitian, skew_symmetric};
 
     inline std::string prop2str(property p) {
-        if(p == property::general) return "general";
-        else if(p == property::symmetric) return "symmetric";
-        else if(p == property::hermitian) return "hermitian";
+        if (p == property::general) return "general";
+        else if (p == property::symmetric) return "symmetric";
+        else if (p == property::hermitian) return "hermitian";
         else return "skew_symmetric";
     }
 
     template<typename V>
     struct V2str {
         inline static std::string value() {
-            if(is_complex<V>{}) {
+            if (is_complex<V>{}) {
                 return "complex";
             } else if (std::is_integral<V>::value) {
                 return "integer";
@@ -122,9 +122,9 @@ namespace mmio {
             this->objectOK = ! object.compare("matrix");
             assert(this->bannerOK);
             assert(this->objectOK);
-            if(! format.compare("coordinate")) {
+            if (! format.compare("coordinate")) {
                 this->f = format::coordinate;
-            } else if(! format.compare("array")) {
+            } else if (! format.compare("array")) {
                 this->f = format::array;
             } else {
                 assert(false);
@@ -169,38 +169,38 @@ namespace mmio {
             assert(h.f == format::coordinate);
             assert(h.t != type::pattern);
             /** Find M N K row **/
-            while(std::getline(mfile, line)) {
-                if(line.size() == 0 || line[0] == '%') continue;
+            while (std::getline(mfile, line)) {
+                if (line.size() == 0 || line[0] == '%') continue;
                 else break;
             }
             I M, N, K;
             std::istringstream MNK(line);
             MNK >> M >> N >> K;
             std::vector<Eigen::Triplet<V,I>> data;
-            if(h.p != property::general) {
+            if (h.p != property::general) {
                 data.reserve(2*K);
             } else {
                 data.reserve(K);
             }
             /** Read data **/
             int64_t lineread = 0;
-            while(std::getline(mfile, line)) {
-                if(line.size() == 0 || line[0] == '%') continue;
+            while (std::getline(mfile, line)) {
+                if (line.size() == 0 || line[0] == '%') continue;
                 std::istringstream vals(line);
                 Eigen::Triplet<V,I> dataline = read_line<V,I>(vals);
                 data.push_back(dataline);
-                if(dataline.row() != dataline.col() && (h.p == property::symmetric || h.p == property::hermitian)) {
+                if (dataline.row() != dataline.col() && (h.p == property::symmetric || h.p == property::hermitian)) {
                     Eigen::Triplet<V,I> dataline2 = symmetric(dataline);
                     data.push_back(dataline2);
                 }
-                if(dataline.row() != dataline.col() && (h.p == property::skew_symmetric)) {
+                if (dataline.row() != dataline.col() && (h.p == property::skew_symmetric)) {
                     Eigen::Triplet<V,I> dataline2 = skew_symmetric(dataline);
                     data.push_back(dataline2);
                 }
-                if(h.p == property::skew_symmetric && dataline.row() == dataline.col()) {
+                if (h.p == property::skew_symmetric && dataline.row() == dataline.col()) {
                     assert(false);
                 }
-                if(h.p != property::general && dataline.row() < dataline.col()) {
+                if (h.p != property::general && dataline.row() < dataline.col()) {
                     assert(false);
                 }
                 lineread ++;
@@ -231,8 +231,8 @@ namespace mmio {
             assert(h.f == format::array);
             assert(h.t != type::pattern);
             /** Find M N row **/
-            while(std::getline(mfile, line)) {
-                if(line.size() == 0 || line[0] == '%') continue;
+            while (std::getline(mfile, line)) {
+                if (line.size() == 0 || line[0] == '%') continue;
                 else break;
             }
             int64_t M, N;
@@ -241,8 +241,8 @@ namespace mmio {
             Eigen::Matrix<V, Eigen::Dynamic, Eigen::Dynamic> A(M, N); 
             /** Read data **/
             int64_t lineread = 0;
-            while(std::getline(mfile, line)) {
-                if(line.size() == 0 || line[0] == '%') continue;
+            while (std::getline(mfile, line)) {
+                if (line.size() == 0 || line[0] == '%') continue;
                 std::istringstream vals(line);
                 V v = read_entry<V>(vals);
                 int64_t i = (lineread % M);
@@ -274,16 +274,16 @@ namespace mmio {
             int64_t NNZ = 0;
             for (int64_t k = 0; k < mat.outerSize(); ++k) {
                 for (typename Eigen::SparseMatrix<V,S,I>::InnerIterator it(mat,k); it; ++it) {
-                    if( (p == property::symmetric || p == property::hermitian) && (it.row() < it.col()) ) continue;
-                    if( (p == property::skew_symmetric) && (it.row() <= it.col()) ) continue;
+                    if ( (p == property::symmetric || p == property::hermitian) && (it.row() < it.col()) ) continue;
+                    if ( (p == property::skew_symmetric) && (it.row() <= it.col()) ) continue;
                     NNZ ++;
                 }
             }
             mfile << mat.rows() << " " << mat.cols() << " " << NNZ << "\n";
             for (int64_t k = 0; k < mat.outerSize(); ++k) {
                 for (typename Eigen::SparseMatrix<V,S,I>::InnerIterator it(mat,k); it; ++it) {
-                    if( (p == property::symmetric || p == property::hermitian) && (it.row() < it.col()) ) continue;
-                    if( (p == property::skew_symmetric) && (it.row() <= it.col()) ) continue;
+                    if ( (p == property::symmetric || p == property::hermitian) && (it.row() < it.col()) ) continue;
+                    if ( (p == property::skew_symmetric) && (it.row() <= it.col()) ) continue;
                     mfile << get_line(it.row(), it.col(), it.value()).rdbuf() << "\n";
                 }
             }
@@ -306,10 +306,10 @@ namespace mmio {
             std::string prop = prop2str(p);
             mfile << "%%MatrixMarket matrix array " << type << " " << prop << "\n";
             mfile << mat.rows() << " " << mat.cols() << "\n";
-            for(int64_t j = 0; j < mat.cols(); j++) {
-                for(int64_t i = 0; i < mat.rows(); i++) {
-                    if( (p == property::symmetric || p == property::hermitian) && (i < j) ) continue;
-                    if( (p == property::skew_symmetric) && (i <= j) ) continue;
+            for (int64_t j = 0; j < mat.cols(); j++) {
+                for (int64_t i = 0; i < mat.rows(); i++) {
+                    if ( (p == property::symmetric || p == property::hermitian) && (i < j) ) continue;
+                    if ( (p == property::skew_symmetric) && (i <= j) ) continue;
                     mfile << mat(i,j) << "\n";
                 }
             }
