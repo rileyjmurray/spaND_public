@@ -1334,6 +1334,7 @@ void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred
     VectorXd diag = Asn->diagonal();
     if (this->monitor_Rdiag) { self->Rdiag = std::vector<double>(diag.data(), diag.data() + diag.size()); }
     int64_t rank = choose_rank(diag, tol);
+    std::cout << ", numerical rank = " << rank << std::endl;
     if (rank >= rows) { // No point, nothing to do
         return;
     }
