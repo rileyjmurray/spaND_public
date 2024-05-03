@@ -1,7 +1,8 @@
 #include "spaND.h"
+#include <algorithm>
+#include <random>
 
 using namespace Eigen;
-using namespace std;
 
 namespace spaND {
 
@@ -14,7 +15,7 @@ bool are_connected(VectorXi64 &a, VectorXi64 &b, SpMat &A) {
         int64_t node = a[ia];
         for (SpMat::InnerIterator it(A,node); it; ++it) {
             auto neigh = it.row();
-            auto id = lower_bound(b_begin, b_end, neigh);
+            auto id = std::lower_bound(b_begin, b_end, neigh);
             int64_t pos = id - b_begin;
             if (pos < bsize && b[pos] == neigh) // Found one in b! They are connected.
                 return true;
@@ -418,8 +419,8 @@ void block2dense(VectorXi64 &rowval, VectorXi64 &colptr, VectorXd &nnzval, int64
         auto start = rowval.data() + start_c;
         auto end = rowval.data() + end_c;
         // Find i
-        auto found = lower_bound(start, end, i);
-        int64_t id = distance(start, found);
+        auto found = std::lower_bound(start, end, i);
+        int64_t id = std::distance(start, found);
         // While we are between i and i+i...
         while (id < size) {
             int64_t row = rowval[start_c + id];
@@ -500,9 +501,9 @@ SpMat symm_perm(SpMat &A, VectorXi64 &p) {
 
 // Random [-1,1]
 VectorXd random(int64_t size, int64_t seed) {
-    mt19937 rng;
+    std::mt19937 rng;
     rng.seed(seed);
-    uniform_real_distribution<double> dist(-1.0,1.0);
+    std::uniform_real_distribution<double> dist(-1.0,1.0);
     VectorXd x(size);
     for (int64_t i = 0;i < size; i++) {
         x[i] = dist(rng);
@@ -511,9 +512,9 @@ VectorXd random(int64_t size, int64_t seed) {
 }
 
 MatrixXd random(int64_t rows, int64_t cols, int64_t seed) {
-    mt19937 rng;
+    std::mt19937 rng;
     rng.seed(seed);
-    uniform_real_distribution<double> dist(-1.0,1.0);
+    std::uniform_real_distribution<double> dist(-1.0,1.0);
     MatrixXd A(rows, cols);
     for (int64_t i = 0; i < rows; i++) {
         for (int64_t j = 0; j < cols; j++) {

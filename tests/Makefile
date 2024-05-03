@@ -12,7 +12,7 @@ INCLUDE = -I$(INCDIR) $(EXTRA_INCDIR)
 LINK = $(EXTRA_LINKDIR)
 
 ## Compiler flags
-CFLAGS = -std=c++20 -Wall -v
+CFLAGS = -std=c++20
 ifdef DEBUG
     CFLAGS += -g -O0 -D_GLIBCXX_DEBUG
 else

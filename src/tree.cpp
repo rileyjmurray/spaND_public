@@ -373,7 +373,7 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
         auto self = std::make_unique<Cluster>(k, size, id.self.lvl, get_new_order(), id.l.lvl == 0 && id.r.lvl == 0);
         clusters_ids[self.get()] = id;
         clustersstats[self->level()].addData(self->size());
-        bottoms[0].push_back(move(self));
+        bottoms[0].push_back(std::move(self));
         k = knext;
     }
     if (this->verb) {
@@ -387,7 +387,7 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
     if (this->verb) printf("Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)\n");
     if (this->verb) printf("%3d %9lu\n", 0, bottoms[0].size());
     for (int64_t lvl = 1; lvl < nlevels; lvl++) {
-        auto begin = find_if(bottoms[lvl-1].begin(), bottoms[lvl-1].end(), [lvl](const pCluster& s){
+        auto begin = std::find_if(bottoms[lvl-1].begin(), bottoms[lvl-1].end(), [lvl](const pCluster& s){
                         return s->level() >= lvl; // All others should have been eliminated by now
                      });
         auto end   = bottoms[lvl-1].end();        
@@ -417,7 +417,7 @@ std::vector<ClusterID> Tree::partition(SpMat &A) {
                 parent->add_children(c);                
             }
             clusters_ids[parent.get()] = idparent;
-            bottoms[lvl].push_back(move(parent));            
+            bottoms[lvl].push_back(std::move(parent));            
         }
         if (this->verb) printf("%3d %9lu\n", lvl, bottoms[lvl].size());
     }
@@ -462,14 +462,14 @@ void Tree::partition_lorasp(SpMat& A) {
         int64_t size = knext - k;
         auto self = std::make_unique<Cluster>(k, size, lvltop, get_new_order(), true);
         clusters_ids[self.get()] = self->order();
-        bottoms[0].push_back(move(self));
+        bottoms[0].push_back(std::move(self));
         k = knext;
     }    
     // Create the cluster hierarchy
     if (this->verb) printf("Hierarchy numbers (# of cluster at each level of the cluster-hierarchy)\n");
     if (this->verb) printf("%3d %9lu\n", 0, bottoms[0].size());
     for (int64_t lvl = 1; lvl < nlevels; lvl++) {
-        auto begin = find_if(bottoms[lvl-1].begin(), bottoms[lvl-1].end(), [lvl](const pCluster& s){
+        auto begin = std::find_if(bottoms[lvl-1].begin(), bottoms[lvl-1].end(), [lvl](const pCluster& s){
                         return s->level() >= lvl; // All others should have been eliminated by now
                      });
         auto end = bottoms[lvl-1].end();
@@ -499,7 +499,7 @@ void Tree::partition_lorasp(SpMat& A) {
                 parent->add_children(c);                
             }
             clusters_ids[parent.get()] = idparent;
-            bottoms[lvl].push_back(move(parent));            
+            bottoms[lvl].push_back(std::move(parent));            
         }
         if (this->verb) printf("%3d %9lu\n", lvl, bottoms[lvl].size());
     }
@@ -560,8 +560,8 @@ void Tree::assemble(SpMat& A) {
             setZero(A.get());
             block2dense(rowval, colptr, nnzval, nbr->start(), self->start(), nbr->size(), self->size(), A.get(), false);
             edgesizestats[self->level()].addData(nbr->size() * self->size());
-            pEdge e = std::make_unique<Edge>(self.get(), nbr, move(A), true);
-            self->add_edge(move(e));
+            pEdge e = std::make_unique<Edge>(self.get(), nbr, std::move(A), true);
+            self->add_edge(std::move(e));
         }
         nedgestats[self->level()].addData(nbrs.size());
         self->sort_edges();
@@ -768,15 +768,15 @@ void Tree::gemm_edges(Edge* edge1, Edge* edge2, VectorXd* diag, bool transpose_e
     // Look for An1n2
     auto begin = n2->edgesOutAll().begin();
     auto end   = n2->edgesOutAll().end();
-    auto found = find_if(begin, end, [&](Edge* e){ return e->n2 == n1; } );
+    auto found = std::find_if(begin, end, [&](Edge* e){ return e->n2 == n1; } );
     if (found == end) { // An1n2 doesn't exist - create fill in
         pMatrixXd An1n2 = std::make_unique<MatrixXd>(n1->size(), n2->size());
         setZero(An1n2.get());
-        pEdge e = std::make_unique<Edge>(n2, n1, move(An1n2), false);
-        n2->add_edge(move(e));
+        pEdge e = std::make_unique<Edge>(n2, n1, std::move(An1n2), false);
+        n2->add_edge(std::move(e));
         auto begin = n2->edgesOutAll().begin();
         auto end   = n2->edgesOutAll().end();
-        found = find_if(begin, end, [&](Edge* e){ return e->n2 == n1; } );
+        found = std::find_if(begin, end, [&](Edge* e){ return e->n2 == n1; } );
     }
     // We have An1n2
     assert(found != n2->edgesOutAll().end());
@@ -834,7 +834,7 @@ void Tree::scale_cluster(Cluster* self) {
             trmm_trans(L.get(), self->phi());
         }
         VectorXd* diag = s.get();
-        this->ops.push_back(std::make_unique<ScalingLDLT>(self, move(L), move(s), move(p))); // Fwd, Bwd and Diag
+        this->ops.push_back(std::make_unique<ScalingLDLT>(self, std::move(L), std::move(s), std::move(p))); // Fwd, Bwd and Diag
         *NewPiv = diag->asDiagonal();
     } else if (this->scale_kind == ScalingKind::PLUQ || this->scale_kind == ScalingKind::PLU) {
         // Factor pivot in-place
@@ -852,13 +852,13 @@ void Tree::scale_cluster(Cluster* self) {
         t2 = wctime();
         // Record
         assert(! preserve);
-        this->ops.push_back(std::make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q)));
+        this->ops.push_back(std::make_unique<ScalingPLUQ>(self, std::move(L), std::move(U), std::move(p), std::move(q)));
         *NewPiv = MatrixXd::Identity(self->size(), self->size());
     } else {
         std::cout << "Wrong scaling kind" << std::endl;
         assert(false);
     }
-    self->pivot()->set_A(move(NewPiv));
+    self->pivot()->set_A(std::move(NewPiv));
     this->tprof[this->ilvl].scale_pivot += elapsed(t0, t1);
     this->tprof[this->ilvl].scale_panel += elapsed(t1, t2);
 }
@@ -932,7 +932,7 @@ void Tree::eliminate_cluster(Cluster* self){
         schur_symmetric(self, diag);
         t3 = wctime(); 
         // Record
-        this->ops.push_back(std::make_unique<ScalingLDLT>(self, move(L), move(s), move(p))); // Fwd, Bwd and Diag
+        this->ops.push_back(std::make_unique<ScalingLDLT>(self, std::move(L), std::move(s), std::move(p))); // Fwd, Bwd and Diag
         record_schur_symmetric(self, diag);        
     } else if (this->scale_kind == ScalingKind::PLUQ || this->scale_kind == ScalingKind::PLU) {
         // Factor pivot in-place
@@ -955,7 +955,7 @@ void Tree::eliminate_cluster(Cluster* self){
         }
         t3 = wctime(); 
         // Record
-        this->ops.push_back(std::make_unique<ScalingPLUQ>(self, move(L), move(U), move(p), move(q))); // Fwd and Bwd
+        this->ops.push_back(std::make_unique<ScalingPLUQ>(self, std::move(L), std::move(U), std::move(p), std::move(q))); // Fwd and Bwd
         for (auto edge : self->edgesOutNbr()) {
             this->ops.push_back(std::make_unique<GemmOut>(self, edge->n2, edge->get_A())); // Fwd only
         }
@@ -1031,8 +1031,8 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
             if (keep_sibling_if_pred_false) {
                 pMatrixXd Asn = std::make_unique<MatrixXd>(sibling_size,  n->size());
                 (*Asn) = Apn->middleRows(original_size, sibling_size);
-                pEdge Ens = std::make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
-                n->add_edge(move(Ens));
+                pEdge Ens = std::make_unique<Edge>(n, sibling, std::move(Asn), edge->is_original());
+                n->add_edge(std::move(Ens));
             }
             // Shrink original
             Apn->conservativeResize(original_size, NoChange_t::NoChange);
@@ -1060,13 +1060,13 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
                 if (! this->symmetry()) {
                     pMatrixXd Ans = std::make_unique<MatrixXd>(n->size(), sibling_size);
                     (*Ans) = Anp->middleCols(original_size, sibling_size);
-                    pEdge Esn = std::make_unique<Edge>(sibling, n, move(Ans), edge->is_original());
-                    sibling->add_edge(move(Esn));
+                    pEdge Esn = std::make_unique<Edge>(sibling, n, std::move(Ans), edge->is_original());
+                    sibling->add_edge(std::move(Esn));
                 } else {
                     pMatrixXd Asn = std::make_unique<MatrixXd>(sibling_size, n->size());
                     (*Asn) = Anp->middleCols(original_size, sibling_size).transpose();
-                    pEdge Ens = std::make_unique<Edge>(n, sibling, move(Asn), edge->is_original());
-                    n->add_edge(move(Ens));
+                    pEdge Ens = std::make_unique<Edge>(n, sibling, std::move(Asn), edge->is_original());
+                    n->add_edge(std::move(Ens));
                 }
             }
             // Shrink original
@@ -1086,27 +1086,27 @@ Cluster* Tree::shrink_split_scatter_phi(Cluster* original, int64_t original_size
     (*Aoo) = piv->block(0,             0,             original_size, original_size); // Aoo : s -> s
     (*Ass) = piv->block(original_size, original_size, sibling_size,  sibling_size);  // Ass : s -> s
     // Create s-s pivot
-    pEdge Ess = std::make_unique<Edge>(sibling,   sibling,  move(Ass), true);
-    sibling->add_edge(move(Ess));
+    pEdge Ess = std::make_unique<Edge>(sibling,   sibling, std::move(Ass), true);
+    sibling->add_edge(std::move(Ess));
     // Create s-o and o-s edges, if needed
     if (! is_pivot_I) {
         // Create s-o edge
         pMatrixXd Aso = std::make_unique<MatrixXd>(sibling_size,  original_size);
         (*Aso) = piv->block(original_size, 0,             sibling_size,  original_size); // Aso : o -> s                
-        pEdge Eso = std::make_unique<Edge>(original,  sibling,  move(Aso), true);
-        original->add_edge(move(Eso));
+        pEdge Eso = std::make_unique<Edge>(original,  sibling, std::move(Aso), true);
+        original->add_edge(std::move(Eso));
         // Create o-s edge
         if (! this->symmetry()) {
             pMatrixXd Aos = std::make_unique<MatrixXd>(original_size, sibling_size);
             (*Aos) = piv->block(0,             original_size, original_size, sibling_size);  // Aos : s -> o
-            pEdge Eos = std::make_unique<Edge>(sibling,   original, move(Aos), true);
-            sibling->add_edge(move(Eos));
+            pEdge Eos = std::make_unique<Edge>(sibling,   original, std::move(Aos), true);
+            sibling->add_edge(std::move(Eos));
         }
     }
     // Reset o-o pivot
-    original->pivot()->set_A(move(Aoo));
+    original->pivot()->set_A(std::move(Aoo));
     // Store new sibling somewhere, return a view on it
-    this->others.push_back(move(psibling));
+    this->others.push_back(std::move(psibling));
     this->ops.push_back(std::make_unique<Split>(original, sibling));
     return sibling;
 }
@@ -1166,8 +1166,8 @@ void Tree::update_edges(Cluster* snew, std::map<Cluster*,int64_t>* posparent) {
         setZero(A.get());
         timer t1 = wctime();
         this->tprof[this->ilvl].merge_alloc += elapsed(t0, t1);
-        pEdge e = std::make_unique<Edge>(snew, nnew, move(A), original);
-        snew->add_edge(move(e));
+        pEdge e = std::make_unique<Edge>(snew, nnew, std::move(A), original);
+        snew->add_edge(std::move(e));
     }
     snew->sort_edges(); // Make the edge ordering reproducible (set above can make it ~random)
     // Fill edges, delete previous edges
@@ -1175,7 +1175,7 @@ void Tree::update_edges(Cluster* snew, std::map<Cluster*,int64_t>* posparent) {
         for (auto eold : sold->edgesOutAll()){
             auto nold = eold->n2;
             auto nnew = nold->parent();
-            auto found = find_if(snew->edgesOutAll().begin(), snew->edgesOutAll().end(), [&nnew](Edge* e){return e->n2 == nnew;});
+            auto found = std::find_if(snew->edgesOutAll().begin(), snew->edgesOutAll().end(), [&nnew](Edge* e){return e->n2 == nnew;});
             assert(found != snew->edgesOutAll().end());                            
             timer t0 = wctime();
             /**  [x x] . [. x]
@@ -1281,11 +1281,11 @@ void Tree::sparsify_preserve_only(Cluster* self) {
     this->tprof[this->ilvl].geqrf += elapsed(tgeqrf_0, tgeqrf_1);
     timer t2 = wctime();
     Asnp->conservativeResize(rows, rank);
-    pMatrixXd v = move(Asnp);    
+    pMatrixXd v = std::move(Asnp);    
     // Record
     MatrixXd* pv = v.get();
     VectorXd* ph = h.get();
-    this->ops.push_back(std::make_unique<Orthogonal>(self, move(v), move(h)));        
+    this->ops.push_back(std::make_unique<Orthogonal>(self, std::move(v), std::move(h)));        
     // Scatter Q, shrink and split
     Cluster* sibling = this->shrink_split_scatter_phi(self, rank, [](Edge*e){(void)e; return false;}, pv, ph, nullptr, is_pivot_I, false);    
     // Eliminate sibling
@@ -1336,7 +1336,7 @@ void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred
     // Record Q
     MatrixXd* pv = v.get();
     VectorXd* ph = h.get();
-    this->ops.push_back(std::make_unique<Orthogonal>(self, move(v), move(h)));
+    this->ops.push_back(std::make_unique<Orthogonal>(self, std::move(v), std::move(h)));
     // Compute shrinked edges
     timer tS_0 = wctime();
     MatrixXd AsnP = Asn->topRows(rank).triangularView<Upper>();
@@ -1373,7 +1373,7 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
     this->tprof[this->ilvl].geqrf += elapsed(tgeqrf_0, tgeqrf_1);
     // Build Q1
     Asnphi->conservativeResize(rows, rank1);
-    pMatrixXd Q1 = move(Asnphi);
+    pMatrixXd Q1 = std::move(Asnphi);
     orgqr_spand(Q1.get(), &h1);
     // (2) Get edge
     auto Asn = this->assemble_Asn(self, [](Edge* e){(void)e; return true;}); // Asn    
@@ -1398,7 +1398,7 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
     Asn->conservativeResize(rows, rank2);
     h2.conservativeResize(rank2);
     orgqr_spand(Asn.get(), &h2);
-    pMatrixXd Q2 = move(Asn);
+    pMatrixXd Q2 = std::move(Asn);
     // Concatenate [Q1, Q2] & orthogonalize
     pMatrixXd v = std::make_unique<MatrixXd>(rows, rank);
     pVectorXd h = std::make_unique<VectorXd>(rank);
@@ -1409,7 +1409,7 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
     MatrixXd* pv = v.get();
     VectorXd* ph = h.get();
     this->tprof[this->ilvl].geqrf += elapsed(tgeqrf_2, tgeqrf_3);        
-    this->ops.push_back(std::make_unique<Orthogonal>(self, move(v), move(h))); 
+    this->ops.push_back(std::make_unique<Orthogonal>(self, std::move(v), std::move(h))); 
     // Scatter Q, shrink and split
     Cluster* sibling = this->shrink_split_scatter_phi(self, rank, [](Edge*e){(void)e; return false;}, pv, ph, nullptr, is_pivot_I, false);
     // Eliminate sibling
@@ -1445,7 +1445,7 @@ void Tree::merge_all() {
     std::map<Cluster*,int64_t> posparent;
     for (auto& self : this->bottom_current()) {
         pOperation op = this->reset_size(self.get(), &posparent);
-        this->ops.push_back(move(op));
+        this->ops.push_back(std::move(op));
     }
     for (auto& self : this->bottom_current()) {
         this->update_edges(self.get(), &posparent);

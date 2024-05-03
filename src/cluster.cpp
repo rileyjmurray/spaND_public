@@ -1,6 +1,6 @@
 #include "spaND.h"
+#include <string>
 
-using namespace std;
 using namespace Eigen;
 
 namespace spaND {
@@ -103,7 +103,7 @@ int64_t Cluster::order() const { return order_; }
 MatrixXd* Cluster::phi() const { return phi_.get(); }
 void Cluster::set_phi(pMatrixXd phi) { 
     assert(phi->rows() == this->size());
-    phi_ = move(phi);
+    phi_ = std::move(phi);
 }
 const std::vector<Cluster*>& Cluster::children() const { return children_; }
 void Cluster::add_children(Cluster* c) { children_.push_back(c); }
@@ -114,11 +114,11 @@ void Cluster::add_edge(pEdge e) {
     assert(this == e->n1);
     // Pivot goes in front
     if (e->n1 == e->n2) {
-        this->edgesOut.insert(this->edgesOut.begin(), move(e));
+        this->edgesOut.insert(this->edgesOut.begin(), std::move(e));
     // Rest doesn't matter
     } else {
         e->n2->edgesIn.push_back(e.get());
-        this->edgesOut.push_back(move(e));
+        this->edgesOut.push_back(std::move(e));
     }
 }
 
@@ -193,7 +193,7 @@ int64_t Cluster::merge_level() const {
 }
 
 std::string Cluster::get_name() const {
-    return to_string(this->order_);
+    return std::to_string(this->order_);
 }
 
 }

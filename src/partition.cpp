@@ -71,7 +71,7 @@ void partition_metis(std::vector<int64_t> &colptr, std::vector<int64_t> &rowval,
             int64_t k_ = rowval[k];
             if (k_ == i_) // Skip diagonal
                 continue;
-            auto found = lower_bound(dofs.begin(), dofs.end(), k_); // Is k a neighbor of i ?
+            auto found = std::lower_bound(dofs.begin(), dofs.end(), k_); // Is k a neighbor of i ?
             int64_t pos = distance(dofs.begin(), found);
             if (pos < size && dofs[pos] == k_) {
                 rowvaltmp[colptrtmp[i+1]] = pos;                
@@ -465,9 +465,9 @@ std::vector<ClusterID> partition_modifiedND(SpMat &A, int64_t nlevels, bool verb
             auto isleft   = [&part, &idleft ](int64_t i){return (part[i].self == idleft || part[i].l == idleft || part[i].r == idleft);};
             auto isright  = [&part, &idright ](int64_t i){return (part[i].self == idright || part[i].l == idright || part[i].r == idright);};
             auto isnewsep = [&part, &idself, &idleft, &idright ](int64_t i){return (part[i].self == idself && part[i].l == idleft && part[i].r == idright);};
-            auto nleft  = count_if(dofssep.begin(), dofssep.end(), isleft);
-            auto nright = count_if(dofssep.begin(), dofssep.end(), isright);
-            auto nnewsep = count_if(dofssep.begin(), dofssep.end(), isnewsep);
+            auto nleft  = std::count_if(dofssep.begin(), dofssep.end(), isleft);
+            auto nright = std::count_if(dofssep.begin(), dofssep.end(), isright);
+            auto nnewsep = std::count_if(dofssep.begin(), dofssep.end(), isnewsep);
             sepsstats.addData(nnewsep);
             std::vector<int64_t> newleft(nleft);
             std::vector<int64_t> newright(nright);            

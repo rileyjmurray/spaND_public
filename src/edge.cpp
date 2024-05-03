@@ -1,6 +1,5 @@
 #include "spaND.h"
 
-using namespace std;
 using namespace Eigen;
 
 namespace spaND {
@@ -33,7 +32,7 @@ pEdgeIt& pEdgeIt::operator++() {
 /** Edge **/
 Edge::Edge(Cluster* n1, Cluster* n2, pMatrixXd A, bool original) : n1(n1), n2(n2), original(original) {
     assert(A != nullptr);
-    A21 = move(A);
+    A21 = std::move(A);
     assert(A21->rows() == n2->size());
     assert(A21->cols() == n1->size());
 }
@@ -41,10 +40,10 @@ MatrixXd* Edge::A() {
     return this->A21.get();
 }
 void Edge::set_A(pMatrixXd A) {
-    this->A21 = move(A);
+    this->A21 = std::move(A);
 }
 pMatrixXd Edge::get_A() {
-    return move(this->A21);
+    return std::move(this->A21);
 }
 bool Edge::is_original() {
     return this->original;

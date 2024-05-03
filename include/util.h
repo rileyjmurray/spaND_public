@@ -54,7 +54,6 @@ bool isperm(const iVEC* perm) {
 
 template <typename VEC2, typename VEC1>
 VEC2 invperm(const VEC1& perm) {
-    using VEC1_scalar_t = typename VEC1::Scalar;
     using VEC2_scalar_t = typename VEC2::Scalar;
     assert(isperm(&perm));
     VEC2 invperm(perm.size());
@@ -139,7 +138,7 @@ void split_LU(Eigen::MatrixXd* A, Eigen::MatrixXd* L, Eigen::MatrixXd* U);
  */
 double rcond_1_getf(Eigen::MatrixXd* A_LU, double A_1_norm);
 double rcond_1_potf(Eigen::MatrixXd* A_LLT, double A_1_norm);
-double rcond_1_trcon(Eigen::MatrixXd* LU, char uplo, char diag);
+double rcond_1_trcon(Eigen::MatrixXd* LU, Uplo uplo, Diag diag);
 
 /**
  * B <- B * L^(-1)

@@ -99,7 +99,7 @@ SpMat neglapl_unsym(int64_t n, int64_t d, int64_t seed) {
     SpMat A = neglapl(n, d);
     default_random_engine gen;
     gen.seed(seed);
-    uniform_real_distribution<double> rand(-0.1, 0.1);
+    std::uniform_real_distribution<double> rand(-0.1, 0.1);
     for (int64_t k = 0; k < A.outerSize(); ++k) {
         for (SpMat::InnerIterator it(A, k); it; ++it) {
             A.coeffRef(it.row(), it.col()) += rand(gen);
@@ -125,7 +125,7 @@ SpMat make_indef(SpMat& A, int64_t seed) {
 SpMat random_SpMat(int64_t n, double p, int64_t seed) {
     default_random_engine gen;
     gen.seed(seed);
-    uniform_real_distribution<double> dist(0.0,1.0);
+    std::uniform_real_distribution<double> dist(0.0,1.0);
     vector<Triplet<double>> triplets;
     for (int64_t i = 0; i < n; ++i) {
         for (int64_t j = 0; j < n; ++j) {
@@ -322,7 +322,7 @@ TEST(Util, SymmPerm) {
         int64_t N = A.rows();
         VectorXi64 p = VectorXi64::LinSpaced(N, 0, N-1);
         random_device rd;
-        mt19937 g(rd());
+        std::mt19937 g(rd());
         shuffle(p.data(), p.data() + N, g);
         // Compare
         SpMat pAp = symm_perm(A, p);

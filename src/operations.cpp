@@ -3,22 +3,22 @@
 namespace spaND {
 
 Gemm::Gemm(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : 
-    self(self->head_x()), nbr(nbr->head_x()), A(move(A)), Adiag(Adiag) {};
+    self(self->head_x()), nbr(nbr->head_x()), A(std::move(A)), Adiag(Adiag) {};
 
 Gemm::Gemm(Cluster* self, Cluster* nbr, pMatrixXd A) : 
-    self(self->head_x()), nbr(nbr->head_x()), A(move(A)), Adiag(nullptr) {};
+    self(self->head_x()), nbr(nbr->head_x()), A(std::move(A)), Adiag(nullptr) {};
 
-GemmIn::GemmIn(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, move(A), Adiag) {};
-GemmIn::GemmIn(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, move(A)) {};
+GemmIn::GemmIn(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, std::move(A), Adiag) {};
+GemmIn::GemmIn(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, std::move(A)) {};
 
-GemmOut::GemmOut(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, move(A), Adiag) {};
-GemmOut::GemmOut(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, move(A)) {};
+GemmOut::GemmOut(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, std::move(A), Adiag) {};
+GemmOut::GemmOut(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, std::move(A)) {};
 
-GemmSymmIn::GemmSymmIn(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, move(A), Adiag) {};
-GemmSymmIn::GemmSymmIn(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, move(A)) {};
+GemmSymmIn::GemmSymmIn(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, std::move(A), Adiag) {};
+GemmSymmIn::GemmSymmIn(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, std::move(A)) {};
 
-GemmSymmOut::GemmSymmOut(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, move(A), Adiag) {};
-GemmSymmOut::GemmSymmOut(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, move(A)) {};
+GemmSymmOut::GemmSymmOut(Cluster* self, Cluster* nbr, pMatrixXd A, Eigen::VectorXd* Adiag) : Gemm(self, nbr, std::move(A), Adiag) {};
+GemmSymmOut::GemmSymmOut(Cluster* self, Cluster* nbr, pMatrixXd A) : Gemm(self, nbr, std::move(A)) {};
 
 long long Gemm::nnz() {
     return self.size() * nbr.size() + (Adiag == nullptr ? 0 : self.size());
@@ -127,7 +127,7 @@ std::string ScalingPLUQ::name() {
 }
 
 ScalingLDLT::ScalingLDLT(Cluster* n1, pMatrixXd L, pVectorXd s, pVectorXi64 p) : 
-    xs(n1->head_x()), L(std::move(L)), s(move(s)), p(move(p)) {}
+    xs(n1->head_x()), L(std::move(L)), s(std::move(s)), p(std::move(p)) {}
 void ScalingLDLT::fwd() {
     xs = p->asPermutation().transpose() * xs;
     trsv(L.get(), &xs, Uplo::Lower, Op::NoTrans, Diag::NonUnit);
