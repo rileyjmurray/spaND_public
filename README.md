@@ -15,8 +15,8 @@ This is indicated when needed.
 
 Necessary:
 - Download Eigen (header library only) : http://eigen.tuxfamily.org/index.php?title=Main_Page
-- Download, build and install Metis in **Int 32 bits mode** : http://glaros.dtc.umn.edu/gkhome/metis/metis/overview (so that you can pass it `int64_t`s)
-- Download, build and install Openblas : https://www.openblas.net/ or Intel MKL
+- Download, build and install Metis in **Int 64 bits mode** : http://glaros.dtc.umn.edu/gkhome/metis/metis/overview (so that you can pass it `int64_t`s)
+- Download, build and install blaspp and lapackpp.
 
 Optional, for testing and custom experiments only:
 - Download, build and install Mfem : https://mfem.org/
@@ -35,7 +35,6 @@ Then
     
     You need to set the following variables in `Makefile.conf`:
     
-    - `USE_MKL` to either 0 (not using MKL) or 1 (using MKL - this is because MKL requires specific build flags). If you have both, you can set it at build time (see below.). If unset, default is 0.
     - `CC` should be your C++ compiler (needs to support -std=c++14)
     - `EXTRA_INCDIR` should contains path to the above libraries headers (Eigen, Metis, Blas/Lapack, linalgCpp) if not in your compiler path (may or may not be needed)
     - `EXTRA_LINKDIR`should contains path to the above libraries objects (Metis, Blas/Lapack), if not in your compiler path (may or may not be needed)
@@ -44,37 +43,13 @@ Then
     - `MFEMLIB` should point to MFEM's root (optional)
         
 3. Then, move to `tests/`. You can create any of the executables with `make target` or all with `make`. 
-If you have both Openblas and MKL, you can pass `USE_MKL=0` or `USE_MKL=1` to make to chose between the two.
 
 ## Some additional things to do (maybe) when you run:
-- You may have to add Metis's LIB or BLAS's LIB folder to `LD_LIBRARY_PATH`. For instance, with MKL on the Stanford Sherlock system, it looks like this (in this case, it's automatically set, no need to do anything)
-
-    ```
-    [lcambier@sh-ln07 login ~]$ module load icc metis imkl eigen
-    [lcambier@sh-ln07 login ~]$ echo $LD_LIBRARY_PATH
-    /share/software/user/restricted/imkl/2019/mkl/lib/intel64:/share/software/user/open/metis/5.1.0/lib:/share/software/user/restricted/icc/2019/lib/intel64
-    ```
-    
-    or with Openblas
-
-    ```
-    [lcambier@sh-ln07 login ~]$ module load icc metis openblas eigen
-    [lcambier@sh-ln07 login ~]$ echo $LD_LIBRARY_PATH
-    /share/software/user/open/openblas/0.3.4/lib:/share/software/user/open/metis/5.1.0/lib:/share/software/user/restricted/icc/2019/lib/intel64
-    ```
-    
-    If you don't have modules, you may have to set `LD_LIBRARY_PATH` yourself.
-    
-- You may have to change the Openblas link flag from `-lblas` to `-lopenblas`. Not clear why :-()
-
-- when running the code, you might need to set your DYLD_LIBRARY_PATH:
-    ```shell
-    export DYLD_LIBRARY_PATH=/Users/rjmurr/Documents/randnla/blaspp-install/lib:/Users/rjmurr/Documents/randnla/lapackpp-install/lib
-    ```
+You'll probably need to add Metis' LIB and blaspp/lapackpp LIB folders to `LD_LIBRARY_PATH` and/or ``DYLD_LIBRARY_PATH``.
 
 ## Example
 
-Let's compile the general driver code and run it on a sample arbitrary matrix. Set-up all the above. We assume you have Openblas installed, with 'USE_MKL=0' set in your `Makefile.conf` file.
+Let's compile the general driver code and run it on a sample arbitrary matrix.
 1. Compile the ```spaND.cpp``` example
 
     ```make spaND```
