@@ -1296,8 +1296,12 @@ void Tree::sparsify_preserve_only(Cluster* self) {
     this->tprof[this->ilvl].spars_scatt += elapsed(t2, t3);    
 }
 
-// RRQR only
-void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred) {
+// RRQR only : interested in modifying to avoid densifying the sparse submatrix.
+void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred, bool make_Asn_dense) {
+    // (s,n) here  --> (p, n) in the paper
+    //
+    // The paper computes low-rank approx of A_pn, so we're interested in this function's Asn.
+    //
     bool is_pivot_I = (this->symm_kind != SymmKind::SYM);
     MatrixXd* Ass = self->pivot()->A();
     if (is_pivot_I) {
@@ -1318,14 +1322,29 @@ void Tree::sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred
     timer t2 = wctime();
     this->tprof[this->ilvl].geqp3 += elapsed(t1, t2);
     if (this->monitor_flops) this->tprof_flops[this->ilvl].rrqr.push_back({Asn->rows(), Asn->cols(), elapsed(t1, t2)});    
-    // Truncate ?
+    // Determine numerical rank
+    // ----------------------------------------------------------------------------------------------
+    //  Let "Rsn" denote the R-factor from QRCP of Asn.
+    //  Right now we infer numerical rank by looking at the diagonal of Rsn.
+    //  Specifically, do
+    //      rank = max{ k : rcond(diag(Asn)[:k]) >= tol }.
+    //  If we only had a partial QR decomposition (because Asn is kept sparse), then we could set
+    //      rank = min{ k_max ,  max{ k : rcond(diag(Rsn)) }  } 
+    //
     VectorXd diag = Asn->diagonal();
     if (this->monitor_Rdiag) { self->Rdiag = std::vector<double>(diag.data(), diag.data() + diag.size()); }
     int64_t rank = choose_rank(diag, tol);
     if (rank >= rows) { // No point, nothing to do
         return;
     }
-    // Save Q
+    // Get access to Q as a linear operator via our custom "Orthogonal" class,
+    //  which wraps the Householder vectors from this QR decomposition.
+    //
+    // Note: Depending on the calls to the .fwd() and .bwd() methods 
+    // of the resulting Orthogonal object, it might be that we get away with
+    // only keeping the explicit representation of Q. If that isn't the case, then we'll
+    // need a temporary copy of Q that we can make explicit in order to form R.
+    // 
     timer tQ_0 = wctime();
     pMatrixXd v = std::make_unique<MatrixXd>(rows, rank);
     *v = Asn->leftCols(rank);
@@ -1418,7 +1437,7 @@ void Tree::sparsify_preserve_adaptive(Cluster* self) {
 
 void Tree::sparsify_cluster_farfield(Cluster* self) {
     this->log[this->ilvl].rank_before.addData(self->size());        
-    this->sparsify_adaptive_only(self, [](Edge* e){return ! e->is_original();});
+    this->sparsify_adaptive_only(self, [](Edge* e){return ! e->is_original();}, true);
     this->log[this->ilvl].rank_after.addData(self->size());
 }
 
@@ -1432,7 +1451,7 @@ void Tree::sparsify_cluster(Cluster* self) {
                 this->sparsify_preserve_only(self);
             }            
         } else {
-            this->sparsify_adaptive_only(self, [](Edge* e){(void)e; return true;});
+            this->sparsify_adaptive_only(self, [](Edge* e){(void)e; return true;}, true);
         }
         this->log[this->ilvl].rank_after.addData(self->size());
     } else {

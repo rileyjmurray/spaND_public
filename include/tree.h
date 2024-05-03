@@ -100,7 +100,7 @@ class Tree
         void sparsify_cluster(Cluster*);
         void sparsify_cluster_farfield(Cluster*);
         pMatrixXd assemble_Asn(Cluster*, std::function<bool(Edge*)>);                
-        void sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred);
+        void sparsify_adaptive_only(Cluster* self, std::function<bool(Edge*)> pred, bool make_Asn_dense);
         pMatrixXd assemble_Asphi(Cluster*);
         void sparsify_preserve_only(Cluster*);
         void sparsify_preserve_adaptive(Cluster*);
