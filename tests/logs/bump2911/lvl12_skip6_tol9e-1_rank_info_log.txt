@@ -564,3 +564,8 @@ CG: #iterations: 101, residual |Ax-b|/|b|: 0.000438664
   CG: 2188 s.
 <<<<CG=101
 <<<<tCG=2188
+<<<<tpart=76.7517
+<<<<tassm=5.08113
+<<<<tfact=1108.12
+<<<<stop=643
+<<<<nnzfact=7972129335
