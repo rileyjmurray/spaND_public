@@ -101,6 +101,7 @@ void Tree::init(int64_t nlevels) {
     this->nlevels = nlevels;
     this->tol = 10.0;
     this->skip = 0;
+    this->stop = 0;
     this->scale_kind = ScalingKind::LLT;
     this->symm_kind = SymmKind::SPD;
     this->Xcoo = nullptr;
@@ -129,6 +130,7 @@ int64_t  Tree::nphis() const {
 void Tree::set_preserve(bool preserve) { this->preserve = preserve; }
 void Tree::set_tol(double tol) { this->tol = tol; }
 void Tree::set_skip(int64_t skip) { this->skip = skip; }
+void Tree::set_stop(int64_t stop) { this->stop = stop; }
 void Tree::set_scaling_kind(ScalingKind scaling_kind) { this->scale_kind = scaling_kind; }
 void Tree::set_symm_kind(SymmKind symm_kind) { this->symm_kind = symm_kind; }
 void Tree::set_part_kind(PartKind part_kind) { this->part_kind = part_kind; }
@@ -163,17 +165,17 @@ int64_t Tree::get_N() const {
     return this->perm.size();
 }
 
-int64_t Tree::get_stop() const {
-    int64_t stop = get_N();
+int64_t Tree::get_last() const {
+    int64_t last = get_N();
     for (int64_t lvl = 0; lvl < this->log.size(); lvl++) {
         if (this->log[lvl].dofs_left_elim > 0) {
-            stop = std::min(stop, this->log[lvl].dofs_left_elim);
+            last = std::min(last, this->log[lvl].dofs_left_elim);
         }
         if (this->log[lvl].dofs_left_spars > 0) {
-            stop = std::min(stop, this->log[lvl].dofs_left_spars);
+            last = std::min(last, this->log[lvl].dofs_left_spars);
         }
     }
-    return stop;
+    return last;
 }
 
 int64_t Tree::get_nlevels() const {
@@ -1493,6 +1495,7 @@ void Tree::factorize() {
         std::cout << "  verbose?:   " << verb     << std::endl;
         std::cout << "  tol?:       " << tol      << std::endl;
         std::cout << "  #skip:      " << skip     << std::endl;
+        std::cout << "  #stop:      " << stop     << std::endl;
         std::cout << "  symmetrykd? " << symm2str(symm_kind) << std::endl;                                    
         std::cout << "  scalingkd?  " << scaling2str(scale_kind) << std::endl;
         std::cout << "  want_spars? " << use_want_sparsify << std::endl;
@@ -1533,7 +1536,7 @@ void Tree::factorize() {
             if (this->verb) printf("  Elim: %3.2e s., %d dofs left, %d clusters left\n", elapsed(telim_0, telim_1), this->log[this->ilvl].dofs_left_elim, this->nclusters_left());
         }
 
-        if (this->ilvl >= skip) {
+        if (this->ilvl >= skip && this->ilvl < stop) {
 
             // Scale
             timer tscale_0 = wctime();

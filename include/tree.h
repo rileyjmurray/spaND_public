@@ -39,6 +39,7 @@ class Tree
         int64_t nlevels;            // Maximum tree depth        
         double tol;             // Compression tolerance
         int64_t skip;               // #levels to skip for sparsification
+        int64_t stop;               // stop sparsification after this number of levels
         bool scale;             // Wether to scale the pivot (true) or not
         ScalingKind scale_kind; // The kind of scaling
         SymmKind symm_kind;     // Wether the matrix is SPD (SPD), symmetric indefinite (SYM) or general unsymmetric (GEN)
@@ -137,6 +138,7 @@ class Tree
         void set_preserve(bool);
         void set_tol(double);
         void set_skip(int64_t);
+        void set_stop(int64_t);
         void set_scaling_kind(ScalingKind);
         void set_symm_kind(SymmKind);
         void set_part_kind(PartKind);
@@ -156,7 +158,7 @@ class Tree
         std::list<const Cluster*> get_clusters() const;
         std::vector<int64_t> get_dof2ID() const;
         int64_t get_nlevels() const;
-        int64_t get_stop() const;
+        int64_t get_last() const;
         long long nnz() const ;
 
         // Publicly visible profiling & other log info

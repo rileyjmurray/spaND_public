@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
         // Compression choices
         ("t,tol", "Tolerance", cxxopts::value<double>()->default_value("1e-1"))            
         ("skip", "Skip sparsification", cxxopts::value<int>()->default_value("0"))        
+        ("stop", "Stop sparsification", cxxopts::value<int>()->default_value("-1"))        
         ("preserve", "Wether to preserve the 1 vector or not (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("scaling_kind", "The scaling kind, LLT, EVD, SVD, PLU or PLUQ", cxxopts::value<string>()->default_value("LLT"))
         ("use_want_sparsify", "Wether to use want_sparsify (true) or not (default: true)", cxxopts::value<bool>()->default_value("true"))
@@ -86,6 +87,9 @@ int main(int argc, char* argv[]) {
     double tol = result["tol"].as<double>();
     int skip = result["skip"].as<int>();
     int nlevels = result["lvl"].as<int>();
+    int stop = result["stop"].as<int>();
+    if (stop < 0)
+        stop = nlevels;
     bool preserve = result["preserve"].as<bool>();
     string s0 = result["symm_kind"].as<string>();
     SymmKind symmk = (s0 == "SPD" ? SymmKind::SPD :
@@ -211,6 +215,7 @@ int main(int argc, char* argv[]) {
     t.set_symm_kind(symmk);
     t.set_tol(tol);
     t.set_skip(skip);
+    t.set_stop(stop);
     t.set_preserve(preserve);
     t.set_use_geo(geo);
     if (geo) {
@@ -230,6 +235,7 @@ int main(int argc, char* argv[]) {
     std::cout << "<<<<nlevels=" << nlevels << endl;
     std::cout << "<<<<tol=" << tol << endl;
     std::cout << "<<<<skip=" << skip << endl;
+    std::cout << "<<<<stop=" << stop << endl;
     std::cout << "<<<<preserve=" << preserve << endl;
     std::cout << "<<<<lorasp=" << use_lorasp << endl;
 
@@ -291,7 +297,7 @@ int main(int argc, char* argv[]) {
     std::cout << "<<<<tpart=" << elapsed(tpart_0, tpart) << endl;
     std::cout << "<<<<tassm=" << elapsed(tass_0,  tass)  << endl;
     std::cout << "<<<<tfact=" << elapsed(tfact_0, tfact) << endl;
-    std::cout << "<<<<stop="  << t.get_stop() << endl;
+    std::cout << "<<<<last="  << t.get_last() << endl;
     std::cout << "<<<<nnzfact=" << t.nnz() << endl;
 
     if (result.count("write_log_flops")) {
