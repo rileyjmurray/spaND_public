@@ -165,7 +165,7 @@ def __(dimension_heatmap_for_rank_threshold, plt):
 @app.cell
 def __(dimension_heatmap_for_rank_threshold, np, tol):
     _tolstr  = '%.2f' % tol
-    _foldername = '/Users/rjmurr/Documents/randnla/spand-repo/scripts/plots'
+    _foldername = '/Users/rjmurr/Documents/randnla/spand-repo/scripts/plots/bump2911/lvl20_skip10/'
     for _rankfrac in np.arange(start=0.05, stop=1.01, step=0.01):
         _ax, _fig = dimension_heatmap_for_rank_threshold(_rankfrac)
         _rf = '%.2f' % _rankfrac
@@ -175,9 +175,10 @@ def __(dimension_heatmap_for_rank_threshold, np, tol):
 
 
 @app.cell
-def __(imageio, np):
+def __(imageio, np, tol):
+    _tolstr  = '%.2f' % tol
     images = []
-    _foldername = '/Users/rjmurr/Documents/randnla/spand-repo/scripts/plots'
+    _foldername = '/Users/rjmurr/Documents/randnla/spand-repo/scripts/bump2911/lvl20_skip10/'
     for _rankfrac in np.arange(start=0.05, stop=1.01, step=0.01):
         _rf = '%.2f' % _rankfrac
         _filename = f'{_foldername}/dimheatmaps_for_rankfrac_{_rf}_tol{_tolstr}.png'
