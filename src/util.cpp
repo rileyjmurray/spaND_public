@@ -338,9 +338,6 @@ void orgqr_spand(Eigen::MatrixXd* v, Eigen::VectorXd* h) {
 void geqp3_spand(MatrixXd* A, VectorXi64* jpvt, VectorXd* tau) {
     int64_t m = A->rows();
     int64_t n = A->cols();
-    std::cout << "GEQP3 call: (m, n) = (" << m << ", " << n << ")"; 
-    // ^ we deliberately don't end the line!  That calling function will handle that
-    //   after deciding numerical rank.
     if (m == 0 || n == 0)
         return;
     assert(jpvt->size() == n);
