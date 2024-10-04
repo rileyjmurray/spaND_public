@@ -1069,8 +1069,7 @@ int main(int argc, char **argv) {
         ("n_threads", "Number of threads", cxxopts::value<int64_t>()->default_value("4"))
         ("run", "How many Run.Many to run", cxxopts::value<int64_t>()->default_value("4"))
         ;
-    int64_t argc64 = argc;
-    auto result = options.parse(argc64, argv);
+    auto result = options.parse(argc, argv);
 
     if (result.count("help"))
     {

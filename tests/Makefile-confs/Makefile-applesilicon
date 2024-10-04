@@ -1,5 +1,5 @@
 CXX = clang++
-EXTRA_CFLAGS = -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context
+EXTRA_CFLAGS = -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context -DCXXOPTS_USE_UNICODE
 
 SPAND_DEPS_STAGING = 
 # ^ An optional (but suggested) folder. It's intended to hold any source code, build directories,
@@ -15,10 +15,11 @@ LAPACKPP_HOME = ${SPAND_DEPS_INSTALL}
 
 # Below: definitions that spaND's main makefile uses in all build targets
 REQUIRED_INCDIRS = -isystem${LAPACKPP_HOME}/include -isystem${BLASPP_HOME}/include -isystem${EIGEN_HOME}/include -isystem${METIS_HOME}/include
-REQUIRED_LIBDIRS = -L${LAPACKPP_HOME}/lib -L${BLASPP_HOME}/lib 
+REQUIRED_LIBDIRS = -L${LAPACKPP_HOME}/lib -L${BLASPP_HOME}/lib -L${METIS_HOME}/lib
 
 # Below: definitions that spaND's main makefile requires for certain build targets
-# (only the latter four definitions are used in that makefile).
+# (the first three are only used in this file).
+UNSUPPORTED_EIGEN_DIR = 
 MFEM_HOME     = ${SPAND_DEPS_INSTALL}
 GTEST_HOME    = ${SPAND_DEPS_INSTALL}
 

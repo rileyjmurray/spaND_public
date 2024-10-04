@@ -56,8 +56,7 @@ int main(int argc, char* argv[]) {
         ("sp_mid", "Saddle point middle point", cxxopts::value<int>()->default_value("-1"))
         ("sp_eps", "Saddle point epsilon point", cxxopts::value<double>()->default_value("0.0"))       
         ;
-    int64_t argc64 = (int64_t) argc;
-    auto result = options.parse(argc64, argv);
+    auto result = options.parse(argc, argv);
 
     if (result.count("help")) {
         std::cout << options.help({"", "Group"}) << std::endl;
