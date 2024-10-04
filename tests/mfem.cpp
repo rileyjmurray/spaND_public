@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 {
     // 1. Parse command-line options.
     const char *mesh_file = "../data/star.mesh";
-    int64_t order = 1;
+    int order = 1;
     bool static_cond = false;
     bool visualization = 1;
 
@@ -71,25 +71,25 @@ int main(int argc, char *argv[])
     args.Parse();
     if (!args.Good())
     {
-        args.PrintUsage(cout);
+        args.PrintUsage(std::cout);
         return 1;
     }
-    args.PrintOptions(cout);
+    args.PrintOptions(std::cout);
 
     // 2. Read the mesh from the given mesh file. We can handle triangular,
     //    quadrilateral, tetrahedral, hexahedral, surface and volume meshes with
     //    the same code.
     mfem::Mesh *mesh = new mfem::Mesh(mesh_file, 1, 1);
-    int64_t dim = mesh->Dimension();
+    int dim = mesh->Dimension();
 
     // 3. Refine the mesh to increase the resolution. In this example we do
     //    'ref_levels' of uniform refinement. We choose 'ref_levels' to be the
     //    largest number that gives a final mesh with no more than 50,000
     //    elements.
     {
-        int64_t ref_levels =
-            (int64_t)floor(log(50000./mesh->GetNE())/log(2.)/dim);
-        for (int64_t l = 0; l < ref_levels; l++)
+        int ref_levels =
+            (int)floor(log(50000./mesh->GetNE())/log(2.)/dim);
+        for (int l = 0; l < ref_levels; l++)
         {
             mesh->UniformRefinement();
         }
@@ -106,24 +106,24 @@ int main(int argc, char *argv[])
     else if (mesh->GetNodes())
     {
         fec = mesh->GetNodes()->OwnFEC();
-        cout << "Using isoparametric FEs: " << fec->Name() << endl;
+        std::cout << "Using isoparametric FEs: " << fec->Name() << std::endl;
     }
     else
     {
         fec = new mfem::H1_FECollection(order = 1, dim);
     }
     mfem::FiniteElementSpace *fespace = new mfem::FiniteElementSpace(mesh, fec);
-    cout << "Number of finite element unknowns: "
-            << fespace->GetTrueVSize() << endl;
+    std::cout << "Number of finite element unknowns: "
+            << fespace->GetTrueVSize() << std::endl;
 
     // 5. Determine the list of true (i.e. conforming) essential boundary dofs.
     //    In this example, the boundary conditions are defined by marking all
     //    the boundary attributes from the mesh as essential (Dirichlet) and
     //    converting them to a list of true dofs.
-    mfem::Array<int64_t> ess_tdof_list;
+    mfem::Array<int> ess_tdof_list;
     if (mesh->bdr_attributes.Size())
     {
-        mfem::Array<int64_t> ess_bdr(mesh->bdr_attributes.Max());
+        mfem::Array<int> ess_bdr(mesh->bdr_attributes.Max());
         ess_bdr = 1;
         fespace->GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
     }
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     b->AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
     b->Assemble();
 
-    // 7. Define the solution vector x as a finite element grid function
+    // 7. Define the solution mfem::Vector x as a finite element grid function
     //    corresponding to fespace. Initialize x with initial guess of zero,
     //    which satisfies the boundary conditions.
     mfem::GridFunction x(fespace);
@@ -159,12 +159,12 @@ int main(int argc, char *argv[])
     mfem::Vector B, X;
     a->FormLinearSystem(ess_tdof_list, x, *b, A, X, B);
 
-    cout << "Size of linear system: " << A.Height() << endl;
+    std::cout << "Size of linear system: " << A.Height() << std::endl;
 
     // 9b. Use spaND
     // Run Algo
     MatrixXd Xcoo(3, mesh->GetNV());
-    for (int64_t i = 0; i < mesh->GetNV(); i++) {
+    for (int i = 0; i < mesh->GetNV(); i++) {
         Xcoo(0, i) = mesh->GetVertex(i)[0];
         Xcoo(1, i) = mesh->GetVertex(i)[1];
         Xcoo(2, i) = mesh->GetVertex(i)[2];
@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
     SpMat A2 = mfem2eigen(A); 
     VectorXd b2 = mfem2eigen(B);
 
-    cout << b2.topRows(150) << endl;
-    cout << A2.block(0, 0, 150, 150) << endl;
+    std::cout << b2.topRows(150) << std::endl;
+    std::cout << A2.block(0, 0, 150, 150) << std::endl;
 
     VectorXd x2 = VectorXd::Zero(B.Size());
     
@@ -188,10 +188,10 @@ int main(int argc, char *argv[])
     try {
         t.factorize();
     } catch (std::exception& ex) {
-        cout << ex.what();
+        std::cout << ex.what();
     }
-    int64_t iter = cg(A2, b2, x2, t, 500, 1e-12, true);
-    cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A2*x2-b2).norm() / b2.norm() << endl;
+    int iter = cg(A2, b2, x2, t, 500, 1e-12, true);
+    std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A2*x2-b2).norm() / b2.norm() << std::endl;
     eigen2mfem(x2, X);
 
     // 11. Recover the solution as a finite element grid function.
@@ -210,10 +210,10 @@ int main(int argc, char *argv[])
     if (visualization)
     {
         char vishost[] = "localhost";
-        int64_t  visport   = 19916;
+        int  visport   = 19916;
         mfem::socketstream sol_sock(vishost, visport);
         sol_sock.precision(8);
-        sol_sock << "solution\n" << *mesh << x << flush;
+        sol_sock << "solution\n" << *mesh << x << std::flush;
     }
 
     // 14. Free the used memory.

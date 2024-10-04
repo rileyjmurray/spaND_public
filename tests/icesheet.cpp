@@ -5,7 +5,7 @@
 #include <unsupported/Eigen/IterativeSolvers>
 #include "mmio.hpp"
 
-using namespace Eigen;
+// using namespace Eigen;
 using namespace std;
 using namespace spaND;
 
@@ -15,14 +15,14 @@ int main(int argc, char* argv[]) {
     int64_t nlevels = atoi(argv[2]);
     double tol = atof(argv[3]);
     int64_t skip = atoi(argv[4]);
-    cout << "Inputs folder " << folder << " nlevels = " << nlevels << " tol = " << tol << " skip = " << skip << endl;
+    std::cout << "Inputs folder " << folder << " nlevels = " << nlevels << " tol = " << tol << " skip = " << skip << std::endl;
     string file  = folder + "/jac4.mm";
     string xfile = folder + "/xCoords.mm";
     string yfile = folder + "/yCoords.mm";
-    cout << "Reading from " << file << " " << xfile << " " << yfile << endl;
+    std::cout << "Reading from " << file << " " << xfile << " " << yfile << std::endl;
     SpMat A = mmio::sp_mmread<double,int64_t>(file);
     int64_t N = A.rows();
-    cout << "A has " << N << " rows" << endl;
+    std::cout << "A has " << N << " rows" << std::endl;
     VectorXd xcoords = mmio::dense_mmread<double>(xfile);
     VectorXd ycoords = mmio::dense_mmread<double>(yfile);
     // Create X coordinate matrix
@@ -48,19 +48,19 @@ int main(int argc, char* argv[]) {
     try {
         t.factorize();
     } catch (exception& ex) {
-        cout << ex.what();
+        std::cout << ex.what();
         exit(1);
     }
     timer end = wctime();
     t.print_log();
-    cout << "Timings:" << endl << "  Partition: " << elapsed(start,part) << " s." << endl << "  Assembly: " << elapsed(part,ass) << " s." << endl << "  Factorization: " << elapsed(ass, end) << " s." << endl;
+    std::cout << "Timings:" << std::endl << "  Partition: " << elapsed(start,part) << " s." << std::endl << "  Assembly: " << elapsed(part,ass) << " s." << std::endl << "  Factorization: " << elapsed(ass, end) << " s." << std::endl;
     // Use CG
     VectorXd x = VectorXd::Zero(N);
     VectorXd b = VectorXd::Random(N);
     timer cg0 = wctime();
     int64_t iter = cg(A, b, x, t, 500, 1e-12, true);
     timer cg1 = wctime();
-    cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
-    cout << "  CG: " << elapsed(cg0, cg1) << " s." << endl;
+    std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << std::endl;
+    std::cout << "  CG: " << elapsed(cg0, cg1) << " s." << std::endl;
     return 0;
 }

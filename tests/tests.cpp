@@ -69,8 +69,8 @@ struct params {
     bool preserve;
 };
 
-vector<params> get_params() {
-    vector<params> configs;
+std::vector<params> get_params() {
+    std::vector<params> configs;
     for (int64_t symm = 0; symm < 3; symm++) {
         for (int64_t pki = 0; pki < 2; pki++) {
             for (int64_t ski = 0; ski < 6; ski++) {
@@ -90,7 +90,7 @@ vector<params> get_params() {
 SpMat neglapl(int64_t n, int64_t d) {
     stringstream s;
     s << "../mats/neglapl_" << d << "_" << n << ".mm";
-    string file = s.str();
+    std::string file = s.str();
     SpMat A = mmio::sp_mmread<double,int64_t>(file);
     return A;
 }
@@ -126,7 +126,7 @@ SpMat random_SpMat(int64_t n, double p, int64_t seed) {
     default_random_engine gen;
     gen.seed(seed);
     std::uniform_real_distribution<double> dist(0.0,1.0);
-    vector<Triplet<double>> triplets;
+    std::vector<Triplet<double>> triplets;
     for (int64_t i = 0; i < n; ++i) {
         for (int64_t j = 0; j < n; ++j) {
             auto v_ij = dist(gen);
@@ -141,7 +141,7 @@ SpMat random_SpMat(int64_t n, double p, int64_t seed) {
 }
 
 SpMat identity_SpMat(int64_t n) {
-    vector<Triplet<double>> triplets;
+    std::vector<Triplet<double>> triplets;
     for (int64_t i = 0; i < n; ++i) {
         triplets.push_back(Triplet<double>(i,i,1.0));
     }
@@ -310,8 +310,8 @@ TEST(Util, LinspaceNd) {
 }
 
 TEST(Util, SymmPerm) {
-    vector<int64_t> dims  = {2, 2,  2,  3, 3,  3,  3 };
-    vector<int64_t> sizes = {5, 10, 20, 5, 15, 25, 30};
+    std::vector<int64_t> dims  = {2, 2,  2,  3, 3,  3,  3 };
+    std::vector<int64_t> sizes = {5, 10, 20, 5, 15, 25, 30};
     for (int64_t test = 0; test < dims.size(); test++) {
         int64_t s = sizes[test];
         int64_t d = dims[test];
@@ -383,21 +383,21 @@ TEST(PartitionTest, Square) {
     t.set_use_geo(true);
     t.set_Xcoo(&X);
     auto part = t.partition(A);
-    vector<SepID> sepidref { 
+    std::vector<SepID> sepidref { 
         SepID(0,0), SepID(0,0), SepID(1,0), SepID(0,1), SepID(0,1),
         SepID(0,0), SepID(0,0), SepID(1,0), SepID(0,1), SepID(0,1),
         SepID(2,0), SepID(2,0), SepID(2,0), SepID(2,0), SepID(2,0),
         SepID(0,2), SepID(0,2), SepID(1,1), SepID(0,3), SepID(0,3),
         SepID(0,2), SepID(0,2), SepID(1,1), SepID(0,3), SepID(0,3), 
     } ;
-    vector<SepID> leftref { 
+    std::vector<SepID> leftref { 
         SepID(0,0), SepID(0,0), SepID(0,0), SepID(0,1), SepID(0,1),
         SepID(0,0), SepID(0,0), SepID(0,0), SepID(0,1), SepID(0,1),
         SepID(0,0), SepID(0,0), SepID(1,0), SepID(0,1), SepID(0,1),
         SepID(0,2), SepID(0,2), SepID(0,2), SepID(0,3), SepID(0,3),
         SepID(0,2), SepID(0,2), SepID(0,2), SepID(0,3), SepID(0,3), 
     } ;
-    vector<SepID> rightref { 
+    std::vector<SepID> rightref { 
         SepID(0,0), SepID(0,0), SepID(0,1), SepID(0,1), SepID(0,1),
         SepID(0,0), SepID(0,0), SepID(0,1), SepID(0,1), SepID(0,1),
         SepID(0,2), SepID(0,2), SepID(1,1), SepID(0,3), SepID(0,3),
@@ -415,15 +415,15 @@ TEST(PartitionTest, Square) {
  * Check consistency of the partitioning
  */
 TEST(PartitionTest, Consistency) {
-    vector<int64_t> dims  = {2, 2,  2,   3, 3,  3 };
-    vector<int64_t> sizes = {5, 20, 100, 5, 15, 25};
+    std::vector<int64_t> dims  = {2, 2,  2,   3, 3,  3 };
+    std::vector<int64_t> sizes = {5, 20, 100, 5, 15, 25};
     for (int64_t test = 0; test < dims.size(); test++) {
         int64_t s = sizes[test];
         int64_t d = dims[test];
         stringstream ss;
         ss << "../mats/neglapl_" << d << "_" << s << ".mm";
         int64_t n = pow(s, d);
-        string file = ss.str();
+        std::string file = ss.str();
         for (int64_t nlevels = 1; nlevels < 8; nlevels++) {
             for (int64_t geoi = 0; geoi < 2; geoi++) {
                 for (int64_t pki = 0; pki < 2; pki++) {
@@ -486,8 +486,8 @@ TEST(PartitionTest, Consistency) {
  * Check assembly
  */
 TEST(Assembly, Consistency) {
-    vector<int64_t> dims  = {2, 2,  2,  3, 3,  3};
-    vector<int64_t> sizes = {5, 10, 20, 5, 10, 15};
+    std::vector<int64_t> dims  = {2, 2,  2,  3, 3,  3};
+    std::vector<int64_t> sizes = {5, 10, 20, 5, 10, 15};
     for (int64_t spandlorasp = 0; spandlorasp < 2; spandlorasp++) {
         for (int64_t test = 0; test < dims.size(); test++) { 
             for (int64_t pki = 0; pki < 2; pki++) {
@@ -549,10 +549,10 @@ TEST(Assembly, Consistency) {
 /** Factorization tests **/
 
 TEST(ApproxTest, PrintConfigs) {
-    vector<params> configs = get_params();
-    cout << "Preserve ? PartKind ? ScalingKind ? SymmKind ?" << endl;
+    std::vector<params> configs = get_params();
+    std::cout << "Preserve ? PartKind ? ScalingKind ? SymmKind ?" << std::endl;
     for (auto c: configs) {
-        cout << c.preserve << " " << part2str(c.pk) << " " << scaling2str(c.sk) << " " << symm2str(c.syk) << endl;
+        std::cout << c.preserve << " " << part2str(c.pk) << " " << scaling2str(c.sk) << " " << symm2str(c.syk) << std::endl;
     }
 }
 
@@ -560,13 +560,13 @@ TEST(ApproxTest, PrintConfigs) {
  * Test that with eps=0, we get exact solutions
  */
 TEST(ApproxTest, Exact) {
-    vector<int64_t> dims  = {2, 2,  2,  3, 3};
-    vector<int64_t> sizes = {5, 10, 20, 5, 15};
-    vector<double> tols = {1e-14, 1e-14, 0.0};
-    vector<int64_t> skips   = {0,     4,     1000};
-    vector<params> configs = get_params();
+    std::vector<int64_t> dims  = {2, 2,  2,  3, 3};
+    std::vector<int64_t> sizes = {5, 10, 20, 5, 15};
+    std::vector<double> tols = {1e-14, 1e-14, 0.0};
+    std::vector<int64_t> skips   = {0,     4,     1000};
+    std::vector<params> configs = get_params();
     for (int64_t test = 0; test < dims.size(); test++) {
-        cout << "Test " << test << "... ";
+        std::cout << "Test " << test << "... ";
         int64_t count = 0;
         int64_t s = sizes[test];
         int64_t d = dims[test];
@@ -604,7 +604,7 @@ TEST(ApproxTest, Exact) {
                 }
             }
         }
-        cout << count << " tested.\n";
+        std::cout << count << " tested.\n";
     }
 }
 
@@ -612,13 +612,13 @@ TEST(ApproxTest, Exact) {
  * Test SPD on A (laplacian) and SYM+LDLT on -A (- laplacian) give the same, with or without compression
  */
 TEST(ApproxTest, SPD_vs_LDLT) {
-    vector<int64_t> dims  = {2,  3, 3};
-    vector<int64_t> sizes = {128, 5, 15};
-    vector<double> tols = {0,   1e-4, 1e-14};
-    vector<int64_t> skips   = {100, 1,    0};
-    vector<params> configs = get_params();
+    std::vector<int64_t> dims  = {2,  3, 3};
+    std::vector<int64_t> sizes = {128, 5, 15};
+    std::vector<double> tols = {0,   1e-4, 1e-14};
+    std::vector<int64_t> skips   = {100, 1,    0};
+    std::vector<params> configs = get_params();
     for (int64_t test = 0; test < dims.size(); test++) {
-        cout << "Test " << test << "... ";
+        std::cout << "Test " << test << "... ";
         int64_t count = 0;
         int64_t s = sizes[test];
         int64_t d = dims[test];
@@ -678,7 +678,7 @@ TEST(ApproxTest, SPD_vs_LDLT) {
                 }
             }
         }
-        cout << count << " tested.\n";
+        std::cout << count << " tested.\n";
     }
 }
 
@@ -686,20 +686,20 @@ TEST(ApproxTest, SPD_vs_LDLT) {
  * Test conservation is correct
  */
 TEST(ApproxTest, Preservation) {
-    vector<int64_t> dims  = {2, 2,  2,  3, 3,  3};
-    vector<int64_t> sizes = {5, 10, 20, 5, 10, 25};
+    std::vector<int64_t> dims  = {2, 2,  2,  3, 3,  3};
+    std::vector<int64_t> sizes = {5, 10, 20, 5, 10, 25};
     for (int64_t test = 0; test < dims.size(); test++) {
-        cout << "Test " << test;
+        std::cout << "Test " << test;
         int64_t s = sizes[test];
         int64_t d = dims[test];
         stringstream ss;
         ss << "../mats/neglapl_" << d << "_" << s << ".mm";
         int64_t n = pow(s, d);
-        string file = ss.str();
+        std::string file = ss.str();
         SpMat A_spd = mmio::sp_mmread<double,int64_t>(file);        
         SpMat A_sym = - A_spd;
         int64_t nlevelsmin = n < 1000 ? 1 : 8;
-        vector<double> tols = {10, 1e-2, 1e-3, 1e-4, 1e-6, 0.0};
+        std::vector<double> tols = {10, 1e-2, 1e-3, 1e-4, 1e-6, 0.0};
         for (int64_t nlevels = nlevelsmin; nlevels < nlevelsmin + 5; nlevels++) {
             for (int64_t it = 0; it < tols.size(); it++) {
                 for (int64_t skip = 0; skip < 3; skip++) {
@@ -733,8 +733,8 @@ TEST(ApproxTest, Preservation) {
                                 t.solve(x);
                                 double err1 = (A*x-b).norm() / b.norm();
                                 double err2 = (x-phi.col(c)).norm() / phi.col(c).norm();
-                                EXPECT_TRUE(err1 < 1e-12) << "err1 = " << err1 << " | " << skip << " " << it << " " << nlevels << " " << test << endl;
-                                EXPECT_TRUE(err2 < 1e-12) << "err2 = " << err2 << " | " << skip << " " << it << " " << nlevels << " " << test << endl;
+                                EXPECT_TRUE(err1 < 1e-12) << "err1 = " << err1 << " | " << skip << " " << it << " " << nlevels << " " << test << std::endl;
+                                EXPECT_TRUE(err2 < 1e-12) << "err2 = " << err2 << " | " << skip << " " << it << " " << nlevels << " " << test << std::endl;
                             }
                             VectorXd b = random(n, nlevels+it+skip+2019);
                             auto x = b;
@@ -771,8 +771,8 @@ TEST(ApproxTest, Preservation) {
                                 t.solve(x);
                                 double err1 = (A*x-b).norm() / b.norm();
                                 double err2 = (x-phi.col(c)).norm() / phi.col(c).norm();
-                                EXPECT_TRUE(err1 < 1e-12) << "err1 = " << err1 << " | " << skip << " " << it << " " << nlevels << " " << test << endl;
-                                EXPECT_TRUE(err2 < 1e-12) << "err2 = " << err2 << " | " << skip << " " << it << " " << nlevels << " " << test << endl;
+                                EXPECT_TRUE(err1 < 1e-12) << "err1 = " << err1 << " | " << skip << " " << it << " " << nlevels << " " << test << std::endl;
+                                EXPECT_TRUE(err2 < 1e-12) << "err2 = " << err2 << " | " << skip << " " << it << " " << nlevels << " " << test << std::endl;
                             }
                             VectorXd b = random(n, nlevels+it+skip+2019);
                             auto x = b;
@@ -797,15 +797,15 @@ TEST(ApproxTest, Preservation) {
  * with and without preservation
  */
 TEST(ApproxTest, Approx) {
-    vector<int64_t> dims  = {2, 2,  2,  2,   3, 3};
-    vector<int64_t> sizes = {5, 10, 20, 128, 5, 15};
-    vector<double> tols = {0.0, 1e-10, 1e-6, 1e-2, 10};
+    std::vector<int64_t> dims  = {2, 2,  2,  2,   3, 3};
+    std::vector<int64_t> sizes = {5, 10, 20, 128, 5, 15};
+    std::vector<double> tols = {0.0, 1e-10, 1e-6, 1e-2, 10};
     matrix_hash<VectorXd> hash;
-    vector<params> configs = get_params();
+    std::vector<params> configs = get_params();
     for (int64_t test = 0; test < dims.size(); test++) {
-        vector<size_t> allhashes;
+        std::vector<size_t> allhashes;
         int64_t count = 0;
-        cout << "Test " << test << "... ";
+        std::cout << "Test " << test << "... ";
         int64_t s = sizes[test];
         int64_t d = dims[test];
         SpMat Aref = neglapl(s, d);
@@ -851,20 +851,20 @@ TEST(ApproxTest, Approx) {
             }
         }
         size_t h = hashv(allhashes);
-        cout << count << " tested. Overall hash(x,b) = " << h << endl;
+        std::cout << count << " tested. Overall hash(x,b) = " << h << std::endl;
     }
 }
 
 TEST(ApproxTest, ApproxLoRaSp) {
-    vector<int64_t> dims  = {2, 2,  2,  2,   3, 3};
-    vector<int64_t> sizes = {5, 10, 20, 64,  5, 15};
-    vector<double> tols = {0.0, 1e-10, 1e-6, 1e-4};
+    std::vector<int64_t> dims  = {2, 2,  2,  2,   3, 3};
+    std::vector<int64_t> sizes = {5, 10, 20, 64,  5, 15};
+    std::vector<double> tols = {0.0, 1e-10, 1e-6, 1e-4};
     matrix_hash<VectorXd> hash;
-    vector<params> configs = get_params();
+    std::vector<params> configs = get_params();
     for (int64_t test = 0; test < dims.size(); test++) {
-        vector<size_t> allhashes;
+        std::vector<size_t> allhashes;
         int64_t count = 0;
-        cout << "Test " << test << "... ";
+        std::cout << "Test " << test << "... ";
         int64_t s = sizes[test];
         int64_t d = dims[test];
         SpMat Aref = neglapl(s, d);
@@ -899,7 +899,7 @@ TEST(ApproxTest, ApproxLoRaSp) {
                             EXPECT_LE(err, tols[it] * 2e2);
                         } 
                     } catch (exception& ex) {
-                        cout << ex.what();
+                        std::cout << ex.what();
                         EXPECT_TRUE(false);
                     }                    
                     count++;
@@ -907,7 +907,7 @@ TEST(ApproxTest, ApproxLoRaSp) {
             }
         }
         size_t h = hashv(allhashes);
-        cout << count << " tested. Overall hash(x,b) = " << h << endl;
+        std::cout << count << " tested. Overall hash(x,b) = " << h << std::endl;
     }
 }
 
@@ -920,7 +920,7 @@ TEST(ApproxTest, Repro) {
     double tols[4]      = {1e-5, 10, 1e-8, 0.1};
     double skips[4]     = {1, 2, 0, 1};
     int64_t    repeat       = 10;
-    vector<params> configs = get_params();
+    std::vector<params> configs = get_params();
     for (int64_t test = 0; test < 3; test++) {
         printf("Tests "); fflush(stdout);
         int64_t count = 0;
@@ -994,15 +994,15 @@ TEST(ApproxTest, Repro) {
 }
 
 TEST(Run, Many) {
-    vector<int64_t>    dims  = {2,  2,  2,   3, 3,  3 };
-    vector<int64_t>    sizes = {5,  16, 64,  5, 10, 15};
-    vector<double> tols  = {0.0, 1e-2, 1.0, 10.0};
+    std::vector<int64_t>    dims  = {2,  2,  2,   3, 3,  3 };
+    std::vector<int64_t>    sizes = {5,  16, 64,  5, 10, 15};
+    std::vector<double> tols  = {0.0, 1e-2, 1.0, 10.0};
     RUN_MANY = RUN_MANY > dims.size() ? dims.size() : RUN_MANY;
     matrix_hash<VectorXd> hash;
-    vector<size_t> allhashes;
-    vector<params> configs = get_params();
+    std::vector<size_t> allhashes;
+    std::vector<params> configs = get_params();
     for (int64_t test = 0; test < RUN_MANY; test++) {
-        cout << "Run " << test << "... \n";
+        std::cout << "Run " << test << "... \n";
         int64_t count = 0;
         int64_t n = sizes[test];
         int64_t d = dims[test];
@@ -1051,12 +1051,12 @@ TEST(Run, Many) {
                 }
             }
         }
-        cout << "Ran " << count << " tests\n";
+        std::cout << "Ran " << count << " tests\n";
         size_t h = hashv(allhashes);
-        cout << "Overall hash so far: " << h << endl;
+        std::cout << "Overall hash so far: " << h << std::endl;
     }
     size_t h = hashv(allhashes);
-    cout << "Overall hash: " << h << endl;
+    std::cout << "Overall hash: " << h << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -1074,16 +1074,16 @@ int main(int argc, char **argv) {
 
     if (result.count("help"))
     {
-        cout << options.help({"", "Group"}) << endl;
+        std::cout << options.help({"", "Group"}) << std::endl;
         exit(0);
     }
 
     VERB = result["verb"].as<bool>();
     N_THREADS = result["n_threads"].as<int64_t>();
     RUN_MANY = result["run"].as<int64_t>();
-    cout << "n_threads: " << N_THREADS << endl;
-    cout << "verb: " << VERB << endl;
-    cout << "run: " << RUN_MANY << endl;
+    std::cout << "n_threads: " << N_THREADS << std::endl;
+    std::cout << "verb: " << VERB << std::endl;
+    std::cout << "run: " << RUN_MANY << std::endl;
 
     return RUN_ALL_TESTS();
 }

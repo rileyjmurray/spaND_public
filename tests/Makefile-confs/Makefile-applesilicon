@@ -1,0 +1,28 @@
+CXX = clang++
+EXTRA_CFLAGS = -Wfatal-errors -Wnull-dereference -Wno-sign-compare -Wno-format -Wno-int-in-bool-context
+
+SPAND_DEPS_STAGING = 
+# ^ An optional (but suggested) folder. It's intended to hold any source code, build directories,
+#   or installation files for libraries that you're only using with spand.
+SPAND_DEPS_INSTALL = ${SPAND_DEPS_STAGING}/install
+# ^ Optional. If you don't use this, then you need to separately specify directories that contain
+#   "include" and "lib" subdirectories for several dependencies.
+METIS_HOME    = ${SPAND_DEPS_INSTALL}
+EIGEN_HOME    = ${SPAND_DEPS_INSTALL}
+BLASPP_HOME   = ${SPAND_DEPS_INSTALL}
+LAPACKPP_HOME = ${SPAND_DEPS_INSTALL}
+# ^ We define these separately in case you already have some of them elsewhere.
+
+# Below: definitions that spaND's main makefile uses in all build targets
+REQUIRED_INCDIRS = -isystem${LAPACKPP_HOME}/include -isystem${BLASPP_HOME}/include -isystem${EIGEN_HOME}/include -isystem${METIS_HOME}/include
+REQUIRED_LIBDIRS = -L${LAPACKPP_HOME}/lib -L${BLASPP_HOME}/lib 
+
+# Below: definitions that spaND's main makefile requires for certain build targets
+# (only the latter four definitions are used in that makefile).
+MFEM_HOME     = ${SPAND_DEPS_INSTALL}
+GTEST_HOME    = ${SPAND_DEPS_INSTALL}
+
+GTESTDIR = ${GTEST_HOME}/include
+GTESTLIB = ${GTEST_HOME}/lib
+MFEMDIR = ${MFEM_HOME}/include
+MFEMLIB = ${MFEM_HOME}/lib

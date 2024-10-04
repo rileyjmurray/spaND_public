@@ -1,10 +1,10 @@
 USE_MKL = 0
 
-CC = g++ -g
+CXX = g++ -g
 
 EXTRA_CFLAGS = 
-EXTRA_INCDIR = -I/usr/local/opt/openblas/include/ -I$(HOME)/git/linalgCpp/mmio -I/usr/local/Cellar/eigen/3.3.7/include/eigen3/
-EXTRA_LINKDIR = -L/usr/local/opt/openblas/lib/
+REQUIRED_INCDIRS = -I/usr/local/opt/openblas/include/ -I$(HOME)/git/linalgCpp/mmio -I/usr/local/Cellar/eigen/3.3.7/include/eigen3/
+REQUIRED_LIBDIRS = -L/usr/local/opt/openblas/lib/
 
 MFEMDIR = $(HOME)/Softwares/mfem-3.4
 MFEMLIB = $(HOME)/Softwares/mfem-3.4

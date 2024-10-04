@@ -38,16 +38,16 @@
 #include "mfem_util.h"
 #include "mmio.hpp"
 
-using namespace std;
+// using namespace std;
 using namespace mfem;
 using namespace spaND;
 
 // Define the analytical solution and forcing terms / boundary conditions
-void uFun_ex(const Vector & x, Vector & u);
-double pFun_ex(const Vector & x);
-void fFun(const Vector & x, Vector & f);
-double gFun(const Vector & x);
-double f_natural(const Vector & x);
+void uFun_ex(const mfem::Vector & x, mfem::Vector & u);
+double pFun_ex(const mfem::Vector & x);
+void fFun(const mfem::Vector & x, mfem::Vector & f);
+double gFun(const mfem::Vector & x);
+double f_natural(const mfem::Vector & x);
 
 int main(int argc, char *argv[])
 {
@@ -55,12 +55,12 @@ int main(int argc, char *argv[])
 
    // 1. Parse command-line options.
    const char *mesh_file = "../data/star.mesh";
-   int64_t order = 1;
+   int order = 1;
    bool visualization = 1;
-   int64_t target = 10000;
+   int target = 10000;
    double tol = 1e-2;
    double sp_eps = 1e-2;
-   int64_t skip = 2;
+   int skip = 2;
 
    OptionsParser args(argc, argv);
    args.AddOption(&mesh_file, "-m", "--mesh",
@@ -82,10 +82,10 @@ int main(int argc, char *argv[])
    args.Parse();
    if (!args.Good())
    {
-      args.PrintUsage(cout);
+      args.PrintUsage(std::cout);
       return 1;
    }
-   args.PrintOptions(cout);
+   args.PrintOptions(std::cout);
 
    // 2. Read the mesh from the given mesh file. We can handle triangular,
    //    quadrilateral, tetrahedral, hexahedral, surface and volume meshes with
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
          mesh->UniformRefinement();
       }
    }
-   cout << "Number of elements: " << mesh->GetNE() << endl;
+   std::cout << "Number of elements: " << mesh->GetNE() << std::endl;
 
    // 4. Define a finite element space on the mesh. Here we use the
    //    Raviart-Thomas finite elements of the specified order.
@@ -115,20 +115,20 @@ int main(int argc, char *argv[])
    FiniteElementSpace *R_space = new FiniteElementSpace(mesh, hdiv_coll);
    FiniteElementSpace *W_space = new FiniteElementSpace(mesh, l2_coll);
 
-   cout << "R Vdim: " << R_space->GetVDim() << endl;
-   cout << "R NDof: " << R_space->GetNDofs() << endl;
-   cout << "R VSize: " << R_space->GetVSize() << endl;
-   cout << "R NV/NE/NF dofs: " << R_space->GetNV() << " " << R_space->GetNE() << " " << R_space->GetNBE() << " " << R_space->GetNF() << endl;
+   std::cout << "R Vdim: " << R_space->GetVDim() << std::endl;
+   std::cout << "R NDof: " << R_space->GetNDofs() << std::endl;
+   std::cout << "R VSize: " << R_space->GetVSize() << std::endl;
+   std::cout << "R NV/NE/NF dofs: " << R_space->GetNV() << " " << R_space->GetNE() << " " << R_space->GetNBE() << " " << R_space->GetNF() << std::endl;
 
-   cout << "W Vdim: " << W_space->GetVDim() << endl;
-   cout << "W NDof: " << W_space->GetNDofs() << endl;
-   cout << "W VSize: " << W_space->GetVSize() << endl;
-   cout << "W NV/NE/NF dofs: " << W_space->GetNV() << " " << W_space->GetNE() << " " << W_space->GetNBE() << " " << W_space->GetNF() << endl;
+   std::cout << "W Vdim: " << W_space->GetVDim() << std::endl;
+   std::cout << "W NDof: " << W_space->GetNDofs() << std::endl;
+   std::cout << "W VSize: " << W_space->GetVSize() << std::endl;
+   std::cout << "W NV/NE/NF dofs: " << W_space->GetNV() << " " << W_space->GetNE() << " " << W_space->GetNBE() << " " << W_space->GetNF() << std::endl;
 
    // 5. Define the BlockStructure of the problem, i.e. define the array of
    //    offsets for each variable. The last component of the Array is the sum
    //    of the dimensions of each block.
-   Array<int64_t> block_offsets(3); // number of variables + 1
+   mfem::Array<int64_t> block_offsets(3); // number of variables + 1
    block_offsets[0] = 0;
    block_offsets[1] = R_space->GetVSize();
    block_offsets[2] = W_space->GetVSize();
@@ -185,14 +185,14 @@ int main(int argc, char *argv[])
    mVarf->AddDomainIntegrator(new VectorFEMassIntegrator(k));
    mVarf->Assemble();
    mVarf->Finalize();
-   SparseMatrix &M(mVarf->SpMat());
+   mfem::SparseMatrix &M(mVarf->SpMat());
 
    bVarf->AddDomainIntegrator(new VectorFEDivergenceIntegrator);
    bVarf->Assemble();
    bVarf->Finalize();
-   SparseMatrix & B(bVarf->SpMat());
+   mfem::SparseMatrix & B(bVarf->SpMat());
    B *= -1.;
-   SparseMatrix *BT = Transpose(B);
+   mfem::SparseMatrix *BT = mfem::Transpose(B);
 
    BlockMatrix darcyMatrix(block_offsets);
    darcyMatrix.SetBlock(0,0, &M);
@@ -201,13 +201,13 @@ int main(int argc, char *argv[])
 
    // Get the matrix
    int64_t Nout = darcyMatrix.NumRows();
-   cout << darcyMatrix.NumRows() << " x " << darcyMatrix.NumCols() << endl;
+   std::cout << darcyMatrix.NumRows() << " x " << darcyMatrix.NumCols() << std::endl;
    SpMat Me = mfem2eigen(M);
    SpMat Be = mfem2eigen(B);
-   cout << "Mfem: " << M.NumNonZeroElems() << " + 2x " << B.NumNonZeroElems() << endl;
-   cout << Me.cols() << "x" << Me.rows() << " - " << Be.cols() << "x" << Be.rows() << endl;
+   std::cout << "Mfem: " << M.NumNonZeroElems() << " + 2x " << B.NumNonZeroElems() << std::endl;
+   std::cout << Me.cols() << "x" << Me.rows() << " - " << Be.cols() << "x" << Be.rows() << std::endl;
    // M to triplets
-   vector<Eigen::Triplet<double>> triplets;
+   std::vector<Eigen::Triplet<double>> triplets;
    for (int64_t k = 0; k < Me.outerSize(); ++k) {
       for (SpMat::InnerIterator it(Me,k); it; ++it) {
          triplets.push_back({it.row(), it.col(), it.value()});
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
    // All together for A
    SpMat A(Nout, Nout);
    A.setFromTriplets(triplets.begin(), triplets.end());
-   cout << A.rows() << "x" << A.cols() << " NNZ ? " << A.nonZeros() << endl;
+   std::cout << A.rows() << "x" << A.cols() << " NNZ ? " << A.nonZeros() << std::endl;
 
    // Add negative bottom right diagonal for Aprec
    // double Anorm = A.norm();
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
    GridFunction R_coords(R_vfes);
    {
       DenseMatrix coords, coords_t;
-      Array<int64_t> rt_vdofs;
+      mfem::Array<int> rt_vdofs;
       for (int64_t i = 0; i < mesh->GetNE(); i++)
       {
          const FiniteElement *rt_fe = R_vfes->GetFE(i);
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
    GridFunction W_coords(W_vfes);
    {
       DenseMatrix coords, coords_t;
-      Array<int64_t> wt_vdofs;
+      mfem::Array<int> wt_vdofs;
       for (int64_t i = 0; i < mesh->GetNE(); i++)
       {
          const FiniteElement *wt_fe = W_vfes->GetFE(i);
@@ -285,13 +285,13 @@ int main(int argc, char *argv[])
          Xcoo(d, Rsize + i) = W_coords.GetData()[i + d * Wsize];
       }
    }
-   cout << Xcoo.leftCols(10) << endl;
-   cout << Xcoo.rightCols(10) << endl;
+   std::cout << Xcoo.leftCols(10) << std::endl;
+   std::cout << Xcoo.rightCols(10) << std::endl;
 
 #if 0
-      cout << "***********" << endl;
-      cout << "R_coords.Size() = " << R_coords.Size() << endl;
-      cout << "W_coords.Size() = " << W_coords.Size() << endl;
+      std::cout << "***********" << std::endl;
+      std::cout << "R_coords.Size() = " << R_coords.Size() << std::endl;
+      std::cout << "W_coords.Size() = " << W_coords.Size() << std::endl;
       std::ofstream Rfs("R_coords.txt", std::ofstream::out);
       Rfs << R_coords;
       Rfs.close();
@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
       Wfs << W_coords;
       Wfs.close();
       mmio::sp_mmwrite("A.txt", Aprec);
-      cout << "***********" << endl;
+      std::cout << "***********" << std::endl;
 #endif
    
    // Try solving
@@ -318,13 +318,13 @@ int main(int argc, char *argv[])
    try {
       t.factorize();
    } catch (std::exception& ex) {
-      cout << ex.what();
+      std::cout << ex.what();
    }
    t.print_log();
    Eigen::VectorXd rhse = mfem2eigen(rhs);
    Eigen::VectorXd sole = Eigen::VectorXd::Zero(rhse.rows());
    int64_t iter = gmres(A, rhse, sole, t, 100, 100, 1e-12, true);
-   cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sole-rhse).norm() / rhse.norm() << endl;
+   std::cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sole-rhse).norm() / rhse.norm() << std::endl;
 
    {
       for (int64_t i = 0; i < Nout; i++) {
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
    //     Here we use Symmetric Gauss-Seidel to approximate the inverse of the
    //     pressure Schur Complement
 //    SparseMatrix *MinvBt = Transpose(B);
-//    Vector Md(M.Height());
+//    mfem::Vector Md(M.Height());
 //    M.GetDiag(Md);
 //    for (int64_t i = 0; i < Md.Size(); i++)
 //    {
@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
    u.MakeRef(R_space, x.GetBlock(0), 0);
    p.MakeRef(W_space, x.GetBlock(1), 0);
 
-   int64_t order_quad = max(2, 2*order+1);
+   int64_t order_quad = std::max(2, 2*order+1);
    const IntegrationRule *irs[Geometry::NumGeom];
    for (int64_t i=0; i < Geometry::NumGeom; ++i)
    {
@@ -414,15 +414,15 @@ int main(int argc, char *argv[])
    //     GLVis: "glvis -m ex5.mesh -g sol_u.gf" or "glvis -m ex5.mesh -g
    //     sol_p.gf".
    {
-      ofstream mesh_ofs("ex5.mesh");
+      std::ofstream mesh_ofs("ex5.mesh");
       mesh_ofs.precision(8);
       mesh->Print(mesh_ofs);
 
-      ofstream u_ofs("sol_u.gf");
+      std::ofstream u_ofs("sol_u.gf");
       u_ofs.precision(8);
       u.Save(u_ofs);
 
-      ofstream p_ofs("sol_p.gf");
+      std::ofstream p_ofs("sol_p.gf");
       p_ofs.precision(8);
       p.Save(p_ofs);
    }
@@ -440,10 +440,10 @@ int main(int argc, char *argv[])
       int64_t  visport   = 19916;
       socketstream u_sock(vishost, visport);
       u_sock.precision(8);
-      u_sock << "solution\n" << *mesh << u << "window_title 'Velocity'" << endl;
+      u_sock << "solution\n" << *mesh << u << "window_title 'Velocity'" << std::endl;
       socketstream p_sock(vishost, visport);
       p_sock.precision(8);
-      p_sock << "solution\n" << *mesh << p << "window_title 'Pressure'" << endl;
+      p_sock << "solution\n" << *mesh << p << "window_title 'Pressure'" << std::endl;
    }
 
    // 15. Free the used memory.
@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
 }
 
 
-void uFun_ex(const Vector & x, Vector & u)
+void uFun_ex(const mfem::Vector & x, mfem::Vector & u)
 {
    double xi(x(0));
    double yi(x(1));
@@ -486,7 +486,7 @@ void uFun_ex(const Vector & x, Vector & u)
 }
 
 // Change if needed
-double pFun_ex(const Vector & x)
+double pFun_ex(const mfem::Vector & x)
 {
    double xi(x(0));
    double yi(x(1));
@@ -500,12 +500,12 @@ double pFun_ex(const Vector & x)
    return exp(xi)*sin(yi)*cos(zi);
 }
 
-void fFun(const Vector & x, Vector & f)
+void fFun(const mfem::Vector & x, mfem::Vector & f)
 {
    f = 0.0;
 }
 
-double gFun(const Vector & x)
+double gFun(const mfem::Vector & x)
 {
    if (x.Size() == 3)
    {
@@ -517,7 +517,7 @@ double gFun(const Vector & x)
    }
 }
 
-double f_natural(const Vector & x)
+double f_natural(const mfem::Vector & x)
 {
    return (-pFun_ex(x));
 }

@@ -43,26 +43,26 @@
 #include "mfem_util.h"
 #include "mmio.hpp"
 
-using namespace std;
+// using namespace std;
 using namespace mfem;
 using namespace Eigen;
 using namespace spaND;
 
 // Choice for the problem setup. The fluid velocity, initial condition and
 // inflow boundary condition are chosen based on this parameter.
-int64_t problem;
+int problem;
 
 // Velocity coefficient
-void velocity_function(const Vector &x, Vector &v);
+void velocity_function(const mfem::Vector &x, mfem::Vector &v);
 
 // Initial condition
-double u0_function(const Vector &x);
+double u0_function(const mfem::Vector &x);
 
 // Inflow boundary condition
-double inflow_function(const Vector &x);
+double inflow_function(const mfem::Vector &x);
 
 // Mesh bounding box
-Vector bb_min, bb_max;
+mfem::Vector bb_min, bb_max;
 
 
 /** A time-dependent operator for the right-hand side of the ODE. The DG weak
@@ -74,12 +74,12 @@ class FE_Evolution : public TimeDependentOperator
 {
 private:
    mfem::SparseMatrix &M, &K;
-   const Vector &b;
+   const mfem::Vector &b;
    DSmoother M_prec;
    CGSolver M_solver;
    
    // Mfem implicit
-   mutable Vector z;   
+   mutable mfem::Vector z;   
    mfem::SparseMatrix T;
    GMRESSolver T_solver;
    DSmoother T_prec; 
@@ -89,10 +89,10 @@ private:
    Tree* t;
 
 public:
-   FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const Vector &_b, double, Eigen::MatrixXd&, double, int64_t);
+   FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const mfem::Vector &_b, double, Eigen::MatrixXd&, double, int64_t);
 
-   virtual void Mult(const Vector &x, Vector &y) const; // Computes y = f(x, t), i.e., y = M^{-1} (K u + b)
-   virtual void ImplicitSolve(const double dt, const Vector &x, Vector &k); // Solves k = f(x + dt*k, t + dt), i.e., solves for k: k = M^{-1} (K (x + dt*k) + b)
+   virtual void Mult(const mfem::Vector &x, mfem::Vector &y) const; // Computes y = f(x, t), i.e., y = M^{-1} (K u + b)
+   virtual void ImplicitSolve(const double dt, const mfem::Vector &x, mfem::Vector &k); // Solves k = f(x + dt*k, t + dt), i.e., solves for k: k = M^{-1} (K (x + dt*k) + b)
 
    virtual ~FE_Evolution() { }
 };
@@ -103,20 +103,20 @@ int main(int argc, char *argv[])
    // 1. Parse command-line options.
    problem = 0;
    const char *mesh_file = "../data/periodic-hexagon.mesh";
-   int64_t ref_levels = 2;
-   int64_t order = 3;
-   int64_t ode_solver_type = 4;
+   int ref_levels = 2;
+   int order = 3;
+   int ode_solver_type = 4;
    double t_final = 10.0;
    double dt = 0.01;
    bool visualization = true;
    bool visit = false;
    bool binary = false;
-   int64_t vis_steps = 5;
+   int vis_steps = 5;
    double tol = 1e-2;
-   int64_t skip = 4;
+   int skip = 4;
 
-   int64_t precision = 8;
-   cout.precision(precision);
+   int precision = 8;
+   std::cout.precision(precision);
 
    OptionsParser args(argc, argv);
    args.AddOption(&mesh_file, "-m", "--mesh",
@@ -152,10 +152,10 @@ int main(int argc, char *argv[])
    args.Parse();
    if (!args.Good())
    {
-      args.PrintUsage(cout);
+      args.PrintUsage(std::cout);
       return 1;
    }
-   args.PrintOptions(cout);
+   args.PrintOptions(std::cout);
 
    // 2. Read the mesh from the given mesh file. We can handle geometrically
    //    periodic meshes in this code.
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
       case 4: ode_solver = new RK4Solver; break;
       case 6: ode_solver = new RK6Solver; break;
       default:
-         cout << "Unknown ODE solver type: " << ode_solver_type << '\n';
+         std::cout << "Unknown ODE solver type: " << ode_solver_type << '\n';
          delete mesh;
          return 3;
    }
@@ -189,15 +189,15 @@ int main(int argc, char *argv[])
    }
    if (mesh->NURBSext)
    {
-      mesh->SetCurvature(max(order, 1));
+      mesh->SetCurvature(std::max(order, 1));
    }
-   mesh->GetBoundingBox(bb_min, bb_max, max(order, 1));
+   mesh->GetBoundingBox(bb_min, bb_max, std::max(order, 1));
 
    // 5. Define the discontinuous DG finite element space of the given
    //    polynomial order on the refined mesh.
    DG_FECollection fec(order, dim);
    FiniteElementSpace fes(mesh, &fec);
-   cout << "Number of unknowns: " << fes.GetVSize() << endl;
+   std::cout << "Number of unknowns: " << fes.GetVSize() << std::endl;
 
    // 6. Set up and assemble the bilinear and linear forms corresponding to the
    //    DG discretization. The DGTraceIntegrator involves integrals over mesh
@@ -237,9 +237,9 @@ int main(int argc, char *argv[])
          Xcoo(j,i) = nodes(j * N + i);
       }
    }
-   cout << "Xcoo" << endl;
-   cout << Xcoo.rows() << " x " << Xcoo.cols() << endl;
-   cout << Xcoo.leftCols(10) << endl;
+   std::cout << "Xcoo" << std::endl;
+   std::cout << Xcoo.rows() << " x " << Xcoo.cols() << std::endl;
+   std::cout << Xcoo.leftCols(10) << std::endl;
 
    // 7. Define the initial conditions, save the corresponding grid function to
    //    a file and (optionally) save data in the VisIt format and initialize
@@ -248,10 +248,10 @@ int main(int argc, char *argv[])
    u.ProjectCoefficient(u0);
 
    {
-      ofstream omesh("ex9.mesh");
+      std::ofstream omesh("ex9.mesh");
       omesh.precision(precision);
       mesh->Print(omesh);
-      ofstream osol("ex9-init.gf");
+      std::ofstream osol("ex9-init.gf");
       osol.precision(precision);
       u.Save(osol);
    }
@@ -288,18 +288,18 @@ int main(int argc, char *argv[])
       sout.open(vishost, visport);
       if (!sout)
       {
-         cout << "Unable to connect to GLVis server at "
-              << vishost << ':' << visport << endl;
+         std::cout << "Unable to connect to GLVis server at "
+              << vishost << ':' << visport << std::endl;
          visualization = false;
-         cout << "GLVis visualization disabled.\n";
+         std::cout << "GLVis visualization disabled.\n";
       }
       else
       {
          sout.precision(precision);
          sout << "solution\n" << *mesh << u;
          sout << "pause\n";
-         sout << flush;
-         cout << "GLVis visualization paused."
+         sout << std::flush;
+         std::cout << "GLVis visualization paused."
               << " Press space (in the GLVis window) to resume it.\n";
       }
    }
@@ -331,11 +331,11 @@ int main(int argc, char *argv[])
 
       if (done || ti % vis_steps == 0)
       {
-         cout << "time step: " << ti << ", time: " << t << endl;
+         std::cout << "time step: " << ti << ", time: " << t << std::endl;
 
          if (visualization)
          {
-            sout << "solution\n" << *mesh << u << flush;
+            sout << "solution\n" << *mesh << u << std::flush;
          }
 
          if (visit)
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
    // 9. Save the final solution. This output can be viewed later using GLVis:
    //    "glvis -m ex9.mesh -g ex9-final.gf".
    {
-      ofstream osol("ex9-final.gf");
+      std::ofstream osol("ex9-final.gf");
       osol.precision(precision);
       u.Save(osol);
    }
@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
 
 
 // Implementation of class FE_Evolution
-FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const Vector &_b, double dt, Eigen::MatrixXd &Xcoo, double tol, int64_t skip)
+FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const mfem::Vector &_b, double dt, Eigen::MatrixXd &Xcoo, double tol, int64_t skip)
    : TimeDependentOperator(_M.Size()), M(_M), K(_K), b(_b), z(_M.Size())
 {
    M_solver.SetPreconditioner(M_prec);
@@ -378,9 +378,9 @@ FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const
    
    auto Meigen = mfem2eigen(_M); 
    auto Keigen = mfem2eigen(_K); 
-   cout << "**** M norm     : " << Meigen.norm() << endl;
-   cout << "**** K norm     : " << Keigen.norm() << endl;
-   cout << "**** dt * K norm: " << dt * Keigen.norm() << endl;
+   std::cout << "**** M norm     : " << Meigen.norm() << std::endl;
+   std::cout << "**** K norm     : " << Keigen.norm() << std::endl;
+   std::cout << "**** dt * K norm: " << dt * Keigen.norm() << std::endl;
 
    T = *Add(1.0, _M, -dt, _K);
    T_solver.SetPreconditioner(T_prec);
@@ -396,10 +396,10 @@ FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const
    A = mfem2eigen(T); 
    SpMat AAT = symmetric_graph(A);
    int64_t N = A.rows();
-   cout << "Vertices? " << N << endl;
-   cout << "NNZ? " << A.nonZeros() << endl;
+   std::cout << "Vertices? " << N << std::endl;
+   std::cout << "NNZ? " << A.nonZeros() << std::endl;
    int64_t lvl = (int64_t)ceil(log( double(N) / 64.0)/log(2.0)) - 1;
-   cout << "Lvl " << lvl << endl;
+   std::cout << "Lvl " << lvl << std::endl;
    
 #if 0
    std::ofstream Coofs("mfem9_coords.txt", std::ofstream::out);
@@ -421,18 +421,18 @@ FE_Evolution::FE_Evolution(mfem::SparseMatrix &_M, mfem::SparseMatrix &_K, const
    try {
       t->factorize();
    } catch (std::exception& ex) {
-      cout << ex.what();
+      std::cout << ex.what();
    }
    t->print_log();
    // Try a random solve
    VectorXd b = VectorXd::Random(A.rows());
    VectorXd x = b;
-   cout << "Random RHS GMRES\n";
+   std::cout << "Random RHS GMRES\n";
    int64_t iter = gmres(A, b, x, *t, 100, 100, 1e-9, true);
-   cout << "GMRES: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
+   std::cout << "GMRES: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << std::endl;
 }
 
-void FE_Evolution::ImplicitSolve(const double dt, const Vector &x, Vector &k)
+void FE_Evolution::ImplicitSolve(const double dt, const mfem::Vector &x, mfem::Vector &k)
 {
    // Solves k = F(x + dt*k, t + dt) = M^(-1) ( K(x+dt*k) + b), ie,
    // T k =  K x + b, with T = M - dt K
@@ -449,11 +449,11 @@ void FE_Evolution::ImplicitSolve(const double dt, const Vector &x, Vector &k)
    VectorXd rhs = mfem2eigen(z);
    VectorXd sol = VectorXd::Zero(rhs.rows());
    int64_t iter = gmres(A, rhs, sol, *t, 100, 100, 1e-9, true);
-   cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sol-rhs).norm() / rhs.norm() << endl;
+   std::cout << "GMRES: " << iter << " |Ax-b|/|b|: " << (A*sol-rhs).norm() / rhs.norm() << std::endl;
    eigen2mfem(sol, k);
 }
 
-void FE_Evolution::Mult(const Vector &x, Vector &y) const
+void FE_Evolution::Mult(const mfem::Vector &x, mfem::Vector &y) const
 {
    // y = M^{-1} (K x + b)
    K.Mult(x, z);
@@ -463,12 +463,12 @@ void FE_Evolution::Mult(const Vector &x, Vector &y) const
 
 
 // Velocity coefficient
-void velocity_function(const Vector &x, Vector &v)
+void velocity_function(const mfem::Vector &x, mfem::Vector &v)
 {
    int64_t dim = x.Size();
 
    // map to the reference [-1,1] domain
-   Vector X(dim);
+   mfem::Vector X(dim);
    for (int64_t i = 0; i < dim; i++)
    {
       double center = (bb_min[i] + bb_max[i]) * 0.5;
@@ -506,7 +506,7 @@ void velocity_function(const Vector &x, Vector &v)
       {
          // Clockwise twisting rotation in 2D around the origin
          const double w = M_PI/2;
-         double d = max((X(0)+1.)*(1.-X(0)),0.) * max((X(1)+1.)*(1.-X(1)),0.);
+         double d = std::max((X(0)+1.)*(1.-X(0)),0.) * std::max((X(1)+1.)*(1.-X(1)),0.);
          d = d*d;
          switch (dim)
          {
@@ -520,12 +520,12 @@ void velocity_function(const Vector &x, Vector &v)
 }
 
 // Initial condition
-double u0_function(const Vector &x)
+double u0_function(const mfem::Vector &x)
 {
    int64_t dim = x.Size();
 
    // map to the reference [-1,1] domain
-   Vector X(dim);
+   mfem::Vector X(dim);
    for (int64_t i = 0; i < dim; i++)
    {
       double center = (bb_min[i] + bb_max[i]) * 0.5;
@@ -573,7 +573,7 @@ double u0_function(const Vector &x)
 }
 
 // Inflow boundary condition (zero for the problems considered in this example)
-double inflow_function(const Vector &x)
+double inflow_function(const mfem::Vector &x)
 {
    switch (problem)
    {

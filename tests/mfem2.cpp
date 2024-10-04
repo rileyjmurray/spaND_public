@@ -9,9 +9,9 @@
 #include "spaND.h"
 #include "mfem_util.h"
 
-using namespace std;
+// using namespace std;
 using namespace mfem;
-using namespace Eigen;
+// using namespace Eigen;
 using namespace spaND;
 
 int main(int argc, char *argv[])
@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
     bool static_cond = false;
     bool visualization = 0;
     double tol = 1e-2;
-    int64_t skip = 4;
+    int skip = 4;
     bool preserve = false;
-    int64_t target = 5000;
+    int target = 5000;
 
     mfem::OptionsParser args(argc, argv);
     args.AddOption(&mesh_file, "-m", "--mesh",
@@ -44,10 +44,10 @@ int main(int argc, char *argv[])
     args.Parse();
     if (!args.Good())
     {
-       args.PrintUsage(cout);
+       args.PrintUsage(std::cout);
        return 1;
     }
-    args.PrintOptions(cout);
+    args.PrintOptions(std::cout);
 
     // 2. Read the mesh from the given mesh file. We can handle triangular,
     //    quadrilateral, tetrahedral or hexahedral elements with the same code.
@@ -56,18 +56,18 @@ int main(int argc, char *argv[])
 
     if (mesh->attributes.Max() < 2 || mesh->bdr_attributes.Max() < 2)
     {
-        cerr << "\nInput mesh should have at least two materials and "
+        std::cerr << "\nInput mesh should have at least two materials and "
             << "two boundary attributes! (See schematic in ex2.cpp)\n"
-            << endl;
+            << std::endl;
         return 3;
     }
 
-    cout << mesh->attributes.Max() << endl;
-    cout << mesh->bdr_attributes.Max() << endl;
+    std::cout << mesh->attributes.Max() << std::endl;
+    std::cout << mesh->bdr_attributes.Max() << std::endl;
 
-    cout << "Mesh attributes" << endl;
+    std::cout << "Mesh attributes" << std::endl;
     mesh->attributes.Print();
-    cout << "Bndry attributes" << endl;
+    std::cout << "Bndry attributes" << std::endl;
     mesh->bdr_attributes.Print();
 
     // 3. Select the order of the finite element discretization space. For NURBS
@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
    }
 
     int64_t N = mesh->GetNV();
-    cout << "Dimension? " << dim << endl;
-    cout << "Vertices? " << N << endl;
+    std::cout << "Dimension? " << dim << std::endl;
+    std::cout << "Vertices? " << N << std::endl;
 
     Eigen::MatrixXd Xcoo(dim, N * dim);
     for (int64_t i = 0; i < N; i++) {
@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    cout << "Coo matrix" << endl;
-    cout << Xcoo.leftCols(10).transpose() << endl;
+    std::cout << "Coo matrix" << std::endl;
+    std::cout << Xcoo.leftCols(10).transpose() << std::endl;
     int64_t lvl = (int64_t)ceil(log(N * dim / 64.0)/log(2.0));
 
-    // 5. Define a finite element space on the mesh. Here we use vector finite
-    //    elements, i.e. dim copies of a scalar finite element space. The vector
+    // 5. Define a finite element space on the mesh. Here we use mfem::Vector finite
+    //    elements, i.e. dim copies of a scalar finite element space. The mfem::Vector
     //    dimension is specified by the last argument of the FiniteElementSpace
     //    constructor. For NURBS meshes, we use the (degree elevated) NURBS space
     //    associated with the mesh nodes.
@@ -124,14 +124,14 @@ int main(int argc, char *argv[])
        fec = new mfem::H1_FECollection(order, dim);
        fespace = new mfem::FiniteElementSpace(mesh, fec, dim);
     }
-    cout << "Number of finite element unknowns: " << fespace->GetTrueVSize()
-         << endl << "Assembling: " << flush;
+    std::cout << "Number of finite element unknowns: " << fespace->GetTrueVSize()
+         << std::endl << "Assembling: " << std::flush;
 
     // 6. Determine the list of true (i.e. conforming) essential boundary dofs.
     //    In this example, the boundary conditions are defined by marking only
     //    boundary attribute 1 from the mesh as essential and converting it to a
     //    list of true dofs.
-    mfem::Array<int64_t> ess_tdof_list, ess_bdr(mesh->bdr_attributes.Max());
+    mfem::Array<int> ess_tdof_list, ess_bdr(mesh->bdr_attributes.Max());
     ess_bdr = 0;
     ess_bdr[0] = 1;
     fespace->GetEssentialTrueDofs(ess_bdr, ess_tdof_list);
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     //    of f*phi_i where f represents a "pull down" force on the Neumann part
     //    of the boundary and phi_i are the basis functions in the finite element
     //    fespace. The force is defined by the VectorArrayCoefficient object f,
-    //    which is a vector of Coefficient objects. The fact that f is non-zero
+    //    which is a mfem::Vector of Coefficient objects. The fact that f is non-zero
     //    on boundary attribute 2 is indicated by the use of piece-wise constants
     //    coefficient for its last component.
     mfem::VectorArrayCoefficient f(dim);
@@ -159,10 +159,10 @@ int main(int argc, char *argv[])
 
     mfem::LinearForm *b = new mfem::LinearForm(fespace);
     b->AddBoundaryIntegrator(new mfem::VectorBoundaryLFIntegrator(f));
-    cout << "r.h.s. ... " << flush;
+    std::cout << "r.h.s. ... " << std::flush;
     b->Assemble();
 
-    // 8. Define the solution vector x as a finite element grid function
+    // 8. Define the solution mfem::Vector x as a finite element grid function
     //    corresponding to fespace. Initialize x with initial guess of zero,
     //    which satisfies the boundary conditions.
     mfem::GridFunction x(fespace);
@@ -172,11 +172,11 @@ int main(int argc, char *argv[])
     //    corresponding to the linear elasticity integrator with piece-wise
     //    constants coefficient lambda and mu.
     //    [ lambda=mu=high | lambda=mu=low]
-    Vector lambda(mesh->attributes.Max());
+    mfem::Vector lambda(mesh->attributes.Max());
     lambda = 1.0;
     lambda(0) = lambda(1)*50;
     PWConstCoefficient lambda_func(lambda);
-    Vector mu(mesh->attributes.Max());
+    mfem::Vector mu(mesh->attributes.Max());
     mu = 1.0;
     mu(0) = mu(1)*50;
     PWConstCoefficient mu_func(mu);
@@ -188,16 +188,16 @@ int main(int argc, char *argv[])
     //     applying any necessary transformations such as: eliminating boundary
     //     conditions, applying conforming constraints for non-conforming AMR,
     //     static condensation, etc.
-    cout << "matrix ... " << flush;
+    std::cout << "matrix ... " << std::flush;
     if (static_cond) { a->EnableStaticCondensation(); }
     a->Assemble();
 
     mfem::SparseMatrix A;
     mfem::Vector B, X;
     a->FormLinearSystem(ess_tdof_list, x, *b, A, X, B);
-    cout << "done." << endl;
+    std::cout << "done." << std::endl;
 
-    cout << "Size of linear system: " << A.Height() << endl;
+    std::cout << "Size of linear system: " << A.Height() << std::endl;
 
     // Run Algo
     SpMat A2 = mfem2eigen(A); 
@@ -251,13 +251,13 @@ int main(int argc, char *argv[])
     try {
         t.factorize();
         timer t3 = wctime();
-        cout << ">>>>t_F=" << elapsed(t0, t3) << endl;
+        std::cout << ">>>>t_F=" << elapsed(t0, t3) << std::endl;
         t.print_log();
         int64_t iter = cg(A2, b2, x2, t, 500, 1e-12, true);
         timer t4 = wctime();
-        cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A2*x2-b2).norm() / b2.norm() << endl;
-        cout << ">>>>t_S=" << elapsed(t3, t4) << endl;
-        cout << ">>>>CG=" << iter << endl;
+        std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A2*x2-b2).norm() / b2.norm() << std::endl;
+        std::cout << ">>>>t_S=" << elapsed(t3, t4) << std::endl;
+        std::cout << ">>>>CG=" << iter << std::endl;
         eigen2mfem(x2, X);
         if (preserve) {
             for (int64_t i = 0; i < phi.cols(); i++) {
@@ -265,13 +265,13 @@ int main(int argc, char *argv[])
                 VectorXd x3 = b3;
                 t.solve(x3);
                 double error = (A2*x3-b3).norm() / b3.norm();
-                cout << ">>>>Preservation error=" << error << endl;
+                std::cout << ">>>>Preservation error=" << error << std::endl;
             }
         }
     } catch (std::exception& ex) {
-        cout << ex.what();
-        cout << ">>>>t_S=0" << endl;
-        cout << ">>>>NOT SPD" << endl;
+        std::cout << ex.what();
+        std::cout << ">>>>t_S=0" << std::endl;
+        std::cout << ">>>>NOT SPD" << std::endl;
     }
 
     // 12. Recover the solution as a finite element grid function.
@@ -296,10 +296,10 @@ int main(int argc, char *argv[])
         mfem::GridFunction *nodes = mesh->GetNodes();
         *nodes += x;
         x *= -1;
-        ofstream mesh_ofs("displaced.mesh");
+        std::ofstream mesh_ofs("displaced.mesh");
         mesh_ofs.precision(8);
         mesh->Print(mesh_ofs);
-        ofstream sol_ofs("sol.gf");
+        std::ofstream sol_ofs("sol.gf");
         sol_ofs.precision(8);
         x.Save(sol_ofs);
     }
@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
        int64_t  visport   = 19916;
        mfem::socketstream sol_sock(vishost, visport);
        sol_sock.precision(8);
-       sol_sock << "solution\n" << *mesh << x << flush;
+       sol_sock << "solution\n" << *mesh << x << std::flush;
     }
 
     // 16. Free the used memory.

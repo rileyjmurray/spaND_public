@@ -35,9 +35,9 @@ Then
     
     You need to set the following variables in `Makefile.conf`:
     
-    - `CC` should be your C++ compiler (needs to support -std=c++14)
-    - `EXTRA_INCDIR` should contains path to the above libraries headers (Eigen, Metis, Blas/Lapack, linalgCpp) if not in your compiler path (may or may not be needed)
-    - `EXTRA_LINKDIR`should contains path to the above libraries objects (Metis, Blas/Lapack), if not in your compiler path (may or may not be needed)
+    - `CC` should be your C++ compiler (needs to support -std=c++20)
+    - `REQUIRED_INCDIRS` should contains path to the above libraries headers (Eigen, Metis, Blas/Lapack, linalgCpp) if not in your compiler path (may or may not be needed)
+    - `REQUIRED_LIBDIRS`should contains path to the above libraries objects (Metis, Blas/Lapack), if not in your compiler path (may or may not be needed)
     - `GTEST` should point to googletest folder (optional)
     - `MFEMDIR` should point to MFEM's root (optional)
     - `MFEMLIB` should point to MFEM's root (optional)

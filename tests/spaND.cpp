@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         ("t,tol", "Tolerance", cxxopts::value<double>()->default_value("1e-1"))            
         ("skip", "Skip sparsification", cxxopts::value<int>()->default_value("0"))        
         ("stop", "Stop sparsification", cxxopts::value<int>()->default_value("-1"))        
-        ("preserve", "Wether to preserve the 1 vector or not (default: false)", cxxopts::value<bool>()->default_value("false"))
+        ("preserve", "Wether to preserve the 1 std::vector or not (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("scaling_kind", "The scaling kind, LLT, EVD, SVD, PLU or PLUQ", cxxopts::value<string>()->default_value("LLT"))
         ("use_want_sparsify", "Wether to use want_sparsify (true) or not (default: true)", cxxopts::value<bool>()->default_value("true"))
         // Iterative method
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         ("solver_tol","Iterative solver tolerance", cxxopts::value<double>()->default_value("1e-12"))
         // Problem transformation, to try some functions of A
         ("flip_sign", "Wether to solve with -A (true) or not (default: false)", cxxopts::value<bool>()->default_value("false"))
-        ("rationale", "Solve with a_0 I + a_1 A + a_2 A^2 ... instead of A", cxxopts::value<vector<double>>())
+        ("rationale", "Solve with a_0 I + a_1 A + a_2 A^2 ... instead of A", cxxopts::value<std::vector<double>>())
         // Output more data
         ("clustering", "Output clustering (before any merging) in text file", cxxopts::value<string>())
         ("clusters", "Output clusters metadata in text file", cxxopts::value<string>())
@@ -60,23 +60,23 @@ int main(int argc, char* argv[]) {
     auto result = options.parse(argc64, argv);
 
     if (result.count("help")) {
-        std::cout << options.help({"", "Group"}) << endl;
+        std::cout << options.help({"", "Group"}) << std::endl;
         exit(0);
     }
 
     if ( (!result.count("matrix")) || (!result.count("lvl")) ) {
-        std::cout << "--matrix and --lvl are mandatory" << endl;
+        std::cout << "--matrix and --lvl are mandatory" << std::endl;
         exit(0);
     }
-    string matrix = result["matrix"].as<string>();
-    string coordinates;
+    std::string matrix = result["matrix"].as<string>();
+    std::string coordinates;
     int cn = result["coordinates_n"].as<int>();
     int cd = result["coordinates_d"].as<int>();
     std::cout << "<<<<cn=" << cn << std::endl;
     std::cout << "<<<<cd=" << cd << std::endl;
     bool geo_file = (result.count("coordinates") > 0);
     if ( (cn == -1 && cd >= 0) || (cd == -1 && cn >= 0) ) {
-        std::cout << "cn and cd should be both provided, or none should be provided" << endl;
+        std::cout << "cn and cd should be both provided, or none should be provided" << std::endl;
         return 1;
     }
     bool geo_tensor = (cn >= 0 && cd >= 0);
@@ -91,12 +91,12 @@ int main(int argc, char* argv[]) {
     if (stop < 0)
         stop = nlevels;
     bool preserve = result["preserve"].as<bool>();
-    string s0 = result["symm_kind"].as<string>();
+    std::string s0 = result["symm_kind"].as<string>();
     SymmKind symmk = (s0 == "SPD" ? SymmKind::SPD :
                      (s0 == "SYM" ? SymmKind::SYM :
                      (SymmKind::GEN)));
     bool verb = result["verbose"].as<bool>();
-    string s1 = result["scaling_kind"].as<string>();
+    std::string s1 = result["scaling_kind"].as<string>();
     ScalingKind sk = (s1 == "LLT"  ? ScalingKind::LLT  :
                      (s1 == "PLU"  ? ScalingKind::PLU  :
                      (s1 == "PLUQ" ? ScalingKind::PLUQ :
@@ -110,23 +110,23 @@ int main(int argc, char* argv[]) {
     int iterations = result["iterations"].as<int>();
     double solver_tol = result["solver_tol"].as<double>();
     if (!useCG && !useGMRES && !useIR) {
-        std::cout << "Wrong solver picked. Should be CG, IR or GMRES" << endl;
+        std::cout << "Wrong solver picked. Should be CG, IR or GMRES" << std::endl;
         return 1;
     }
     bool use_want_sparsify = result["use_want_sparsify"].as<bool>();
     int n_threads = result["n_threads"].as<int>();
     (void) n_threads;
     bool flip_sign = result["flip_sign"].as<bool>();
-    vector<double> rational_coeffs;
+    std::vector<double> rational_coeffs;
     if (result.count("rationale")) {
-        for (auto v: result["rationale"].as<vector<double>>()) {
+        for (auto v: result["rationale"].as<std::vector<double>>()) {
             rational_coeffs.push_back(v);
         }
         std::cout << "Using rational coeffs: ";
         for (int i = 0; i < rational_coeffs.size(); i++) {
             std::cout << rational_coeffs[i] << " A^" << i << " + ";
         }
-        std::cout << endl;
+        std::cout << std::endl;
     }
     bool monitor_cond = result["monitor_cond"].as<bool>();
     bool monitor_unsymmetry = result["monitor_unsym"].as<bool>();
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
     SpMat A = mmio::sp_mmread<double,int>(matrix);
     int N = A.rows();
     std::cout << "<<<<matrix=" << matrix << std::endl;
-    std::cout << "Matrix " << N << "x" << N << " loaded from " << matrix << endl;
+    std::cout << "Matrix " << N << "x" << N << " loaded from " << matrix << std::endl;
     
     if (nlevels <= 0) {
         std::cout << "nlevels = " << nlevels << " -> using log(N/64)/log(2) - |nlevels| instead" << std::endl;
@@ -147,11 +147,11 @@ int main(int argc, char* argv[]) {
     // Modifiy A for some cases/experiments
     if (flip_sign) {
         A = -A;
-        std::cout << "Solving with -A instead" << endl;
+        std::cout << "Solving with -A instead" << std::endl;
     } else if (rational_coeffs.size() > 0) {
-        std::cout << "Solving with rational coefficients instead" << endl;
+        std::cout << "Solving with rational coefficients instead" << std::endl;
         // Create identity
-        vector<Triplet<double>> tripletList;
+        std::vector<Triplet<double>> tripletList;
         for (int i = 0; i < N; i++) { tripletList.push_back({i,i,1.0}); }
         SpMat I(N,N);
         I.setFromTriplets(tripletList.begin(), tripletList.end());
@@ -175,10 +175,10 @@ int main(int argc, char* argv[]) {
     if (is_saddlepoint) {
         int sp_mid = result["sp_mid"].as<int>();
         double sp_eps = result["sp_eps"].as<double>();
-        std::cout << "A[~sp_mid,~sp_mid]:\n" << A.block(sp_mid-2, sp_mid-2, 5, 5) << endl;
-        std::cout << "System is saddle point" << endl;
-        std::cout << "Rebuilding matrix by adding " << sp_eps << " on diagonal at entries [" << sp_mid << ";" << N << "[" << endl;
-        vector<Triplet<double>> tripletList;
+        std::cout << "A[~sp_mid,~sp_mid]:\n" << A.block(sp_mid-2, sp_mid-2, 5, 5) << std::endl;
+        std::cout << "System is saddle point" << std::endl;
+        std::cout << "Rebuilding matrix by adding " << sp_eps << " on diagonal at entries [" << sp_mid << ";" << N << "[" << std::endl;
+        std::vector<Triplet<double>> tripletList;
         for (int i = sp_mid; i < N; i++) { tripletList.push_back({i,i,sp_eps}); }
         for (int k = 0; k < A.outerSize(); ++k) {
             for (SpMat::InnerIterator it(A,k); it; ++it) { tripletList.push_back({int(it.row()),int(it.col()),it.value()}); }
@@ -186,27 +186,27 @@ int main(int argc, char* argv[]) {
         Aprec = SpMat(N,N);
         Aprec.setFromTriplets(tripletList.begin(), tripletList.end());
     }
-    // std::cout << "A:\n" << A.block(0, 0, 10, 10) << endl;
-    // std::cout << "Aprec:\n" << Aprec.block(0, 0, 10, 10) << endl;
+    // std::cout << "A:\n" << A.block(0, 0, 10, 10) << std::endl;
+    // std::cout << "Aprec:\n" << Aprec.block(0, 0, 10, 10) << std::endl;
 
     // Load coordinates ?
     MatrixXd X;
     if (geo_tensor) {
         if (pow(cn, cd) != N) {
-            std::cout << "Error: cn and cd where both provided, but cn^cd != N where A is NxN" << endl;
+            std::cout << "Error: cn and cd where both provided, but cn^cd != N where A is NxN" << std::endl;
             return 1;
         }
         X = linspace_nd(cn, cd);
-        std::cout << "Tensor coordinate matrix of size " << cn << "^" << cd << " built" << endl;
+        std::cout << "Tensor coordinate matrix of size " << cn << "^" << cd << " built" << std::endl;
     } else if (geo_file) {
         X = mmio::dense_mmread<double>(coordinates);
-        std::cout << "Coordinate file " << X.rows() << "x" << X.cols() << " loaded from " << coordinates << endl;
+        std::cout << "Coordinate file " << X.rows() << "x" << X.cols() << " loaded from " << coordinates << std::endl;
         if (X.cols() != N) {
-            std::cout << "Error: coordinate file should hold a matrix of size d x N" << endl;
+            std::cout << "Error: coordinate file should hold a matrix of size d x N" << std::endl;
         }
     }
 
-    // Vector to preserve (maybe)
+    // std::vector to preserve (maybe)
     MatrixXd phi = MatrixXd::Ones(N,1);
 
     // Basic options
@@ -231,13 +231,13 @@ int main(int argc, char* argv[]) {
     if (result.count("write_log_flops")) t.set_monitor_flops(true);
 
     // Print basic parameters
-    std::cout << "<<<<N=" << N << endl;
-    std::cout << "<<<<nlevels=" << nlevels << endl;
-    std::cout << "<<<<tol=" << tol << endl;
-    std::cout << "<<<<skip=" << skip << endl;
-    std::cout << "<<<<stop=" << stop << endl;
-    std::cout << "<<<<preserve=" << preserve << endl;
-    std::cout << "<<<<lorasp=" << use_lorasp << endl;
+    std::cout << "<<<<N=" << N << std::endl;
+    std::cout << "<<<<nlevels=" << nlevels << std::endl;
+    std::cout << "<<<<tol=" << tol << std::endl;
+    std::cout << "<<<<skip=" << skip << std::endl;
+    std::cout << "<<<<stop=" << stop << std::endl;
+    std::cout << "<<<<preserve=" << preserve << std::endl;
+    std::cout << "<<<<lorasp=" << use_lorasp << std::endl;
 
     // Partition
     timer tpart_0 = wctime();
@@ -251,20 +251,20 @@ int main(int argc, char* argv[]) {
 
     // Clustering
     if (result.count("clustering")) {
-        string clustering_fn = result["clustering"].as<string>();        
-        std::cout << "Writing clustering to " << clustering_fn << endl;
+        std::string clustering_fn = result["clustering"].as<string>();        
+        std::cout << "Writing clustering to " << clustering_fn << std::endl;
         write_clustering(t, X, clustering_fn);
     }
     // Hierarchy
     if (result.count("merging")) {
-        string merging_fn = result["merging"].as<string>();
-        std::cout << "Writing merging to " << merging_fn << endl;
+        std::string merging_fn = result["merging"].as<string>();
+        std::cout << "Writing merging to " << merging_fn << std::endl;
         write_merging(t, merging_fn);
     }
     // Cluster metadata
     if (result.count("clusters")) {
-        string clusters_fn = result["clusters"].as<string>();
-        std::cout << "Writing clusters to " << clusters_fn << endl;
+        std::string clusters_fn = result["clusters"].as<string>();
+        std::cout << "Writing clusters to " << clusters_fn << std::endl;
         write_clusters(t, clusters_fn);
     }
 
@@ -286,30 +286,30 @@ int main(int argc, char* argv[]) {
             t.factorize();
         }
     } catch (exception& ex) {
-        cout << ex.what();
-        cout << "<<<<FAILED" << endl;
+        std::cout << ex.what();
+        std::cout << "<<<<FAILED" << std::endl;
         exit(1);
     }
     timer tfact = wctime();
 
     t.print_log();
-    std::cout << "Timings [s.]:" << endl;
-    std::cout << "<<<<tpart=" << elapsed(tpart_0, tpart) << endl;
-    std::cout << "<<<<tassm=" << elapsed(tass_0,  tass)  << endl;
-    std::cout << "<<<<tfact=" << elapsed(tfact_0, tfact) << endl;
-    std::cout << "<<<<last="  << t.get_last() << endl;
-    std::cout << "<<<<nnzfact=" << t.nnz() << endl;
+    std::cout << "Timings [s.]:" << std::endl;
+    std::cout << "<<<<tpart=" << elapsed(tpart_0, tpart) << std::endl;
+    std::cout << "<<<<tassm=" << elapsed(tass_0,  tass)  << std::endl;
+    std::cout << "<<<<tfact=" << elapsed(tfact_0, tfact) << std::endl;
+    std::cout << "<<<<last="  << t.get_last() << std::endl;
+    std::cout << "<<<<nnzfact=" << t.nnz() << std::endl;
 
     if (result.count("write_log_flops")) {
-        string log_flops_fn = result["write_log_flops"].as<string>();
-        std::cout << "Writing flops log to " << log_flops_fn << endl;
+        std::string log_flops_fn = result["write_log_flops"].as<string>();
+        std::cout << "Writing flops log to " << log_flops_fn << std::endl;
         write_log_flops(t, log_flops_fn);
     }
 
     // Sizes & ranks
     if (result.count("stats")) {
-        string stats_fn = result["stats"].as<string>();
-        std::cout << "Writing cluster stats to " << stats_fn << endl;        
+        std::string stats_fn = result["stats"].as<string>();
+        std::cout << "Writing cluster stats to " << stats_fn << std::endl;        
         write_stats(t, stats_fn);
     }
 
@@ -323,11 +323,11 @@ int main(int argc, char* argv[]) {
             timer tsolv_0 = wctime();
             t.solve(x);
             timer tsolv = wctime();
-            std::cout << "<<<<tsolv=" << elapsed(tsolv_0, tsolv) << endl;
-            std::cout << "One-time solve (Random b):" << endl;            
-            std::cout << "<<<<|Ax-b|/|b| : " << (A*x-b).norm() / b.norm() << endl;
-            std::cout << "<<<<hash(b) : "    << hash(b) << endl;
-            std::cout << "<<<<hash(x) : "    << hash(x) << endl;
+            std::cout << "<<<<tsolv=" << elapsed(tsolv_0, tsolv) << std::endl;
+            std::cout << "One-time solve (Random b):" << std::endl;            
+            std::cout << "<<<<|Ax-b|/|b| : " << (A*x-b).norm() / b.norm() << std::endl;
+            std::cout << "<<<<hash(b) : "    << hash(b) << std::endl;
+            std::cout << "<<<<hash(x) : "    << hash(x) << std::endl;
         }
         // Random x
         {
@@ -335,12 +335,12 @@ int main(int argc, char* argv[]) {
             VectorXd b = A*xtrue;
             VectorXd x = b;
             t.solve(x);
-            std::cout << "One-time solve (Random x):" << endl;
-            std::cout << "<<<<|Ax-b|/|b| : "    << (A*x-b).norm() / b.norm() << endl;
-            std::cout << "<<<<|x-xtrue|/|x| : " << (x-xtrue).norm() / xtrue.norm() << endl;
-            std::cout << "<<<<hash(xtrue) : "   << hash(xtrue) << endl;
-            std::cout << "<<<<hash(b) : "       << hash(b) << endl;
-            std::cout << "<<<<hash(x) : "       << hash(x) << endl;  
+            std::cout << "One-time solve (Random x):" << std::endl;
+            std::cout << "<<<<|Ax-b|/|b| : "    << (A*x-b).norm() / b.norm() << std::endl;
+            std::cout << "<<<<|x-xtrue|/|x| : " << (x-xtrue).norm() / xtrue.norm() << std::endl;
+            std::cout << "<<<<hash(xtrue) : "   << hash(xtrue) << std::endl;
+            std::cout << "<<<<hash(b) : "       << hash(b) << std::endl;
+            std::cout << "<<<<hash(x) : "       << hash(x) << std::endl;  
         }
     }
     // Solve
@@ -353,39 +353,39 @@ int main(int argc, char* argv[]) {
             // int iter = cg(A_rm, b, x, t, iterations, solver_tol, verb);
             //
             // ^ Riley note: I added the lines above since my understanding is
-            // that CSR typically has faster matrix-vector products than CSC.
+            // that CSR typically has faster matrix-std::vector products than CSC.
             // But I shouldn't make that change without justifying the decision
             // properly. Checking in now.
             int iter = cg(A, b, x, t, iterations, solver_tol, verb);
             timer cg1 = wctime();
-            std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
-            std::cout << "  CG: " << elapsed(cg0, cg1) << " s." << endl;
-            std::cout << "<<<<CG=" << iter << endl;
-            std::cout << "<<<<tCG=" << elapsed(cg0, cg1) << endl;
+            std::cout << "CG: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << std::endl;
+            std::cout << "  CG: " << elapsed(cg0, cg1) << " s." << std::endl;
+            std::cout << "<<<<CG=" << iter << std::endl;
+            std::cout << "<<<<tCG=" << elapsed(cg0, cg1) << std::endl;
         } else if (useGMRES) {
             timer gmres0 = wctime();
             int iter = gmres(A, b, x, t, iterations, iterations, solver_tol, verb);
             timer gmres1 = wctime();
-            std::cout << "GMRES: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
-            std::cout << "  GMRES: " << elapsed(gmres0, gmres1) << " s." << endl;
-            std::cout << "<<<<GMRES=" << iter << endl;
-            std::cout << "<<<<tGMRES=" << elapsed(gmres0, gmres1) << endl;
+            std::cout << "GMRES: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << std::endl;
+            std::cout << "  GMRES: " << elapsed(gmres0, gmres1) << " s." << std::endl;
+            std::cout << "<<<<GMRES=" << iter << std::endl;
+            std::cout << "<<<<tGMRES=" << elapsed(gmres0, gmres1) << std::endl;
         } else if (useIR) {
             timer ir0 = wctime();
             int iter = ir(A, b, x, t, iterations, solver_tol, verb);
             timer ir1 = wctime();
-            std::cout << "IR: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << endl;
-            std::cout << "  IR: " << elapsed(ir0, ir1) << " s." << endl;
-            std::cout << "<<<<IR=" << iter << endl;
-            std::cout << "<<<<tIR=" << elapsed(ir0, ir1) << endl;
+            std::cout << "IR: #iterations: " << iter << ", residual |Ax-b|/|b|: " << (A*x-b).norm() / b.norm() << std::endl;
+            std::cout << "  IR: " << elapsed(ir0, ir1) << " s." << std::endl;
+            std::cout << "<<<<IR=" << iter << std::endl;
+            std::cout << "<<<<tIR=" << elapsed(ir0, ir1) << std::endl;
         }
     }
     if (preserve)  {
-        std::cout << "Checking preservation" << endl;
+        std::cout << "Checking preservation" << std::endl;
         VectorXd b = A*phi.col(0);
         VectorXd x = b;
         t.solve(x);
-        std::cout << "Residual |Ax-b|/|b| with b = A*phi: " << (A*x-b).norm() / b.norm() << endl;
+        std::cout << "Residual |Ax-b|/|b| with b = A*phi: " << (A*x-b).norm() / b.norm() << std::endl;
     }
     return 0;
 }

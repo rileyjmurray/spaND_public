@@ -2,7 +2,7 @@ ifndef USE_MKL
     USE_MKL = 1
 endif
 
-CC = g++ -Wextra -Wnull-dereference -Wno-sign-compare -Wno-int64_t-in-bool-context # Needs gcc/8.* otherwise complex fails, somewhere
+CXX = g++ -Wextra -Wnull-dereference -Wno-sign-compare -Wno-int64_t-in-bool-context # Needs gcc/8.* otherwise complex fails, somewhere
 
 GTESTDIR = $(HOME)/spaND/gtest/googletest/include/
 MFEMDIR = $(HOME)/Softwares/mfem-3.4
